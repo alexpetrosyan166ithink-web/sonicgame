@@ -8,6 +8,23 @@ let bossProjectiles = [];
 let particleSystem = [];
 let speedTrail = [];
 
+// Sonic World Elements
+let springs = [];
+let loops = [];
+let pipes = [];
+let itemBoxes = [];
+let dashPanels = [];
+let ramps = [];
+let platforms = [];
+let checkpoints = [];
+
+// Player power-up states
+let hasShield = false;
+let hasSpeedBoost = false;
+let speedBoostTimer = 0;
+let hasInvincibility = false;
+let invincibilityTimer = 0;
+
 // Audio System
 let audioContext = null;
 let musicPlaying = false;
@@ -682,21 +699,37 @@ function createPixelSonicTexture() {
 function createEnhancedSonic() {
     const sonicGroup = new THREE.Group();
 
-    // Load real Sonic SVG as texture
-    const loader = new THREE.TextureLoader();
-    const sonicTexture = loader.load('sonic.svg');
-    sonicTexture.magFilter = THREE.LinearFilter;
-    sonicTexture.minFilter = THREE.LinearFilter;
+    // Load SVG as image and convert to canvas texture
+    const img = new Image();
+    img.onload = function() {
+        // Create canvas and draw SVG
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 336;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, 256, 336);
 
-    // Create sprite material with the SVG
+        // Create texture from canvas
+        const sonicTexture = new THREE.CanvasTexture(canvas);
+        sonicTexture.magFilter = THREE.LinearFilter;
+        sonicTexture.minFilter = THREE.LinearFilter;
+
+        // Update sprite material
+        if (sonicGroup.children[0] && sonicGroup.children[0].material) {
+            sonicGroup.children[0].material.map = sonicTexture;
+            sonicGroup.children[0].material.needsUpdate = true;
+        }
+    };
+    img.src = 'sonic.svg';
+
+    // Create sprite with placeholder (will be updated when SVG loads)
     const spriteMaterial = new THREE.SpriteMaterial({
-        map: sonicTexture,
+        color: 0x2659B5,  // Sonic blue as placeholder
         transparent: true
     });
 
-    // Create sprite
     const sprite = new THREE.Sprite(spriteMaterial);
-    sprite.scale.set(2.5, 3, 1);  // Adjusted for Sonic's proportions
+    sprite.scale.set(2, 2.6, 1);  // Adjusted for Sonic's proportions
     sonicGroup.add(sprite);
 
     // Also keep a simple 3D hitbox for collisions (invisible)
@@ -945,6 +978,435 @@ function createRing(lane, z) {
     scene.add(ring);
     rings.push(ring);
 }
+
+// ==================== SONIC WORLD ELEMENTS ====================
+
+// Create Spring (Yellow = normal, Red = super bounce)
+function createSpring(x, y, type = 'yellow') {
+    const springGroup = new THREE.Group();
+
+    // Base
+    const baseGeometry = new THREE.CylinderGeometry(0.4, 0.5, 0.2, 16);
+    const baseMaterial = new THREE.MeshStandardMaterial({
+        color: 0x888888,
+        metalness: 0.8,
+        roughness: 0.3
+    });
+    const base = new THREE.Mesh(baseGeometry, baseMaterial);
+    springGroup.add(base);
+
+    // Spring coil
+    const springColor = type === 'red' ? 0xFF0000 : 0xFFFF00;
+    const coilGeometry = new THREE.TorusGeometry(0.25, 0.08, 8, 16);
+    const coilMaterial = new THREE.MeshStandardMaterial({
+        color: springColor,
+        emissive: springColor,
+        emissiveIntensity: 0.3
+    });
+
+    for (let i = 0; i < 3; i++) {
+        const coil = new THREE.Mesh(coilGeometry, coilMaterial);
+        coil.position.y = 0.2 + i * 0.15;
+        coil.rotation.x = Math.PI / 2;
+        springGroup.add(coil);
+    }
+
+    // Top platform
+    const topGeometry = new THREE.CylinderGeometry(0.35, 0.35, 0.1, 16);
+    const topMaterial = new THREE.MeshStandardMaterial({
+        color: springColor,
+        emissive: springColor,
+        emissiveIntensity: 0.5
+    });
+    const top = new THREE.Mesh(topGeometry, topMaterial);
+    top.position.y = 0.7;
+    springGroup.add(top);
+
+    springGroup.position.set(x, y, 0);
+    springGroup.userData = {
+        type: type,
+        bounceForce: type === 'red' ? 0.8 : 0.5,
+        activated: false,
+        animTimer: 0
+    };
+
+    scene.add(springGroup);
+    springs.push(springGroup);
+}
+
+// Create Loop-de-loop (visual element with auto-movement)
+function createLoop(x, y) {
+    const loopGroup = new THREE.Group();
+
+    // Create loop track using torus
+    const trackGeometry = new THREE.TorusGeometry(3, 0.3, 16, 32);
+    const trackMaterial = new THREE.MeshStandardMaterial({
+        color: 0x8B4513,
+        roughness: 0.7
+    });
+    const track = new THREE.Mesh(trackGeometry, trackMaterial);
+    track.rotation.y = Math.PI / 2;
+    loopGroup.add(track);
+
+    // Add checkered pattern
+    const innerGeometry = new THREE.TorusGeometry(2.7, 0.25, 16, 32);
+    const innerMaterial = new THREE.MeshStandardMaterial({
+        color: 0xD2691E,
+        roughness: 0.6
+    });
+    const inner = new THREE.Mesh(innerGeometry, innerMaterial);
+    inner.rotation.y = Math.PI / 2;
+    loopGroup.add(inner);
+
+    // Arrow indicators
+    const arrowGeometry = new THREE.ConeGeometry(0.2, 0.4, 8);
+    const arrowMaterial = new THREE.MeshStandardMaterial({
+        color: 0x00FF00,
+        emissive: 0x00FF00,
+        emissiveIntensity: 0.5
+    });
+
+    for (let i = 0; i < 4; i++) {
+        const angle = (i / 4) * Math.PI * 2;
+        const arrow = new THREE.Mesh(arrowGeometry, arrowMaterial);
+        arrow.position.set(0, Math.sin(angle) * 2.7, Math.cos(angle) * 2.7);
+        arrow.rotation.x = angle + Math.PI / 2;
+        loopGroup.add(arrow);
+    }
+
+    loopGroup.position.set(x, y, 0);
+    loopGroup.userData = {
+        active: false,
+        progress: 0
+    };
+
+    scene.add(loopGroup);
+    loops.push(loopGroup);
+}
+
+// Create Pipe/Tube (S-tube style)
+function createPipe(x, y, exitX, exitY) {
+    const pipeGroup = new THREE.Group();
+
+    // Entry pipe
+    const entryGeometry = new THREE.CylinderGeometry(0.8, 0.8, 1.5, 16, 1, true);
+    const pipeMaterial = new THREE.MeshStandardMaterial({
+        color: 0x4169E1,
+        metalness: 0.6,
+        roughness: 0.4,
+        side: THREE.DoubleSide
+    });
+    const entry = new THREE.Mesh(entryGeometry, pipeMaterial);
+    entry.rotation.z = Math.PI / 2;
+    pipeGroup.add(entry);
+
+    // Pipe rim (entry)
+    const rimGeometry = new THREE.TorusGeometry(0.8, 0.15, 8, 16);
+    const rimMaterial = new THREE.MeshStandardMaterial({
+        color: 0x00008B,
+        emissive: 0x000044,
+        emissiveIntensity: 0.3
+    });
+    const entryRim = new THREE.Mesh(rimGeometry, rimMaterial);
+    entryRim.position.x = -0.75;
+    entryRim.rotation.y = Math.PI / 2;
+    pipeGroup.add(entryRim);
+
+    // Glow effect
+    const glowGeometry = new THREE.RingGeometry(0.5, 0.8, 16);
+    const glowMaterial = new THREE.MeshBasicMaterial({
+        color: 0x00FFFF,
+        transparent: true,
+        opacity: 0.5,
+        side: THREE.DoubleSide
+    });
+    const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+    glow.position.x = -0.8;
+    glow.rotation.y = Math.PI / 2;
+    pipeGroup.add(glow);
+
+    pipeGroup.position.set(x, y, 0);
+    pipeGroup.userData = {
+        exitX: exitX,
+        exitY: exitY,
+        isInPipe: false
+    };
+
+    scene.add(pipeGroup);
+    pipes.push(pipeGroup);
+}
+
+// Create Item Box / Monitor
+function createItemBox(x, y, powerUp = 'random') {
+    const boxGroup = new THREE.Group();
+
+    // Determine power-up type
+    const powerUps = ['shield', 'speed', 'invincibility', 'extralife', 'rings'];
+    if (powerUp === 'random') {
+        powerUp = powerUps[Math.floor(Math.random() * powerUps.length)];
+    }
+
+    // Box body
+    const boxGeometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+    const boxMaterial = new THREE.MeshStandardMaterial({
+        color: 0x808080,
+        metalness: 0.5,
+        roughness: 0.5
+    });
+    const box = new THREE.Mesh(boxGeometry, boxMaterial);
+    boxGroup.add(box);
+
+    // Screen face
+    const screenGeometry = new THREE.PlaneGeometry(0.6, 0.6);
+    let screenColor;
+    switch(powerUp) {
+        case 'shield': screenColor = 0x00BFFF; break;
+        case 'speed': screenColor = 0xFF4500; break;
+        case 'invincibility': screenColor = 0xFFD700; break;
+        case 'extralife': screenColor = 0x00FF00; break;
+        case 'rings': screenColor = 0xFFCC00; break;
+        default: screenColor = 0xFFFFFF;
+    }
+    const screenMaterial = new THREE.MeshBasicMaterial({
+        color: screenColor
+    });
+    const screen = new THREE.Mesh(screenGeometry, screenMaterial);
+    screen.position.z = 0.41;
+    boxGroup.add(screen);
+
+    // Icon on screen based on power-up
+    const iconGeometry = powerUp === 'rings'
+        ? new THREE.TorusGeometry(0.15, 0.05, 8, 16)
+        : new THREE.SphereGeometry(0.15, 8, 8);
+    const iconMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+    const icon = new THREE.Mesh(iconGeometry, iconMaterial);
+    icon.position.z = 0.45;
+    if (powerUp === 'rings') icon.rotation.x = Math.PI / 2;
+    boxGroup.add(icon);
+
+    boxGroup.position.set(x, y, 0);
+    boxGroup.userData = {
+        powerUp: powerUp,
+        collected: false,
+        bobOffset: Math.random() * Math.PI * 2
+    };
+
+    scene.add(boxGroup);
+    itemBoxes.push(boxGroup);
+}
+
+// Create Dash Panel / Speed Booster
+function createDashPanel(x, y) {
+    const panelGroup = new THREE.Group();
+
+    // Base panel
+    const panelGeometry = new THREE.BoxGeometry(1.5, 0.1, 1);
+    const panelMaterial = new THREE.MeshStandardMaterial({
+        color: 0xFF6600,
+        emissive: 0xFF3300,
+        emissiveIntensity: 0.5,
+        metalness: 0.8
+    });
+    const panel = new THREE.Mesh(panelGeometry, panelMaterial);
+    panelGroup.add(panel);
+
+    // Arrow indicators
+    const arrowShape = new THREE.Shape();
+    arrowShape.moveTo(0, 0.3);
+    arrowShape.lineTo(0.2, 0);
+    arrowShape.lineTo(0.1, 0);
+    arrowShape.lineTo(0.1, -0.3);
+    arrowShape.lineTo(-0.1, -0.3);
+    arrowShape.lineTo(-0.1, 0);
+    arrowShape.lineTo(-0.2, 0);
+    arrowShape.lineTo(0, 0.3);
+
+    const arrowGeometry = new THREE.ShapeGeometry(arrowShape);
+    const arrowMaterial = new THREE.MeshBasicMaterial({
+        color: 0xFFFF00,
+        side: THREE.DoubleSide
+    });
+
+    for (let i = 0; i < 2; i++) {
+        const arrow = new THREE.Mesh(arrowGeometry, arrowMaterial);
+        arrow.position.set(-0.3 + i * 0.6, 0.06, 0);
+        arrow.rotation.x = -Math.PI / 2;
+        arrow.rotation.z = -Math.PI / 2;
+        panelGroup.add(arrow);
+    }
+
+    panelGroup.position.set(x, y, 0);
+    panelGroup.userData = {
+        boostAmount: 0.3,
+        cooldown: 0
+    };
+
+    scene.add(panelGroup);
+    dashPanels.push(panelGroup);
+}
+
+// Create Ramp
+function createRamp(x, y, direction = 'up') {
+    const rampGroup = new THREE.Group();
+
+    // Ramp surface
+    const rampGeometry = new THREE.BoxGeometry(2, 0.2, 1);
+    const rampMaterial = new THREE.MeshStandardMaterial({
+        color: 0x8B4513,
+        roughness: 0.7
+    });
+    const ramp = new THREE.Mesh(rampGeometry, rampMaterial);
+    ramp.rotation.z = direction === 'up' ? -Math.PI / 6 : Math.PI / 6;
+    rampGroup.add(ramp);
+
+    // Support
+    const supportGeometry = new THREE.BoxGeometry(0.2, 1, 0.8);
+    const supportMaterial = new THREE.MeshStandardMaterial({
+        color: 0x654321
+    });
+    const support = new THREE.Mesh(supportGeometry, supportMaterial);
+    support.position.set(direction === 'up' ? 0.8 : -0.8, -0.3, 0);
+    rampGroup.add(support);
+
+    rampGroup.position.set(x, y, 0);
+    rampGroup.userData = {
+        direction: direction,
+        launchForce: 0.35
+    };
+
+    scene.add(rampGroup);
+    ramps.push(rampGroup);
+}
+
+// Create Moving Platform
+function createPlatform(x, y, moveType = 'horizontal', range = 3) {
+    const platformGroup = new THREE.Group();
+
+    // Platform surface
+    const platformGeometry = new THREE.BoxGeometry(2, 0.3, 1);
+    const platformMaterial = new THREE.MeshStandardMaterial({
+        color: 0x228B22,
+        roughness: 0.6
+    });
+    const platform = new THREE.Mesh(platformGeometry, platformMaterial);
+    platformGroup.add(platform);
+
+    // Decorative edges
+    const edgeGeometry = new THREE.BoxGeometry(2.1, 0.1, 1.1);
+    const edgeMaterial = new THREE.MeshStandardMaterial({
+        color: 0x006400,
+        emissive: 0x003300,
+        emissiveIntensity: 0.3
+    });
+    const edge = new THREE.Mesh(edgeGeometry, edgeMaterial);
+    edge.position.y = 0.15;
+    platformGroup.add(edge);
+
+    platformGroup.position.set(x, y, 0);
+    platformGroup.userData = {
+        moveType: moveType,
+        range: range,
+        startX: x,
+        startY: y,
+        speed: 0.02,
+        direction: 1
+    };
+
+    scene.add(platformGroup);
+    platforms.push(platformGroup);
+}
+
+// Create Checkpoint
+function createCheckpoint(x, y) {
+    const checkpointGroup = new THREE.Group();
+
+    // Pole
+    const poleGeometry = new THREE.CylinderGeometry(0.1, 0.1, 3, 8);
+    const poleMaterial = new THREE.MeshStandardMaterial({
+        color: 0xFFD700,
+        metalness: 0.7
+    });
+    const pole = new THREE.Mesh(poleGeometry, poleMaterial);
+    pole.position.y = 1.5;
+    checkpointGroup.add(pole);
+
+    // Spinner (blue when inactive, red when active)
+    const spinnerGeometry = new THREE.SphereGeometry(0.4, 16, 16);
+    const spinnerMaterial = new THREE.MeshStandardMaterial({
+        color: 0x0000FF,
+        emissive: 0x0000FF,
+        emissiveIntensity: 0.5
+    });
+    const spinner = new THREE.Mesh(spinnerGeometry, spinnerMaterial);
+    spinner.position.y = 3.2;
+    checkpointGroup.add(spinner);
+
+    // Star decoration
+    const starGeometry = new THREE.OctahedronGeometry(0.25);
+    const starMaterial = new THREE.MeshStandardMaterial({
+        color: 0xFFFFFF,
+        emissive: 0xFFFFFF,
+        emissiveIntensity: 0.8
+    });
+    const star = new THREE.Mesh(starGeometry, starMaterial);
+    star.position.y = 3.2;
+    checkpointGroup.add(star);
+
+    checkpointGroup.position.set(x, y, 0);
+    checkpointGroup.userData = {
+        activated: false,
+        spinSpeed: 0.05
+    };
+
+    scene.add(checkpointGroup);
+    checkpoints.push(checkpointGroup);
+}
+
+// Play spring sound
+function playSpringSound() {
+    if (!audioContext || musicMuted) return;
+    const now = audioContext.currentTime;
+    playNote(523, now, 0.1, 'sine');
+    playNote(784, now + 0.05, 0.1, 'sine');
+    playNote(1047, now + 0.1, 0.15, 'sine');
+}
+
+// Play item box sound
+function playItemBoxSound() {
+    if (!audioContext || musicMuted) return;
+    const now = audioContext.currentTime;
+    playNote(880, now, 0.1, 'square');
+    playNote(1175, now + 0.1, 0.15, 'square');
+}
+
+// Play dash panel sound
+function playDashSound() {
+    if (!audioContext || musicMuted) return;
+    const now = audioContext.currentTime;
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(200, now);
+    osc.frequency.exponentialRampToValueAtTime(800, now + 0.2);
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+    osc.connect(gain);
+    gain.connect(musicGain);
+    osc.start(now);
+    osc.stop(now + 0.2);
+}
+
+// Play checkpoint sound
+function playCheckpointSound() {
+    if (!audioContext || musicMuted) return;
+    const now = audioContext.currentTime;
+    playNote(523, now, 0.15, 'sine');
+    playNote(659, now + 0.15, 0.15, 'sine');
+    playNote(784, now + 0.3, 0.15, 'sine');
+    playNote(1047, now + 0.45, 0.3, 'sine');
+}
+
+// ==================== END SONIC WORLD ELEMENTS ====================
 
 function createProjectile() {
     const weapon = weapons[equippedWeapon];
@@ -1495,6 +1957,16 @@ function startGame() {
     speedTrail.forEach(t => scene.remove(t));
     if (bossMesh) scene.remove(bossMesh);
 
+    // Clear Sonic world elements
+    springs.forEach(s => scene.remove(s));
+    loops.forEach(l => scene.remove(l));
+    pipes.forEach(p => scene.remove(p));
+    itemBoxes.forEach(b => scene.remove(b));
+    dashPanels.forEach(d => scene.remove(d));
+    ramps.forEach(r => scene.remove(r));
+    platforms.forEach(p => scene.remove(p));
+    checkpoints.forEach(c => scene.remove(c));
+
     obstacles = [];
     rings = [];
     projectiles = [];
@@ -1502,6 +1974,23 @@ function startGame() {
     particleSystem = [];
     speedTrail = [];
     bossMesh = null;
+
+    // Reset world element arrays
+    springs = [];
+    loops = [];
+    pipes = [];
+    itemBoxes = [];
+    dashPanels = [];
+    ramps = [];
+    platforms = [];
+    checkpoints = [];
+
+    // Reset power-up states
+    hasShield = false;
+    hasSpeedBoost = false;
+    speedBoostTimer = 0;
+    hasInvincibility = false;
+    invincibilityTimer = 0;
 
     // Apply skin powers
     const power = skins[equippedSkin].power;
@@ -1848,6 +2337,371 @@ function updateRunnerLevel(level) {
         }
     }
 
+    // ==================== SPAWN SONIC WORLD ELEMENTS ====================
+
+    // Spawn Springs
+    if (frameCount % 180 === 0) {
+        const springType = Math.random() > 0.7 ? 'red' : 'yellow';
+        const lane = Math.floor(Math.random() * 3) - 1;
+        createSpring(15, 1.2 + lane * 1.5, springType);
+    }
+
+    // Spawn Item Boxes
+    if (frameCount % 200 === 0) {
+        const lane = Math.floor(Math.random() * 3) - 1;
+        createItemBox(15, 2.5 + lane * 1.5, 'random');
+    }
+
+    // Spawn Dash Panels
+    if (frameCount % 250 === 0) {
+        const lane = Math.floor(Math.random() * 3) - 1;
+        createDashPanel(15, 1.1 + lane * 1.5);
+    }
+
+    // Spawn Ramps
+    if (frameCount % 300 === 0) {
+        const lane = Math.floor(Math.random() * 3) - 1;
+        createRamp(15, 1.3 + lane * 1.5, 'up');
+    }
+
+    // Spawn Moving Platforms
+    if (frameCount % 350 === 0) {
+        createPlatform(15, 3.5, 'vertical', 2);
+    }
+
+    // Spawn Checkpoints at level milestones
+    if (levelProgress === 200 || levelProgress === 400) {
+        createCheckpoint(15, 1.2);
+    }
+
+    // Spawn Pipes occasionally
+    if (frameCount % 400 === 0 && Math.random() > 0.5) {
+        createPipe(15, 2, 8, 4);  // Entry at 15, exit at 8, higher position
+    }
+
+    // ==================== UPDATE SONIC WORLD ELEMENTS ====================
+
+    // Update power-up timers
+    if (speedBoostTimer > 0) {
+        speedBoostTimer--;
+        if (speedBoostTimer === 0) {
+            hasSpeedBoost = false;
+            gameSpeed = skins[equippedSkin].power === 'speed' || skins[equippedSkin].power === 'all' ? 0.25 : 0.18;
+        }
+    }
+
+    if (invincibilityTimer > 0) {
+        invincibilityTimer--;
+        if (invincibilityTimer === 0) {
+            hasInvincibility = false;
+        }
+    }
+
+    // Update Springs
+    springs.forEach((spring, index) => {
+        spring.position.x -= gameSpeed * level.difficulty * speedMultiplier;
+
+        // Animate spring
+        if (spring.userData.animTimer > 0) {
+            spring.userData.animTimer--;
+            spring.scale.y = 0.5 + (spring.userData.animTimer / 20) * 0.5;
+        } else {
+            spring.scale.y = 1;
+        }
+
+        // Check collision with player
+        const sonicX = -5;
+        const sonicY = player.y + player.jumpHeight;
+
+        if (Math.abs(spring.position.x - sonicX) < 0.8 &&
+            Math.abs(spring.position.y - sonicY) < 1 &&
+            !spring.userData.activated) {
+
+            spring.userData.activated = true;
+            spring.userData.animTimer = 20;
+            player.velocityY = spring.userData.bounceForce;
+            player.jumping = true;
+            hasDoubleJumped = false;
+            playSpringSound();
+            createParticleEffect(spring.position.x, spring.position.y, 0, spring.userData.type === 'red' ? 0xFF0000 : 0xFFFF00, 5);
+        }
+
+        // Reset activation when Sonic passes
+        if (spring.position.x < sonicX - 2) {
+            spring.userData.activated = false;
+        }
+
+        // Remove off-screen
+        if (spring.position.x < -15) {
+            scene.remove(spring);
+            springs.splice(index, 1);
+        }
+    });
+
+    // Update Item Boxes
+    itemBoxes.forEach((box, index) => {
+        box.position.x -= gameSpeed * level.difficulty * speedMultiplier;
+
+        // Bobbing animation
+        box.position.y += Math.sin(frameCount * 0.1 + box.userData.bobOffset) * 0.01;
+        box.rotation.y += 0.02;
+
+        // Check collision with player
+        const sonicX = -5;
+        const sonicY = player.y + player.jumpHeight;
+
+        if (!box.userData.collected &&
+            Math.abs(box.position.x - sonicX) < 0.8 &&
+            Math.abs(box.position.y - sonicY) < 1) {
+
+            box.userData.collected = true;
+            playItemBoxSound();
+            createParticleEffect(box.position.x, box.position.y, 0, 0xFFFFFF, 8);
+
+            // Apply power-up effect
+            switch(box.userData.powerUp) {
+                case 'shield':
+                    hasShield = true;
+                    createParticleEffect(sonicX, sonicY, 0, 0x00BFFF, 10);
+                    break;
+                case 'speed':
+                    hasSpeedBoost = true;
+                    speedBoostTimer = 300;  // 5 seconds at 60fps
+                    gameSpeed = 0.35;
+                    createParticleEffect(sonicX, sonicY, 0, 0xFF4500, 10);
+                    break;
+                case 'invincibility':
+                    hasInvincibility = true;
+                    invincibilityTimer = 600;  // 10 seconds
+                    player.invincible = true;
+                    player.invincibleTimer = 600;
+                    createParticleEffect(sonicX, sonicY, 0, 0xFFD700, 15);
+                    break;
+                case 'extralife':
+                    lives++;
+                    updateUI();
+                    createParticleEffect(sonicX, sonicY, 0, 0x00FF00, 10);
+                    break;
+                case 'rings':
+                    score += 50;
+                    coins += 10;
+                    updateCoinDisplay();
+                    updateUI();
+                    createParticleEffect(sonicX, sonicY, 0, 0xFFCC00, 10);
+                    break;
+            }
+
+            scene.remove(box);
+            itemBoxes.splice(index, 1);
+        }
+
+        // Remove off-screen
+        if (box.position.x < -15) {
+            scene.remove(box);
+            itemBoxes.splice(index, 1);
+        }
+    });
+
+    // Update Dash Panels
+    dashPanels.forEach((panel, index) => {
+        panel.position.x -= gameSpeed * level.difficulty * speedMultiplier;
+
+        // Check collision with player
+        const sonicX = -5;
+        const sonicY = player.y + player.jumpHeight;
+
+        if (Math.abs(panel.position.x - sonicX) < 1 &&
+            Math.abs(panel.position.y - sonicY) < 0.5 &&
+            panel.userData.cooldown === 0) {
+
+            panel.userData.cooldown = 60;
+            playDashSound();
+
+            // Speed boost effect
+            if (!hasSpeedBoost) {
+                hasSpeedBoost = true;
+                speedBoostTimer = 120;  // 2 seconds
+                gameSpeed = 0.35;
+            }
+            createParticleEffect(sonicX, sonicY, 0, 0xFF6600, 8);
+        }
+
+        if (panel.userData.cooldown > 0) {
+            panel.userData.cooldown--;
+        }
+
+        // Remove off-screen
+        if (panel.position.x < -15) {
+            scene.remove(panel);
+            dashPanels.splice(index, 1);
+        }
+    });
+
+    // Update Ramps
+    ramps.forEach((ramp, index) => {
+        ramp.position.x -= gameSpeed * level.difficulty * speedMultiplier;
+
+        // Check collision with player
+        const sonicX = -5;
+        const sonicY = player.y + player.jumpHeight;
+
+        if (Math.abs(ramp.position.x - sonicX) < 1.2 &&
+            Math.abs(ramp.position.y - sonicY) < 0.8 &&
+            !player.jumping) {
+
+            // Launch player
+            player.velocityY = ramp.userData.launchForce;
+            player.jumping = true;
+            hasDoubleJumped = false;
+            playJumpSound();
+            createParticleEffect(ramp.position.x, ramp.position.y, 0, 0x8B4513, 5);
+        }
+
+        // Remove off-screen
+        if (ramp.position.x < -15) {
+            scene.remove(ramp);
+            ramps.splice(index, 1);
+        }
+    });
+
+    // Update Moving Platforms
+    platforms.forEach((platform, index) => {
+        platform.position.x -= gameSpeed * level.difficulty * speedMultiplier;
+
+        // Platform movement
+        if (platform.userData.moveType === 'vertical') {
+            platform.position.y += platform.userData.speed * platform.userData.direction;
+            if (Math.abs(platform.position.y - platform.userData.startY) > platform.userData.range) {
+                platform.userData.direction *= -1;
+            }
+        } else if (platform.userData.moveType === 'horizontal') {
+            // Horizontal movement relative to base scroll
+            platform.userData.startX -= gameSpeed * level.difficulty * speedMultiplier;
+        }
+
+        // Check if player is on platform
+        const sonicX = -5;
+        const sonicY = player.y + player.jumpHeight;
+
+        if (Math.abs(platform.position.x - sonicX) < 1.2 &&
+            sonicY <= platform.position.y + 0.5 &&
+            sonicY >= platform.position.y - 0.3 &&
+            player.velocityY <= 0) {
+
+            // Land on platform
+            player.jumpHeight = platform.position.y - player.y + 0.3;
+            player.velocityY = 0;
+            player.jumping = false;
+
+            // Move with platform vertically
+            if (platform.userData.moveType === 'vertical') {
+                player.y += platform.userData.speed * platform.userData.direction * 0.5;
+            }
+        }
+
+        // Remove off-screen
+        if (platform.position.x < -15) {
+            scene.remove(platform);
+            platforms.splice(index, 1);
+        }
+    });
+
+    // Update Checkpoints
+    checkpoints.forEach((checkpoint, index) => {
+        checkpoint.position.x -= gameSpeed * level.difficulty * speedMultiplier;
+
+        // Spin animation
+        if (checkpoint.children[1]) {
+            checkpoint.children[1].rotation.y += checkpoint.userData.spinSpeed;
+        }
+        if (checkpoint.children[2]) {
+            checkpoint.children[2].rotation.y -= checkpoint.userData.spinSpeed * 2;
+            checkpoint.children[2].rotation.x += checkpoint.userData.spinSpeed;
+        }
+
+        // Check collision with player
+        const sonicX = -5;
+        const sonicY = player.y + player.jumpHeight;
+
+        if (!checkpoint.userData.activated &&
+            Math.abs(checkpoint.position.x - sonicX) < 1 &&
+            Math.abs(checkpoint.position.y + 1.5 - sonicY) < 2) {
+
+            checkpoint.userData.activated = true;
+            checkpoint.userData.spinSpeed = 0.2;  // Spin faster when activated
+
+            // Change color to red
+            if (checkpoint.children[1] && checkpoint.children[1].material) {
+                checkpoint.children[1].material.color.setHex(0xFF0000);
+                checkpoint.children[1].material.emissive.setHex(0xFF0000);
+            }
+
+            playCheckpointSound();
+            createParticleEffect(checkpoint.position.x, checkpoint.position.y + 3, 0, 0xFFD700, 15);
+
+            // Bonus rings
+            score += 20;
+            coins += 5;
+            updateCoinDisplay();
+            updateUI();
+        }
+
+        // Slow down spin after activation
+        if (checkpoint.userData.activated && checkpoint.userData.spinSpeed > 0.05) {
+            checkpoint.userData.spinSpeed *= 0.99;
+        }
+
+        // Remove off-screen
+        if (checkpoint.position.x < -15) {
+            scene.remove(checkpoint);
+            checkpoints.splice(index, 1);
+        }
+    });
+
+    // Update Pipes
+    pipes.forEach((pipe, index) => {
+        pipe.position.x -= gameSpeed * level.difficulty * speedMultiplier;
+
+        // Animate glow
+        if (pipe.children[2] && pipe.children[2].material) {
+            pipe.children[2].material.opacity = 0.3 + Math.sin(frameCount * 0.1) * 0.2;
+        }
+
+        // Check collision with player (pipe entry)
+        const sonicX = -5;
+        const sonicY = player.y + player.jumpHeight;
+
+        if (!pipe.userData.isInPipe &&
+            Math.abs(pipe.position.x - sonicX) < 1 &&
+            Math.abs(pipe.position.y - sonicY) < 1) {
+
+            pipe.userData.isInPipe = true;
+
+            // Teleport effect - move Sonic through pipe
+            createParticleEffect(pipe.position.x, pipe.position.y, 0, 0x00FFFF, 10);
+            playDashSound();
+
+            // Boost player forward and up
+            hasSpeedBoost = true;
+            speedBoostTimer = 60;
+            gameSpeed = 0.35;
+            player.velocityY = 0.3;
+            player.jumping = true;
+
+            // Add bonus
+            score += 10;
+            updateUI();
+        }
+
+        // Remove off-screen
+        if (pipe.position.x < -15) {
+            scene.remove(pipe);
+            pipes.splice(index, 1);
+        }
+    });
+
+    // ==================== END UPDATE SONIC WORLD ELEMENTS ====================
+
     // Update obstacles
     obstacles.forEach((obs, index) => {
         if (obs.userData.dead) return;
@@ -2177,11 +3031,28 @@ function nextLevel() {
     bossProjectiles.forEach(proj => scene.remove(proj));
     if (bossMesh) scene.remove(bossMesh);
 
+    // Clear world elements
+    springs.forEach(s => scene.remove(s));
+    pipes.forEach(p => scene.remove(p));
+    itemBoxes.forEach(b => scene.remove(b));
+    dashPanels.forEach(d => scene.remove(d));
+    ramps.forEach(r => scene.remove(r));
+    platforms.forEach(p => scene.remove(p));
+    checkpoints.forEach(c => scene.remove(c));
+
     obstacles = [];
     rings = [];
     projectiles = [];
     bossProjectiles = [];
     bossMesh = null;
+
+    springs = [];
+    pipes = [];
+    itemBoxes = [];
+    dashPanels = [];
+    ramps = [];
+    platforms = [];
+    checkpoints = [];
 
     levelProgress = 0;
     frameCount = 0;
