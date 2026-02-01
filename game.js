@@ -252,6 +252,7 @@ let cameraShake = { x: 0, y: 0, intensity: 0 };
 let coins = parseInt(localStorage.getItem('sonicCoins')) || 0;
 let ownedSkins = JSON.parse(localStorage.getItem('sonicOwnedSkins')) || ['classic'];
 let equippedSkin = localStorage.getItem('sonicEquippedSkin') || 'classic';
+let equippedWeapon = localStorage.getItem('sonicEquippedWeapon') || 'ring';
 
 const skins = {
     classic: { name: 'Classic Sonic', price: 0, color: 0x0066FF, power: 'none' },
@@ -260,6 +261,64 @@ const skins = {
     tank: { name: 'Tank Sonic', price: 200, color: 0x228B22, power: 'extralife' },
     gunner: { name: 'Gunner Sonic', price: 180, color: 0x6B46C1, power: 'rapidfire' },
     ultimate: { name: 'Ultimate Sonic', price: 500, color: 0xFFD700, power: 'all' }
+};
+
+// Weapons System - All FREE!
+const weapons = {
+    ring: {
+        name: 'Ring Shot',
+        color: 0xFFD700,
+        damage: 5,
+        speed: 0.5,
+        cooldown: 20,
+        size: 0.18,
+        description: 'Classic golden ring projectile'
+    },
+    fireball: {
+        name: 'Fire Ball',
+        color: 0xFF4500,
+        damage: 8,
+        speed: 0.4,
+        cooldown: 25,
+        size: 0.25,
+        description: 'Burning fireball - High damage'
+    },
+    lightning: {
+        name: 'Lightning Bolt',
+        color: 0x00FFFF,
+        damage: 6,
+        speed: 0.8,
+        cooldown: 15,
+        size: 0.15,
+        description: 'Super fast electric bolt'
+    },
+    laser: {
+        name: 'Laser Beam',
+        color: 0xFF00FF,
+        damage: 10,
+        speed: 0.3,
+        cooldown: 35,
+        size: 0.3,
+        description: 'Powerful laser - Highest damage'
+    },
+    star: {
+        name: 'Power Star',
+        color: 0xFFFF00,
+        damage: 7,
+        speed: 0.6,
+        cooldown: 18,
+        size: 0.2,
+        description: 'Spinning star projectile'
+    },
+    ice: {
+        name: 'Ice Shard',
+        color: 0x87CEEB,
+        damage: 5,
+        speed: 0.55,
+        cooldown: 12,
+        size: 0.18,
+        description: 'Rapid fire ice shards'
+    }
 };
 
 // Level data - Classic Sonic Zone Colors (15 Levels)
@@ -623,13 +682,13 @@ function createPixelSonicTexture() {
 function createEnhancedSonic() {
     const sonicGroup = new THREE.Group();
 
-    // Create pixel art texture
-    const sonicCanvas = createPixelSonicTexture();
-    const sonicTexture = new THREE.CanvasTexture(sonicCanvas);
-    sonicTexture.magFilter = THREE.NearestFilter;
-    sonicTexture.minFilter = THREE.NearestFilter;
+    // Load real Sonic SVG as texture
+    const loader = new THREE.TextureLoader();
+    const sonicTexture = loader.load('sonic.svg');
+    sonicTexture.magFilter = THREE.LinearFilter;
+    sonicTexture.minFilter = THREE.LinearFilter;
 
-    // Create sprite material
+    // Create sprite material with the SVG
     const spriteMaterial = new THREE.SpriteMaterial({
         map: sonicTexture,
         transparent: true
@@ -637,7 +696,7 @@ function createEnhancedSonic() {
 
     // Create sprite
     const sprite = new THREE.Sprite(spriteMaterial);
-    sprite.scale.set(2, 2, 1);
+    sprite.scale.set(2.5, 3, 1);  // Adjusted for Sonic's proportions
     sonicGroup.add(sprite);
 
     // Also keep a simple 3D hitbox for collisions (invisible)
@@ -888,21 +947,59 @@ function createRing(lane, z) {
 }
 
 function createProjectile() {
-    const geometry = new THREE.TorusGeometry(0.18, 0.06, 8, 16);
+    const weapon = weapons[equippedWeapon];
+    let geometry;
+
+    // Different geometry based on weapon type
+    switch(equippedWeapon) {
+        case 'ring':
+            geometry = new THREE.TorusGeometry(weapon.size, 0.06, 8, 16);
+            break;
+        case 'fireball':
+            geometry = new THREE.SphereGeometry(weapon.size, 12, 12);
+            break;
+        case 'lightning':
+            geometry = new THREE.CylinderGeometry(0.05, 0.05, weapon.size * 3, 6);
+            break;
+        case 'laser':
+            geometry = new THREE.BoxGeometry(weapon.size * 2, 0.1, 0.1);
+            break;
+        case 'star':
+            geometry = new THREE.OctahedronGeometry(weapon.size);
+            break;
+        case 'ice':
+            geometry = new THREE.ConeGeometry(weapon.size * 0.5, weapon.size * 2, 6);
+            break;
+        default:
+            geometry = new THREE.TorusGeometry(weapon.size, 0.06, 8, 16);
+    }
+
     const material = new THREE.MeshBasicMaterial({
-        color: 0xFFD700
+        color: weapon.color
     });
     const proj = new THREE.Mesh(geometry, material);
+
     // Side-scroll: start from Sonic's position
     const sonicY = sonicMesh ? sonicMesh.position.y : 2;
     proj.position.set(-4, sonicY, 0);
-    proj.rotation.y = Math.PI / 2;
-    proj.userData = { speed: 0.5 };
+
+    // Rotate based on weapon type
+    if (equippedWeapon === 'ring') {
+        proj.rotation.y = Math.PI / 2;
+    } else if (equippedWeapon === 'lightning' || equippedWeapon === 'ice') {
+        proj.rotation.z = -Math.PI / 2;
+    }
+
+    proj.userData = {
+        speed: weapon.speed,
+        damage: weapon.damage,
+        weaponType: equippedWeapon
+    };
 
     scene.add(proj);
     projectiles.push(proj);
 
-    createParticleEffect(-4, sonicY, 0, 0xFFD700, 3);
+    createParticleEffect(-4, sonicY, 0, weapon.color, 3);
 }
 
 function createBoss() {
@@ -1248,11 +1345,15 @@ function shoot() {
     createProjectile();
 
     const power = skins[equippedSkin].power;
+    const weapon = weapons[equippedWeapon];
+    let cooldown = weapon.cooldown;
+
+    // Rapidfire power reduces cooldown
     if (power === 'rapidfire' || power === 'all') {
-        player.shootCooldown = 10;
-    } else {
-        player.shootCooldown = 20;
+        cooldown = Math.floor(cooldown * 0.5);
     }
+
+    player.shootCooldown = cooldown;
 }
 
 // Shop System
@@ -1294,6 +1395,7 @@ document.getElementById('shop-btn').addEventListener('click', () => {
     document.getElementById('start-screen').classList.add('hidden');
     document.getElementById('shop-screen').classList.remove('hidden');
     updateShopUI();
+    updateWeaponUI();
 });
 
 document.getElementById('back-btn').addEventListener('click', () => {
@@ -1325,6 +1427,37 @@ function equipSkin(skinId) {
     localStorage.setItem('sonicEquippedSkin', skinId);
     updateShopUI();
 }
+
+// Weapon selection functions
+function updateWeaponUI() {
+    document.querySelectorAll('.weapon-card').forEach(card => {
+        const weaponId = card.getAttribute('data-weapon');
+        const btn = card.querySelector('.weapon-btn');
+
+        if (equippedWeapon === weaponId) {
+            btn.textContent = 'EQUIPPED';
+            btn.className = 'weapon-btn equipped';
+        } else {
+            btn.textContent = 'SELECT';
+            btn.className = 'weapon-btn';
+        }
+    });
+}
+
+function equipWeapon(weaponId) {
+    equippedWeapon = weaponId;
+    localStorage.setItem('sonicEquippedWeapon', weaponId);
+    updateWeaponUI();
+}
+
+// Initialize weapon button listeners
+document.querySelectorAll('.weapon-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const card = e.target.closest('.weapon-card');
+        const weaponId = card.getAttribute('data-weapon');
+        equipWeapon(weaponId);
+    });
+});
 
 // Game functions
 function startGame() {
@@ -1567,7 +1700,33 @@ function update() {
     // Update projectiles - side scroll (move right)
     projectiles.forEach((proj, index) => {
         proj.position.x += proj.userData.speed;
-        proj.rotation.z += 0.3;
+
+        // Different rotation/animation based on weapon type
+        switch(proj.userData.weaponType) {
+            case 'ring':
+                proj.rotation.z += 0.3;
+                break;
+            case 'fireball':
+                proj.rotation.x += 0.2;
+                proj.rotation.y += 0.2;
+                break;
+            case 'lightning':
+                proj.position.y += Math.sin(frameCount * 0.5) * 0.02;
+                break;
+            case 'laser':
+                // Laser stays straight
+                break;
+            case 'star':
+                proj.rotation.x += 0.3;
+                proj.rotation.y += 0.3;
+                proj.rotation.z += 0.3;
+                break;
+            case 'ice':
+                proj.rotation.z += 0.1;
+                break;
+            default:
+                proj.rotation.z += 0.3;
+        }
 
         if (proj.position.x > 15) {
             scene.remove(proj);
@@ -2053,6 +2212,7 @@ function victory() {
 initThree();
 initShop();
 equipSkin(equippedSkin);
+updateWeaponUI();
 
 // Start game buttons
 document.getElementById('start-btn').addEventListener('click', startGame);
