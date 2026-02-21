@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <!-- Sky background -->
+  <rect width="400" height="300" fill="#87CEEB"/>
+
+  <!-- Road -->
+  <polygon points="100,300 150,150 250,150 300,300" fill="#333"/>
+
+  <!-- Road lines -->
+  <rect x="190" y="160" width="20" height="30" fill="#FFF"/>
+  <rect x="190" y="210" width="20" height="30" fill="#FFF"/>
+  <rect x="190" y="260" width="20" height="30" fill="#FFF"/>
+
+  <!-- Road sides -->
+  <rect x="80" y="150" width="20" height="150" fill="#FF0000"/>
+  <rect x="80" y="150" width="20" height="30" fill="#FFF"/>
+  <rect x="80" y="210" width="20" height="30" fill="#FFF"/>
+  <rect x="80" y="270" width="20" height="30" fill="#FFF"/>
+
+  <rect x="300" y="150" width="20" height="150" fill="#FF0000"/>
+  <rect x="300" y="150" width="20" height="30" fill="#FFF"/>
+  <rect x="300" y="210" width="20" height="30" fill="#FFF"/>
+  <rect x="300" y="270" width="20" height="30" fill="#FFF"/>
+
+  <!-- Mountains in background -->
+  <polygon points="0,200 80,100 160,200" fill="#228B22"/>
+  <polygon points="120,200 200,120 280,200" fill="#228B22"/>
+  <polygon points="240,200 340,80 400,200" fill="#228B22"/>
+
+  <!-- Race car (top view) -->
+  <rect x="170" y="200" width="60" height="80" rx="10" fill="#FF0000" stroke="#000" stroke-width="3"/>
+  <rect x="175" y="210" width="50" height="25" fill="#FFD700"/>
+  <circle cx="180" cy="215" r="8" fill="#000"/>
+  <circle cx="220" cy="215" r="8" fill="#000"/>
+  <circle cx="180" cy="265" r="8" fill="#000"/>
+  <circle cx="220" cy="265" r="8" fill="#000"/>
+
+  <!-- Speed lines -->
+  <line x1="150" y1="240" x2="100" y2="240" stroke="#FFF" stroke-width="3" opacity="0.7"/>
+  <line x1="250" y1="240" x2="300" y2="240" stroke="#FFF" stroke-width="3" opacity="0.7"/>
+
+  <!-- Checkered flag -->
+  <rect x="320" y="30" width="60" height="40" fill="#FFF" stroke="#000" stroke-width="2"/>
+  <rect x="320" y="30" width="20" height="20" fill="#000"/>
+  <rect x="340" y="50" width="20" height="20" fill="#000"/>
+  <rect x="360" y="30" width="20" height="20" fill="#000"/>
+  <rect x="340" y="30" width="20" height="20" fill="#FFF"/>
+  <rect x="360" y="50" width="20" height="20" fill="#FFF"/>
+  <rect x="315" y="70" width="5" height="60" fill="#666"/>
+
+  <!-- Title text -->
+  <text x="200" y="290" font-family="monospace" font-size="24" font-weight="bold" fill="#FFD700" text-anchor="middle" stroke="#000" stroke-width="2">RACING</text>
+</svg>

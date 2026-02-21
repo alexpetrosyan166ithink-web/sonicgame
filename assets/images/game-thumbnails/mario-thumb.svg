@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <!-- Sky background -->
+  <rect width="400" height="300" fill="#5C94FC"/>
+
+  <!-- Clouds (pixelated style) -->
+  <rect x="50" y="40" width="80" height="20" fill="#FFF"/>
+  <rect x="60" y="30" width="60" height="30" fill="#FFF"/>
+  <rect x="250" y="60" width="70" height="20" fill="#FFF"/>
+  <rect x="260" y="50" width="50" height="30" fill="#FFF"/>
+
+  <!-- Ground blocks -->
+  <rect x="0" y="240" width="60" height="60" fill="#A0522D" stroke="#000" stroke-width="3"/>
+  <rect x="60" y="240" width="60" height="60" fill="#8B4513" stroke="#000" stroke-width="3"/>
+  <rect x="120" y="240" width="60" height="60" fill="#A0522D" stroke="#000" stroke-width="3"/>
+  <rect x="180" y="240" width="60" height="60" fill="#8B4513" stroke="#000" stroke-width="3"/>
+  <rect x="240" y="240" width="60" height="60" fill="#A0522D" stroke="#000" stroke-width="3"/>
+  <rect x="300" y="240" width="60" height="60" fill="#8B4513" stroke="#000" stroke-width="3"/>
+  <rect x="360" y="240" width="60" height="60" fill="#A0522D" stroke="#000" stroke-width="3"/>
+
+  <!-- Question block -->
+  <rect x="170" y="150" width="50" height="50" fill="#FFD700" stroke="#000" stroke-width="3"/>
+  <text x="195" y="185" font-family="monospace" font-size="35" font-weight="bold" fill="#000" text-anchor="middle">?</text>
+
+  <!-- Mushroom -->
+  <ellipse cx="320" cy="180" rx="20" ry="15" fill="#FF0000"/>
+  <rect x="310" y="180" width="20" height="30" fill="#FFF"/>
+  <circle cx="315" cy="172" r="5" fill="#FFF"/>
+  <circle cx="325" cy="175" r="5" fill="#FFF"/>
+
+  <!-- Mario character (simplified) -->
+  <ellipse cx="100" cy="200" rx="25" ry="30" fill="#FF0000"/>
+  <rect x="85" y="195" width="30" height="20" fill="#0000FF"/>
+  <circle cx="95" cy="185" r="8" fill="#FFE4C4"/>
+  <rect x="92" y="175" width="16" height="8" fill="#FF0000"/>
+
+  <!-- Title text -->
+  <text x="200" y="280" font-family="monospace" font-size="24" font-weight="bold" fill="#FFD700" text-anchor="middle" stroke="#000" stroke-width="2">MARIO</text>
+</svg>

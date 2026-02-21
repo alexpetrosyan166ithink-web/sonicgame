@@ -3,149 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Sonic Runner 3D</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Alex Games - Retro Arcade Collection</title>
+    <meta name="description" content="A retro arcade gaming portal featuring Sonic Runner, Mario, Snake, Racing, and Tanks games.">
+    <link rel="stylesheet" href="assets/styles/portal.css">
+    <link rel="stylesheet" href="assets/styles/game-card.css">
 </head>
 <body>
-    <div id="game-container">
-        <div id="game-canvas-container"></div>
-        <div id="ui">
-            <div id="score">RINGS  0</div>
-            <div id="level-display">ZONE 1</div>
-            <div id="lives">LIVES 3</div>
-            <div id="ball-mode" class="hidden">SPIN!</div>
-        </div>
-        <div id="start-screen" class="screen">
-            <h1>SONIC RUNNER</h1>
-            <p class="level-count">15 ZONES TO CLEAR!</p>
-            <div id="coin-display">Coins: <span id="coin-amount">0</span></div>
-            <div class="controls">
-                <p><strong>SPACE</strong> or <strong>CLICK</strong> - Jump</p>
-                <p><strong>S</strong> or <strong>DOWN ARROW</strong> - BALL MODE (2X SPEED!)</p>
-                <p><strong>A</strong> or <strong>X</strong> - Shoot Energy Rings</p>
-                <p><strong>LEFT/RIGHT ARROWS</strong> - Move Lanes</p>
-            </div>
-            <p class="tip">Next-Gen Graphics Powered by Three.js</p>
-            <button id="start-btn">START GAME</button>
-            <button id="shop-btn">SHOP</button>
-            <button id="music-btn">🔊 MUSIC ON</button>
-        </div>
-        <div id="shop-screen" class="screen hidden">
-            <h1>SHOP</h1>
-            <div id="coin-display-shop">Coins: <span id="coin-amount-shop">0</span></div>
+    <!-- Portal Header -->
+    <header class="portal-header">
+        <h1 class="portal-title">ALEX GAMES</h1>
+        <p class="portal-subtitle">RETRO ARCADE COLLECTION</p>
+    </header>
 
-            <h2 class="shop-section-title">WEAPONS (FREE!)</h2>
-            <div id="weapons-container">
-                <div class="weapon-card" data-weapon="ring">
-                    <div class="weapon-icon" style="background: #FFD700;">●</div>
-                    <h3>Ring Shot</h3>
-                    <p class="weapon-desc">Classic golden ring</p>
-                    <button class="weapon-btn equipped">EQUIPPED</button>
+    <!-- Games Grid -->
+    <main>
+        <section class="games-grid">
+            <!-- Game 1: Sonic Runner (PLAYABLE) -->
+            <a href="games/sonic/" class="game-card" data-status="playable">
+                <div class="game-card__thumbnail">
+                    <img src="assets/images/game-thumbnails/sonic-thumb.svg" alt="Sonic Runner 3D">
+                    <div class="game-card__overlay">
+                        <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                            <polygon points="20,10 20,90 80,50"/>
+                        </svg>
+                        <span class="play-text">PLAY NOW</span>
+                    </div>
                 </div>
-                <div class="weapon-card" data-weapon="fireball">
-                    <div class="weapon-icon" style="background: #FF4500;">🔥</div>
-                    <h3>Fire Ball</h3>
-                    <p class="weapon-desc">High damage</p>
-                    <button class="weapon-btn">SELECT</button>
+                <div class="game-card__content">
+                    <h2>SONIC RUNNER</h2>
+                    <p>Fast-paced 3D endless runner with 15 zones, power-ups, and customizable skins!</p>
+                    <span class="badge badge--new">NEW</span>
                 </div>
-                <div class="weapon-card" data-weapon="lightning">
-                    <div class="weapon-icon" style="background: #00FFFF;">⚡</div>
-                    <h3>Lightning</h3>
-                    <p class="weapon-desc">Super fast</p>
-                    <button class="weapon-btn">SELECT</button>
+            </a>
+
+            <!-- Game 2: Mario Adventure (COMING SOON) -->
+            <div class="game-card" data-status="coming-soon">
+                <div class="game-card__thumbnail">
+                    <img src="assets/images/game-thumbnails/mario-thumb.svg" alt="Mario Adventure">
+                    <div class="game-card__overlay">
+                        <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                            <rect x="25" y="45" width="50" height="45" rx="5"/>
+                            <path d="M 35 45 L 35 30 Q 35 15, 50 15 Q 65 15, 65 30 L 65 45"
+                                  stroke="currentColor"
+                                  stroke-width="8"
+                                  fill="none"
+                                  stroke-linecap="round"/>
+                            <circle cx="50" cy="65" r="6" fill="#000"/>
+                            <rect x="47" y="65" width="6" height="12" fill="#000"/>
+                        </svg>
+                        <span class="lock-text">COMING SOON</span>
+                    </div>
                 </div>
-                <div class="weapon-card" data-weapon="laser">
-                    <div class="weapon-icon" style="background: #FF00FF;">▬</div>
-                    <h3>Laser Beam</h3>
-                    <p class="weapon-desc">Highest damage</p>
-                    <button class="weapon-btn">SELECT</button>
-                </div>
-                <div class="weapon-card" data-weapon="star">
-                    <div class="weapon-icon" style="background: #FFFF00;">★</div>
-                    <h3>Power Star</h3>
-                    <p class="weapon-desc">Spinning star</p>
-                    <button class="weapon-btn">SELECT</button>
-                </div>
-                <div class="weapon-card" data-weapon="ice">
-                    <div class="weapon-icon" style="background: #87CEEB;">❄</div>
-                    <h3>Ice Shard</h3>
-                    <p class="weapon-desc">Rapid fire</p>
-                    <button class="weapon-btn">SELECT</button>
+                <div class="game-card__content">
+                    <h2>MARIO ADVENTURE</h2>
+                    <p>Classic platformer with coins, power-ups, and epic boss battles</p>
+                    <span class="badge badge--coming-soon">COMING SOON</span>
                 </div>
             </div>
 
-            <h2 class="shop-section-title">SKINS</h2>
-            <div id="skins-container">
-                <div class="skin-card" data-skin="classic">
-                    <div class="skin-preview" id="preview-classic"></div>
-                    <h3>Classic Sonic</h3>
-                    <p class="skin-power">Default - No special powers</p>
-                    <p class="skin-price">FREE</p>
-                    <button class="skin-btn equipped">EQUIPPED</button>
+            <!-- Game 3: Snake Classic (COMING SOON) -->
+            <div class="game-card" data-status="coming-soon">
+                <div class="game-card__thumbnail">
+                    <img src="assets/images/game-thumbnails/snake-thumb.svg" alt="Snake Classic">
+                    <div class="game-card__overlay">
+                        <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                            <rect x="25" y="45" width="50" height="45" rx="5"/>
+                            <path d="M 35 45 L 35 30 Q 35 15, 50 15 Q 65 15, 65 30 L 65 45"
+                                  stroke="currentColor"
+                                  stroke-width="8"
+                                  fill="none"
+                                  stroke-linecap="round"/>
+                            <circle cx="50" cy="65" r="6" fill="#000"/>
+                            <rect x="47" y="65" width="6" height="12" fill="#000"/>
+                        </svg>
+                        <span class="lock-text">COMING SOON</span>
+                    </div>
                 </div>
-                <div class="skin-card" data-skin="speed">
-                    <div class="skin-preview" id="preview-speed"></div>
-                    <h3>Speed Sonic</h3>
-                    <p class="skin-power">Power: 50% Faster Movement</p>
-                    <p class="skin-price">100 Coins</p>
-                    <button class="skin-btn">BUY</button>
-                </div>
-                <div class="skin-card" data-skin="jumper">
-                    <div class="skin-preview" id="preview-jumper"></div>
-                    <h3>Sky Sonic</h3>
-                    <p class="skin-power">Power: Double Jump Ability</p>
-                    <p class="skin-price">150 Coins</p>
-                    <button class="skin-btn">BUY</button>
-                </div>
-                <div class="skin-card" data-skin="tank">
-                    <div class="skin-preview" id="preview-tank"></div>
-                    <h3>Tank Sonic</h3>
-                    <p class="skin-power">Power: Extra Life (4 Lives)</p>
-                    <p class="skin-price">200 Coins</p>
-                    <button class="skin-btn">BUY</button>
-                </div>
-                <div class="skin-card" data-skin="gunner">
-                    <div class="skin-preview" id="preview-gunner"></div>
-                    <h3>Gunner Sonic</h3>
-                    <p class="skin-power">Power: Rapid Fire Rings</p>
-                    <p class="skin-price">180 Coins</p>
-                    <button class="skin-btn">BUY</button>
-                </div>
-                <div class="skin-card ultimate" data-skin="ultimate">
-                    <div class="skin-preview" id="preview-ultimate"></div>
-                    <h3>ULTIMATE SONIC</h3>
-                    <p class="skin-power">Power: ALL POWERS COMBINED!</p>
-                    <p class="skin-price">500 Coins</p>
-                    <button class="skin-btn">BUY</button>
+                <div class="game-card__content">
+                    <h2>SNAKE CLASSIC</h2>
+                    <p>Retro Nokia-style snake game with modern twists and power-ups</p>
+                    <span class="badge badge--coming-soon">COMING SOON</span>
                 </div>
             </div>
-            <button id="back-btn">BACK TO MENU</button>
-        </div>
-        <div id="game-over-screen" class="screen hidden">
-            <h1>GAME OVER</h1>
-            <p id="final-score"></p>
-            <div class="button-row">
-                <button id="restart-btn">TRY AGAIN</button>
-                <button id="menu-btn">MAIN MENU</button>
+
+            <!-- Game 4: Turbo Racing (COMING SOON) -->
+            <div class="game-card" data-status="coming-soon">
+                <div class="game-card__thumbnail">
+                    <img src="assets/images/game-thumbnails/racing-thumb.svg" alt="Turbo Racing">
+                    <div class="game-card__overlay">
+                        <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                            <rect x="25" y="45" width="50" height="45" rx="5"/>
+                            <path d="M 35 45 L 35 30 Q 35 15, 50 15 Q 65 15, 65 30 L 65 45"
+                                  stroke="currentColor"
+                                  stroke-width="8"
+                                  fill="none"
+                                  stroke-linecap="round"/>
+                            <circle cx="50" cy="65" r="6" fill="#000"/>
+                            <rect x="47" y="65" width="6" height="12" fill="#000"/>
+                        </svg>
+                        <span class="lock-text">COMING SOON</span>
+                    </div>
+                </div>
+                <div class="game-card__content">
+                    <h2>TURBO RACING</h2>
+                    <p>High-speed arcade racing with drifting, boosts, and multiplayer</p>
+                    <span class="badge badge--coming-soon">COMING SOON</span>
+                </div>
             </div>
-        </div>
-        <div id="victory-screen" class="screen hidden">
-            <h1>YOU WIN!</h1>
-            <p>You defeated the Final Boss!</p>
-            <p>Congratulations! You completed all 15 levels!</p>
-            <p id="victory-score"></p>
-            <div class="button-row">
-                <button id="play-again-btn">PLAY AGAIN</button>
-                <button id="victory-menu-btn">MAIN MENU</button>
+
+            <!-- Game 5: Battle Tanks (COMING SOON) -->
+            <div class="game-card" data-status="coming-soon">
+                <div class="game-card__thumbnail">
+                    <img src="assets/images/game-thumbnails/tanks-thumb.svg" alt="Battle Tanks">
+                    <div class="game-card__overlay">
+                        <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                            <rect x="25" y="45" width="50" height="45" rx="5"/>
+                            <path d="M 35 45 L 35 30 Q 35 15, 50 15 Q 65 15, 65 30 L 65 45"
+                                  stroke="currentColor"
+                                  stroke-width="8"
+                                  fill="none"
+                                  stroke-linecap="round"/>
+                            <circle cx="50" cy="65" r="6" fill="#000"/>
+                            <rect x="47" y="65" width="6" height="12" fill="#000"/>
+                        </svg>
+                        <span class="lock-text">COMING SOON</span>
+                    </div>
+                </div>
+                <div class="game-card__content">
+                    <h2>BATTLE TANKS</h2>
+                    <p>Strategic tank warfare with destructible terrain and upgrades</p>
+                    <span class="badge badge--coming-soon">COMING SOON</span>
+                </div>
             </div>
-        </div>
-    </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-    <script src="game.js"></script>
+        </section>
+    </main>
+
+    <!-- Portal Footer -->
+    <footer class="portal-footer">
+        <p>&copy; 2026 Alex Games. All Rights Reserved.</p>
+        <p>Built with ❤️ and pixels</p>
+    </footer>
 </body>
 </html>

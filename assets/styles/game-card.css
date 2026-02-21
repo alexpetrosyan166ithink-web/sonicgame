@@ -1,0 +1,231 @@
+/* ============================================
+   GAME CARD COMPONENT
+   ============================================ */
+
+.game-card {
+    position: relative;
+    background: rgba(0, 0, 0, 0.6);
+    border: var(--border-width) solid var(--color-accent-gold);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-default);
+    animation: fadeInUp 0.6s ease-out;
+    animation-fill-mode: both;
+    text-decoration: none;
+    display: block;
+    color: inherit;
+}
+
+/* Stagger animation for cards */
+.game-card:nth-child(1) { animation-delay: 0.1s; }
+.game-card:nth-child(2) { animation-delay: 0.2s; }
+.game-card:nth-child(3) { animation-delay: 0.3s; }
+.game-card:nth-child(4) { animation-delay: 0.4s; }
+.game-card:nth-child(5) { animation-delay: 0.5s; }
+
+/* ============================================
+   PLAYABLE STATE (Default)
+   ============================================ */
+.game-card[data-status="playable"] {
+    cursor: pointer;
+}
+
+.game-card[data-status="playable"]:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--color-accent-cyan);
+}
+
+.game-card[data-status="playable"]:active {
+    transform: translate(2px, 2px);
+    box-shadow: var(--shadow-active);
+}
+
+/* ============================================
+   COMING SOON STATE
+   ============================================ */
+.game-card[data-status="coming-soon"] {
+    cursor: not-allowed;
+    opacity: 0.7;
+    filter: grayscale(50%);
+    border-color: var(--color-gray);
+}
+
+.game-card[data-status="coming-soon"]:hover {
+    transform: none;
+    box-shadow: var(--shadow-default);
+}
+
+/* ============================================
+   GAME CARD THUMBNAIL
+   ============================================ */
+.game-card__thumbnail {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 75%; /* 4:3 aspect ratio (300/400) */
+    overflow: hidden;
+    background: var(--color-black);
+}
+
+.game-card__thumbnail img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    image-rendering: pixelated;
+    transition: transform 0.3s ease;
+}
+
+.game-card[data-status="playable"]:hover .game-card__thumbnail img {
+    transform: scale(1.1);
+}
+
+/* ============================================
+   OVERLAY (Play/Lock Icons)
+   ============================================ */
+.game-card__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-xs);
+    background: rgba(0, 0, 0, 0.7);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.game-card[data-status="playable"]:hover .game-card__overlay {
+    opacity: 1;
+}
+
+.game-card[data-status="coming-soon"] .game-card__overlay {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.85);
+}
+
+/* Icons */
+.play-icon,
+.lock-icon {
+    width: 60px;
+    height: 60px;
+    fill: var(--color-accent-gold);
+    filter: drop-shadow(2px 2px 0px var(--color-black));
+}
+
+.game-card[data-status="playable"]:hover .play-icon {
+    animation: pulse 1s ease-in-out infinite;
+}
+
+.lock-icon {
+    fill: var(--color-gray);
+}
+
+/* Text */
+.play-text,
+.lock-text {
+    font-family: var(--font-primary);
+    font-size: clamp(10px, 2vw, 14px);
+    color: var(--color-accent-gold);
+    text-shadow: 2px 2px 0px var(--color-black);
+    letter-spacing: 2px;
+}
+
+.lock-text {
+    color: var(--color-gray);
+}
+
+/* ============================================
+   GAME CARD CONTENT
+   ============================================ */
+.game-card__content {
+    padding: var(--spacing-md);
+    background: linear-gradient(180deg,
+        rgba(0, 51, 170, 0.9) 0%,
+        rgba(0, 68, 204, 0.9) 100%);
+}
+
+.game-card__content h2 {
+    font-size: clamp(12px, 2.5vw, 18px);
+    color: var(--color-white);
+    text-shadow: 2px 2px 0px var(--color-black);
+    margin-bottom: var(--spacing-xs);
+    letter-spacing: 1px;
+}
+
+.game-card__content p {
+    font-size: clamp(8px, 1.5vw, 10px);
+    color: var(--color-accent-cyan);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-sm);
+}
+
+/* ============================================
+   BADGES
+   ============================================ */
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    font-size: clamp(6px, 1vw, 8px);
+    font-family: var(--font-primary);
+    border: 2px solid;
+    border-radius: 4px;
+    text-shadow: 1px 1px 0px var(--color-black);
+    letter-spacing: 1px;
+}
+
+.badge--new {
+    background: var(--color-accent-red);
+    color: var(--color-white);
+    border-color: var(--color-white);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.badge--coming-soon {
+    background: transparent;
+    color: var(--color-gray);
+    border-color: var(--color-gray);
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+/* Mobile: Larger touch targets */
+@media (max-width: 767px) {
+    .game-card {
+        min-height: 200px;
+    }
+
+    .game-card__content {
+        padding: var(--spacing-sm);
+    }
+
+    .play-icon,
+    .lock-icon {
+        width: 48px;
+        height: 48px;
+    }
+}
+
+/* Tablet: Medium cards */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .game-card__content {
+        padding: var(--spacing-md);
+    }
+}
+
+/* Desktop: Large cards */
+@media (min-width: 1024px) {
+    .game-card__thumbnail {
+        padding-bottom: 75%;
+    }
+}

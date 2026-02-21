@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <!-- Desert background -->
+  <rect width="400" height="300" fill="#D2B48C"/>
+
+  <!-- Sky -->
+  <rect width="400" height="150" fill="#87CEEB"/>
+
+  <!-- Sand dunes -->
+  <ellipse cx="100" cy="200" rx="120" ry="50" fill="#C19A6B"/>
+  <ellipse cx="300" cy="220" rx="150" ry="60" fill="#C19A6B"/>
+
+  <!-- Obstacles (rocks) -->
+  <polygon points="50,210 70,180 90,210" fill="#666"/>
+  <polygon points="340,240 360,220 380,240" fill="#666"/>
+
+  <!-- Enemy tank (gray) -->
+  <rect x="280" y="120" width="60" height="30" fill="#555" stroke="#000" stroke-width="2"/>
+  <rect x="290" y="105" width="40" height="15" fill="#666" stroke="#000" stroke-width="2"/>
+  <line x1="310" y1="105" x2="340" y2="85" stroke="#333" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="285" cy="150" r="8" fill="#000"/>
+  <circle cx="305" cy="150" r="8" fill="#000"/>
+  <circle cx="325" cy="150" r="8" fill="#000"/>
+
+  <!-- Player tank (green) -->
+  <rect x="100" y="180" width="70" height="35" fill="#228B22" stroke="#000" stroke-width="2"/>
+  <rect x="115" y="160" width="40" height="20" fill="#32CD32" stroke="#000" stroke-width="2"/>
+  <line x1="135" y1="160" x2="135" y2="130" stroke="#2F4F2F" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="105" cy="215" r="10" fill="#000"/>
+  <circle cx="130" cy="215" r="10" fill="#000"/>
+  <circle cx="155" cy="215" r="10" fill="#000"/>
+
+  <!-- Projectile -->
+  <circle cx="200" cy="145" r="6" fill="#FF4500"/>
+  <circle cx="205" cy="143" r="8" fill="#FFA500" opacity="0.6"/>
+  <line x1="170" y1="160" x2="200" y2="145" stroke="#FFA500" stroke-width="3" opacity="0.5"/>
+
+  <!-- Explosion effect -->
+  <circle cx="280" cy="100" r="15" fill="#FF4500" opacity="0.7"/>
+  <circle cx="280" cy="100" r="20" fill="#FFA500" opacity="0.4"/>
+  <circle cx="275" cy="95" r="8" fill="#FFD700" opacity="0.6"/>
+  <circle cx="285" cy="105" r="8" fill="#FFD700" opacity="0.6"/>
+
+  <!-- Title text -->
+  <text x="200" y="285" font-family="monospace" font-size="24" font-weight="bold" fill="#2F4F2F" text-anchor="middle" stroke="#FFD700" stroke-width="2">TANKS</text>
+</svg>
