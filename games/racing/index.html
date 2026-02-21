@@ -3,99 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Turbo Racing - Coming Soon</title>
-    <link rel="stylesheet" href="../../assets/styles/portal.css">
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            text-align: center;
-            padding: 2rem;
-        }
-
-        .coming-soon-container {
-            background: rgba(0, 0, 0, 0.8);
-            border: 4px solid #FF0000;
-            border-radius: 8px;
-            padding: 3rem 2rem;
-            max-width: 600px;
-            box-shadow: 4px 4px 0px #000;
-        }
-
-        .game-title {
-            font-size: clamp(24px, 5vw, 48px);
-            color: #FF0000;
-            text-shadow: 3px 3px 0px #AA0000, 4px 4px 0px #000;
-            margin-bottom: 1.5rem;
-            letter-spacing: 2px;
-        }
-
-        .coming-soon-text {
-            font-size: clamp(14px, 3vw, 24px);
-            color: #00FFFF;
-            text-shadow: 2px 2px 0px #000;
-            margin-bottom: 2rem;
-            letter-spacing: 2px;
-        }
-
-        .description {
-            font-size: clamp(8px, 1.5vw, 12px);
-            color: #FFFFFF;
-            line-height: 2;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-        }
-
-        .back-link {
-            display: inline-block;
-            padding: 12px 30px;
-            font-size: clamp(10px, 2vw, 14px);
-            font-family: 'Press Start 2P', monospace;
-            background: #DD0000;
-            color: #FFFFFF;
-            border: 4px solid #FFFFFF;
-            text-decoration: none;
-            box-shadow: 4px 4px 0px #000;
-            transition: all 0.1s;
-        }
-
-        .back-link:hover {
-            background: #FF2222;
-            transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0px #000;
-        }
-
-        .back-link:active {
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0px #000;
-        }
-
-        .icon {
-            font-size: 64px;
-            margin-bottom: 1.5rem;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.1); }
-        }
-    </style>
+    <title>Turbo Racing - Arcade Racer</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="coming-soon-container">
-        <div class="icon">🏎️</div>
-        <h1 class="game-title">TURBO RACING</h1>
-        <p class="coming-soon-text">COMING SOON</p>
-        <p class="description">
-            Experience high-speed arcade racing!<br>
-            Drift around corners, use turbo boosts,<br>
-            and race to victory!
-        </p>
-        <a href="../../" class="back-link">← BACK TO GAMES</a>
+    <div class="breadcrumb">
+        <a href="../../">&#8592; BACK TO GAMES</a>
     </div>
+    <div id="game-container">
+        <canvas id="game-canvas" width="800" height="400"></canvas>
+        <div id="ui">
+            <div id="ui-speed">0 MPH</div>
+            <div id="ui-lap">LAP 1/3</div>
+            <div id="ui-position">POS 1st</div>
+            <div id="ui-time">0:00</div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen">
+            <h1>TURBO RACING</h1>
+            <p class="track-count">8 TRACKS TO MASTER!</p>
+            <div id="coin-display">Coins: <span id="coin-amount">0</span></div>
+            <div class="controls">
+                <p><strong>UP / W</strong> - Accelerate</p>
+                <p><strong>DOWN / S</strong> - Brake</p>
+                <p><strong>LEFT / RIGHT</strong> or <strong>A / D</strong> - Steer</p>
+                <p><strong>SPACE</strong> - Nitro Boost</p>
+            </div>
+            <button id="start-btn">START RACE</button>
+            <div class="button-row">
+                <button id="shop-btn">SHOP</button>
+                <button id="music-btn">MUSIC ON</button>
+            </div>
+        </div>
+
+        <!-- Shop Screen -->
+        <div id="shop-screen" class="screen hidden">
+            <h1>GARAGE</h1>
+            <div id="coin-display-shop">Coins: <span id="coin-amount-shop">0</span></div>
+
+            <h2 class="shop-section-title">CARS</h2>
+            <div id="cars-container">
+                <div class="car-card" data-car="racer">
+                    <div class="car-icon" style="background: #FF0000;">R</div>
+                    <h3>Racer</h3>
+                    <p class="car-power">Balanced all-around</p>
+                    <p class="car-price">FREE</p>
+                    <button class="car-btn equipped">EQUIPPED</button>
+                </div>
+                <div class="car-card" data-car="speedster">
+                    <div class="car-icon" style="background: #0088FF;">S</div>
+                    <h3>Speedster</h3>
+                    <p class="car-power">+20% Top speed</p>
+                    <p class="car-price">100 Coins</p>
+                    <button class="car-btn">BUY</button>
+                </div>
+                <div class="car-card" data-car="muscle">
+                    <div class="car-icon" style="background: #FF8800;">M</div>
+                    <h3>Muscle</h3>
+                    <p class="car-power">+30% Acceleration</p>
+                    <p class="car-price">150 Coins</p>
+                    <button class="car-btn">BUY</button>
+                </div>
+                <div class="car-card" data-car="drift">
+                    <div class="car-icon" style="background: #AA00FF;">D</div>
+                    <h3>Drifter</h3>
+                    <p class="car-power">Better handling</p>
+                    <p class="car-price">200 Coins</p>
+                    <button class="car-btn">BUY</button>
+                </div>
+                <div class="car-card ultimate" data-car="turbo">
+                    <div class="car-icon" style="background: linear-gradient(135deg, #FFD700, #FF0000);">T</div>
+                    <h3>TURBO KING</h3>
+                    <p class="car-power">ALL BONUSES + 2x Nitro!</p>
+                    <p class="car-price">500 Coins</p>
+                    <button class="car-btn">BUY</button>
+                </div>
+            </div>
+
+            <h2 class="shop-section-title">UPGRADES</h2>
+            <div id="upgrades-container">
+                <div class="upgrade-card" data-upgrade="nitro">
+                    <div class="upgrade-icon" style="background: #FF4400;">N</div>
+                    <h3>Extra Nitro</h3>
+                    <p class="upgrade-desc">+1 Nitro boost per race</p>
+                    <p class="upgrade-price">50 Coins</p>
+                    <p class="upgrade-count">Owned: <span class="upgrade-owned">0</span></p>
+                    <button class="upgrade-btn">BUY</button>
+                </div>
+                <div class="upgrade-card" data-upgrade="armor">
+                    <div class="upgrade-icon" style="background: #4488FF;">A</div>
+                    <h3>Armor</h3>
+                    <p class="upgrade-desc">Survive 1 crash</p>
+                    <p class="upgrade-price">75 Coins</p>
+                    <p class="upgrade-count">Owned: <span class="upgrade-owned">0</span></p>
+                    <button class="upgrade-btn">BUY</button>
+                </div>
+                <div class="upgrade-card" data-upgrade="magnet">
+                    <div class="upgrade-icon" style="background: #FFD700;">M</div>
+                    <h3>Coin Magnet</h3>
+                    <p class="upgrade-desc">Attract coins wider</p>
+                    <p class="upgrade-price">100 Coins</p>
+                    <p class="upgrade-count">Owned: <span class="upgrade-owned">0</span></p>
+                    <button class="upgrade-btn">BUY</button>
+                </div>
+            </div>
+            <button id="back-btn">BACK TO MENU</button>
+        </div>
+
+        <!-- Race Complete Screen -->
+        <div id="race-complete-screen" class="screen hidden">
+            <h1>RACE COMPLETE!</h1>
+            <div class="score-tally">
+                <p>Position: <span id="rc-position">1st</span></p>
+                <p>Time: <span id="rc-time">0:00</span></p>
+                <p>Coins: <span id="rc-coins">0</span></p>
+                <p style="color: #FFD700; margin-top: 8px;">Reward: <span id="rc-reward">0</span></p>
+            </div>
+            <button id="next-track-btn">NEXT TRACK</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="screen hidden">
+            <h1>CRASHED OUT!</h1>
+            <p id="final-track"></p>
+            <p id="final-position"></p>
+            <div class="button-row">
+                <button id="restart-btn">RETRY</button>
+                <button id="menu-btn">MAIN MENU</button>
+            </div>
+        </div>
+
+        <!-- Victory Screen -->
+        <div id="victory-screen" class="screen hidden">
+            <h1>CHAMPION!</h1>
+            <p>All 8 tracks conquered!</p>
+            <p>You are the Turbo Racing champion!</p>
+            <p id="victory-time"></p>
+            <div class="button-row">
+                <button id="play-again-btn">RACE AGAIN</button>
+                <button id="victory-menu-btn">MAIN MENU</button>
+            </div>
+        </div>
+    </div>
+    <script src="game.js"></script>
 </body>
 </html>
