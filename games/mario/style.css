@@ -1,0 +1,405 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Press Start 2P', 'Arial', sans-serif;
+    background: linear-gradient(180deg, #6185F8 0%, #4060D0 50%, #3050B0 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+#game-container {
+    position: relative;
+    background: #000;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+    border: 4px solid #FFD700;
+}
+
+#game-canvas {
+    display: block;
+    width: 800px;
+    height: 400px;
+    image-rendering: pixelated;
+}
+
+#ui {
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    justify-content: space-between;
+    color: #FFFFFF;
+    font-weight: bold;
+    font-size: 11px;
+    font-family: 'Press Start 2P', monospace;
+    text-shadow: 2px 2px 0px #000, -1px -1px 0px #000;
+    pointer-events: none;
+    z-index: 10;
+}
+
+#ui > div {
+    background: rgba(0, 0, 0, 0.4);
+    padding: 4px 8px;
+    border-radius: 2px;
+}
+
+#ui-coins {
+    color: #FFD700;
+}
+
+#ui-level {
+    color: #FFFFFF;
+}
+
+#ui-lives {
+    color: #FF6666;
+}
+
+#ui-time {
+    color: #00FFFF;
+}
+
+#ui-score {
+    color: #FFFFFF;
+}
+
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 800px;
+    height: 400px;
+    background: linear-gradient(180deg, #0033AA 0%, #0055CC 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    z-index: 100;
+    overflow-y: auto;
+}
+
+.screen.hidden {
+    display: none;
+}
+
+.screen h1 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #FFD700;
+    text-shadow: 3px 3px 0px #AA6600, 4px 4px 0px #000;
+    font-family: 'Press Start 2P', monospace;
+    letter-spacing: 2px;
+}
+
+.screen p {
+    font-size: 10px;
+    margin: 6px 0;
+    font-family: 'Press Start 2P', monospace;
+}
+
+.controls {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 12px 20px;
+    border: 2px solid #FFD700;
+    margin: 12px 0;
+}
+
+.controls p {
+    margin: 4px 0;
+    font-size: 8px;
+    font-family: 'Press Start 2P', monospace;
+}
+
+.controls strong {
+    color: #FFFF00;
+    font-size: 8px;
+}
+
+.level-count {
+    color: #00FFFF;
+    font-size: 12px !important;
+    font-weight: bold;
+    text-shadow: 2px 2px 0px #000;
+    margin-bottom: 10px !important;
+}
+
+.screen button {
+    margin-top: 10px;
+    padding: 12px 30px;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: 'Press Start 2P', monospace;
+    background: #DD0000;
+    color: #FFFFFF;
+    border: 4px solid #FFFFFF;
+    border-radius: 0;
+    cursor: pointer;
+    transition: all 0.1s;
+    box-shadow: 4px 4px 0px #000;
+    text-shadow: 2px 2px 0px #000;
+}
+
+.screen button:hover {
+    background: #FF2222;
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px #000;
+}
+
+.screen button:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #000;
+}
+
+#coin-display, #coin-display-shop {
+    color: #FFD700;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 10px 0;
+    text-shadow: 0 0 10px #FFD700;
+}
+
+#shop-btn {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    margin-top: 10px;
+}
+
+#music-btn {
+    background: linear-gradient(135deg, #00AA00 0%, #008800 100%);
+    margin-top: 10px;
+    font-size: 10px !important;
+    padding: 8px 16px !important;
+}
+
+.shop-section-title {
+    color: #00FFFF;
+    font-size: 14px;
+    margin: 10px 0 5px 0;
+    text-shadow: 2px 2px 0px #000;
+    font-family: 'Press Start 2P', monospace;
+}
+
+#characters-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    max-width: 750px;
+    padding: 5px;
+    margin: 5px 0;
+}
+
+.char-card {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.char-card:hover {
+    border-color: #00FFFF;
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
+}
+
+.char-card.golden {
+    grid-column: span 5;
+    border: 3px solid #FFD700;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 165, 0, 0.2) 100%);
+}
+
+.char-card.golden:hover {
+    border-color: #FFD700;
+    box-shadow: 0 0 20px #FFD700;
+}
+
+.char-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 5px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    border: 2px solid #000;
+    image-rendering: pixelated;
+}
+
+.char-card h3 {
+    font-size: 8px;
+    margin: 4px 0;
+    color: #FFFFFF;
+    font-family: 'Press Start 2P', monospace;
+}
+
+.char-card.golden h3 {
+    color: #FFD700;
+    font-size: 10px;
+    text-shadow: 0 0 10px #FFD700;
+}
+
+.char-power {
+    font-size: 6px !important;
+    color: #00FFFF;
+    margin: 2px 0 !important;
+}
+
+.char-price {
+    font-size: 7px !important;
+    color: #FFD700;
+    font-weight: bold;
+    margin: 2px 0 !important;
+}
+
+.char-btn {
+    padding: 4px 8px !important;
+    font-size: 7px !important;
+    margin-top: 4px !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.char-btn.owned {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%) !important;
+}
+
+.char-btn.equipped {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%) !important;
+    cursor: default;
+}
+
+.char-btn:disabled {
+    background: #666 !important;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+#powerups-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    max-width: 750px;
+    padding: 5px;
+    margin: 5px 0;
+}
+
+.powerup-card {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.powerup-card:hover {
+    border-color: #00FFFF;
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
+}
+
+.powerup-icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 5px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    border: 2px solid #000;
+}
+
+.powerup-card h3 {
+    font-size: 8px;
+    margin: 4px 0;
+    color: #FFFFFF;
+    font-family: 'Press Start 2P', monospace;
+}
+
+.powerup-desc {
+    font-size: 6px !important;
+    color: #AAAAAA;
+    margin: 2px 0 !important;
+}
+
+.powerup-price {
+    font-size: 7px !important;
+    color: #FFD700;
+    font-weight: bold;
+}
+
+.powerup-btn {
+    padding: 4px 10px !important;
+    font-size: 7px !important;
+    margin-top: 4px !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.powerup-count {
+    font-size: 6px !important;
+    color: #88FF88;
+    margin: 2px 0 !important;
+}
+
+#back-btn {
+    margin-top: 10px;
+    background: linear-gradient(135deg, #666 0%, #888 100%);
+}
+
+.button-row {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+#menu-btn, #victory-menu-btn {
+    background: #0066AA !important;
+}
+
+.score-tally {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px 20px;
+    border: 2px solid #FFD700;
+    margin: 10px 0;
+    text-align: left;
+}
+
+.score-tally p {
+    margin: 4px 0;
+    font-size: 9px;
+}
+
+.breadcrumb {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 8px 16px;
+    border: 2px solid #FFD700;
+    border-radius: 4px;
+}
+
+.breadcrumb a {
+    color: #FFD700;
+    text-decoration: none;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    text-shadow: 2px 2px 0px #000;
+}
+
+.breadcrumb a:hover {
+    color: #00FFFF;
+}

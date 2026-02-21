@@ -3,99 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mario Adventure - Coming Soon</title>
-    <link rel="stylesheet" href="../../assets/styles/portal.css">
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            text-align: center;
-            padding: 2rem;
-        }
-
-        .coming-soon-container {
-            background: rgba(0, 0, 0, 0.8);
-            border: 4px solid #FFD700;
-            border-radius: 8px;
-            padding: 3rem 2rem;
-            max-width: 600px;
-            box-shadow: 4px 4px 0px #000;
-        }
-
-        .game-title {
-            font-size: clamp(24px, 5vw, 48px);
-            color: #FFD700;
-            text-shadow: 3px 3px 0px #AA6600, 4px 4px 0px #000;
-            margin-bottom: 1.5rem;
-            letter-spacing: 2px;
-        }
-
-        .coming-soon-text {
-            font-size: clamp(14px, 3vw, 24px);
-            color: #00FFFF;
-            text-shadow: 2px 2px 0px #000;
-            margin-bottom: 2rem;
-            letter-spacing: 2px;
-        }
-
-        .description {
-            font-size: clamp(8px, 1.5vw, 12px);
-            color: #FFFFFF;
-            line-height: 2;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-        }
-
-        .back-link {
-            display: inline-block;
-            padding: 12px 30px;
-            font-size: clamp(10px, 2vw, 14px);
-            font-family: 'Press Start 2P', monospace;
-            background: #DD0000;
-            color: #FFFFFF;
-            border: 4px solid #FFFFFF;
-            text-decoration: none;
-            box-shadow: 4px 4px 0px #000;
-            transition: all 0.1s;
-        }
-
-        .back-link:hover {
-            background: #FF2222;
-            transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0px #000;
-        }
-
-        .back-link:active {
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0px #000;
-        }
-
-        .icon {
-            font-size: 64px;
-            margin-bottom: 1.5rem;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.1); }
-        }
-    </style>
+    <title>Mario Adventure - 2D Platformer</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="coming-soon-container">
-        <div class="icon">🍄</div>
-        <h1 class="game-title">MARIO ADVENTURE</h1>
-        <p class="coming-soon-text">COMING SOON</p>
-        <p class="description">
-            Get ready for classic platformer action!<br>
-            Jump, collect coins, and defeat enemies<br>
-            in this retro adventure game.
-        </p>
-        <a href="../../" class="back-link">← BACK TO GAMES</a>
+    <div class="breadcrumb">
+        <a href="../../">&#8592; BACK TO GAMES</a>
     </div>
+    <div id="game-container">
+        <canvas id="game-canvas" width="800" height="400"></canvas>
+        <div id="ui">
+            <div id="ui-coins">COINS 0</div>
+            <div id="ui-level">WORLD 1-1</div>
+            <div id="ui-lives">LIVES 3</div>
+            <div id="ui-time">TIME 300</div>
+            <div id="ui-score">SCORE 0</div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen">
+            <h1>MARIO ADVENTURE</h1>
+            <p class="level-count">5 WORLDS TO CONQUER!</p>
+            <div id="coin-display">Coins: <span id="coin-amount">0</span></div>
+            <div class="controls">
+                <p><strong>ARROWS</strong> or <strong>A/D</strong> - Move</p>
+                <p><strong>SPACE</strong> or <strong>W/UP</strong> - Jump (hold for higher)</p>
+                <p><strong>SHIFT</strong> or <strong>S</strong> - Run</p>
+                <p><strong>F</strong> or <strong>X</strong> - Fireball (Fire Mario)</p>
+            </div>
+            <button id="start-btn">START GAME</button>
+            <button id="shop-btn">SHOP</button>
+            <button id="music-btn">MUSIC ON</button>
+        </div>
+
+        <!-- Shop Screen -->
+        <div id="shop-screen" class="screen hidden">
+            <h1>SHOP</h1>
+            <div id="coin-display-shop">Coins: <span id="coin-amount-shop">0</span></div>
+
+            <h2 class="shop-section-title">CHARACTERS</h2>
+            <div id="characters-container">
+                <div class="char-card" data-char="mario">
+                    <div class="char-icon" style="background: #E44040;">M</div>
+                    <h3>Mario</h3>
+                    <p class="char-power">Balanced all-around</p>
+                    <p class="char-price">FREE</p>
+                    <button class="char-btn equipped">EQUIPPED</button>
+                </div>
+                <div class="char-card" data-char="luigi">
+                    <div class="char-icon" style="background: #40A840;">L</div>
+                    <h3>Luigi</h3>
+                    <p class="char-power">Higher jump</p>
+                    <p class="char-price">100 Coins</p>
+                    <button class="char-btn">BUY</button>
+                </div>
+                <div class="char-card" data-char="toad">
+                    <div class="char-icon" style="background: #4080E0;">T</div>
+                    <h3>Toad</h3>
+                    <p class="char-power">Faster speed</p>
+                    <p class="char-price">150 Coins</p>
+                    <button class="char-btn">BUY</button>
+                </div>
+                <div class="char-card" data-char="peach">
+                    <div class="char-icon" style="background: #F08080;">P</div>
+                    <h3>Peach</h3>
+                    <p class="char-power">Float ability</p>
+                    <p class="char-price">200 Coins</p>
+                    <button class="char-btn">BUY</button>
+                </div>
+                <div class="char-card golden" data-char="golden">
+                    <div class="char-icon" style="background: linear-gradient(135deg, #FFD700, #FFA500);">G</div>
+                    <h3>GOLDEN MARIO</h3>
+                    <p class="char-power">ALL POWERS COMBINED!</p>
+                    <p class="char-price">500 Coins</p>
+                    <button class="char-btn">BUY</button>
+                </div>
+            </div>
+
+            <h2 class="shop-section-title">POWER-UP PACKS</h2>
+            <div id="powerups-container">
+                <div class="powerup-card" data-powerup="mushroom">
+                    <div class="powerup-icon" style="background: #E44040;">+</div>
+                    <h3>Mushroom Start</h3>
+                    <p class="powerup-desc">Start level as Big Mario</p>
+                    <p class="powerup-price">50 Coins</p>
+                    <p class="powerup-count">Owned: <span class="powerup-owned">0</span></p>
+                    <button class="powerup-btn">BUY</button>
+                </div>
+                <div class="powerup-card" data-powerup="fireflower">
+                    <div class="powerup-icon" style="background: #FF8800;">F</div>
+                    <h3>Fire Start</h3>
+                    <p class="powerup-desc">Start level as Fire Mario</p>
+                    <p class="powerup-price">100 Coins</p>
+                    <p class="powerup-count">Owned: <span class="powerup-owned">0</span></p>
+                    <button class="powerup-btn">BUY</button>
+                </div>
+                <div class="powerup-card" data-powerup="star">
+                    <div class="powerup-icon" style="background: #FFD700;">S</div>
+                    <h3>Star Start</h3>
+                    <p class="powerup-desc">Start with 8s invincibility</p>
+                    <p class="powerup-price">75 Coins</p>
+                    <p class="powerup-count">Owned: <span class="powerup-owned">0</span></p>
+                    <button class="powerup-btn">BUY</button>
+                </div>
+            </div>
+            <button id="back-btn">BACK TO MENU</button>
+        </div>
+
+        <!-- Level Complete Screen -->
+        <div id="level-complete-screen" class="screen hidden">
+            <h1>LEVEL COMPLETE!</h1>
+            <div class="score-tally">
+                <p>Score: <span id="lc-score">0</span></p>
+                <p>Coins: <span id="lc-coins">0</span></p>
+                <p>Time Bonus: <span id="lc-time">0</span></p>
+                <p style="color: #FFD700; margin-top: 8px;">Total: <span id="lc-total">0</span></p>
+            </div>
+            <button id="next-level-btn">NEXT LEVEL</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="screen hidden">
+            <h1>GAME OVER</h1>
+            <p id="final-score"></p>
+            <div class="button-row">
+                <button id="restart-btn">TRY AGAIN</button>
+                <button id="menu-btn">MAIN MENU</button>
+            </div>
+        </div>
+
+        <!-- Victory Screen -->
+        <div id="victory-screen" class="screen hidden">
+            <h1>YOU WIN!</h1>
+            <p>You rescued the Princess!</p>
+            <p>Congratulations on completing all 5 worlds!</p>
+            <p id="victory-score"></p>
+            <div class="button-row">
+                <button id="play-again-btn">PLAY AGAIN</button>
+                <button id="victory-menu-btn">MAIN MENU</button>
+            </div>
+        </div>
+    </div>
+    <script src="game.js"></script>
 </body>
 </html>
