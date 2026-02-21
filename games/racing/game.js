@@ -10,7 +10,7 @@ const CANVAS_H = 400;
 const ROAD_W = 2000;
 const SEG_LEN = 200;
 const DRAW_DIST = 120;
-const CAM_HEIGHT = 1500;
+const CAM_HEIGHT = 500;
 const CAM_DEPTH = 0.84;
 
 // Physics (tuned for per-frame at 60fps)
@@ -262,7 +262,7 @@ function buildTrack(trackIdx) {
         else if (t > 0.85 && t < 0.95) seg.curve = -1.5 * td.curviness;
 
         // Hills
-        seg.p.world.y = Math.sin(t * Math.PI * 6) * 1500 * td.hilliness;
+        seg.p.world.y = Math.sin(t * Math.PI * 6) * 400 * td.hilliness;
 
         // Segment coloring (alternating stripes)
         const dark = Math.floor(i / 3) % 2 === 0;
@@ -359,6 +359,10 @@ function render() {
     const baseIdx = Math.floor(position / SEG_LEN) % segments.length;
     const baseSeg = segments[baseIdx];
     const playerY = baseSeg.p.world.y || 0;
+
+    // Ground fill below horizon (overdrawn by road segments)
+    ctx.fillStyle = baseSeg.color.grass;
+    ctx.fillRect(0, CANVAS_H / 2, CANVAS_W, CANVAS_H / 2);
 
     // Project all visible segments front-to-back (to accumulate curve offsets)
     const projected = [];
@@ -625,7 +629,8 @@ function drawAICars(baseIdx, projected) {
 function drawCountdown() {
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-    const phase = Math.min(3, Math.floor((180 - countdownTimer) / 60));
+    const elapsed = 210 - countdownTimer;
+    const phase = Math.min(3, Math.floor(elapsed / 60));
     ctx.fillStyle = phase === 0 ? '#FF0000' : (phase === 1 ? '#FFFF00' : '#00FF00');
     ctx.font = '64px "Press Start 2P", monospace';
     ctx.textAlign = 'center';
@@ -848,7 +853,7 @@ function loadTrack(idx) {
         magnetRange = 2;
     }
 
-    countdownTimer = 180;
+    countdownTimer = 210;
     countdownPhase = 0;
 
     document.getElementById('ui-lap').textContent = 'LAP 1/' + totalLaps;
