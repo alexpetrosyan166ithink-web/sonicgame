@@ -3,99 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Classic - Coming Soon</title>
-    <link rel="stylesheet" href="../../assets/styles/portal.css">
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            text-align: center;
-            padding: 2rem;
-        }
-
-        .coming-soon-container {
-            background: rgba(0, 0, 0, 0.8);
-            border: 4px solid #00FF00;
-            border-radius: 8px;
-            padding: 3rem 2rem;
-            max-width: 600px;
-            box-shadow: 4px 4px 0px #000;
-        }
-
-        .game-title {
-            font-size: clamp(24px, 5vw, 48px);
-            color: #00FF00;
-            text-shadow: 3px 3px 0px #006600, 4px 4px 0px #000;
-            margin-bottom: 1.5rem;
-            letter-spacing: 2px;
-        }
-
-        .coming-soon-text {
-            font-size: clamp(14px, 3vw, 24px);
-            color: #00FFFF;
-            text-shadow: 2px 2px 0px #000;
-            margin-bottom: 2rem;
-            letter-spacing: 2px;
-        }
-
-        .description {
-            font-size: clamp(8px, 1.5vw, 12px);
-            color: #FFFFFF;
-            line-height: 2;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-        }
-
-        .back-link {
-            display: inline-block;
-            padding: 12px 30px;
-            font-size: clamp(10px, 2vw, 14px);
-            font-family: 'Press Start 2P', monospace;
-            background: #DD0000;
-            color: #FFFFFF;
-            border: 4px solid #FFFFFF;
-            text-decoration: none;
-            box-shadow: 4px 4px 0px #000;
-            transition: all 0.1s;
-        }
-
-        .back-link:hover {
-            background: #FF2222;
-            transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0px #000;
-        }
-
-        .back-link:active {
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0px #000;
-        }
-
-        .icon {
-            font-size: 64px;
-            margin-bottom: 1.5rem;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.1); }
-        }
-    </style>
+    <title>Snake Classic - Retro Arcade</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="coming-soon-container">
-        <div class="icon">🐍</div>
-        <h1 class="game-title">SNAKE CLASSIC</h1>
-        <p class="coming-soon-text">COMING SOON</p>
-        <p class="description">
-            The legendary mobile game returns!<br>
-            Eat food, grow longer, and avoid walls<br>
-            in this addictive retro classic.
-        </p>
-        <a href="../../" class="back-link">← BACK TO GAMES</a>
+    <div class="breadcrumb">
+        <a href="../../">&#8592; BACK TO GAMES</a>
     </div>
+    <div id="game-container">
+        <canvas id="game-canvas" width="800" height="400"></canvas>
+        <div id="ui">
+            <div id="ui-score">SCORE 0</div>
+            <div id="ui-level">LEVEL 1</div>
+            <div id="ui-length">LENGTH 3</div>
+            <div id="ui-highscore">HI 0</div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen">
+            <h1>SNAKE CLASSIC</h1>
+            <p class="level-count">10 LEVELS + ENDLESS MODE!</p>
+            <div id="coin-display">Coins: <span id="coin-amount">0</span></div>
+            <div class="controls">
+                <p><strong>ARROW KEYS</strong> or <strong>WASD</strong> - Move</p>
+                <p><strong>SPACE</strong> - Pause</p>
+                <p><strong>SHIFT</strong> - Speed Boost</p>
+            </div>
+            <p class="mode-info" id="mode-info">MODE: CLASSIC (10 Levels)</p>
+            <button id="start-btn">START GAME</button>
+            <div class="button-row">
+                <button id="mode-btn">MODE: CLASSIC</button>
+                <button id="shop-btn">SHOP</button>
+                <button id="music-btn">MUSIC ON</button>
+            </div>
+        </div>
+
+        <!-- Shop Screen -->
+        <div id="shop-screen" class="screen hidden">
+            <h1>SHOP</h1>
+            <div id="coin-display-shop">Coins: <span id="coin-amount-shop">0</span></div>
+
+            <h2 class="shop-section-title">SNAKE SKINS</h2>
+            <div id="skins-container">
+                <div class="skin-card" data-skin="classic">
+                    <div class="skin-icon" style="background: #00FF00;">S</div>
+                    <h3>Classic</h3>
+                    <p class="skin-power">Default green snake</p>
+                    <p class="skin-price">FREE</p>
+                    <button class="skin-btn equipped">EQUIPPED</button>
+                </div>
+                <div class="skin-card" data-skin="fire">
+                    <div class="skin-icon" style="background: #FF4400;">S</div>
+                    <h3>Fire</h3>
+                    <p class="skin-power">+10% Score bonus</p>
+                    <p class="skin-price">100 Coins</p>
+                    <button class="skin-btn">BUY</button>
+                </div>
+                <div class="skin-card" data-skin="ice">
+                    <div class="skin-icon" style="background: #00CCFF;">S</div>
+                    <h3>Ice</h3>
+                    <p class="skin-power">Slower speed penalty</p>
+                    <p class="skin-price">150 Coins</p>
+                    <button class="skin-btn">BUY</button>
+                </div>
+                <div class="skin-card" data-skin="gold">
+                    <div class="skin-icon" style="background: #FFD700;">S</div>
+                    <h3>Gold</h3>
+                    <p class="skin-power">2x Coin drops</p>
+                    <p class="skin-price">200 Coins</p>
+                    <button class="skin-btn">BUY</button>
+                </div>
+                <div class="skin-card rainbow" data-skin="rainbow">
+                    <div class="skin-icon" style="background: linear-gradient(135deg, #FF0000, #FFD700, #00FF00, #00FFFF, #0000FF, #FF00FF);">R</div>
+                    <h3>RAINBOW</h3>
+                    <p class="skin-power">ALL BONUSES COMBINED!</p>
+                    <p class="skin-price">500 Coins</p>
+                    <button class="skin-btn">BUY</button>
+                </div>
+            </div>
+
+            <h2 class="shop-section-title">POWER-UPS</h2>
+            <div id="powerups-container">
+                <div class="powerup-card" data-powerup="shield">
+                    <div class="powerup-icon" style="background: #00AAFF;">O</div>
+                    <h3>Shield</h3>
+                    <p class="powerup-desc">Survive 1 wall hit</p>
+                    <p class="powerup-price">50 Coins</p>
+                    <p class="powerup-count">Owned: <span class="powerup-owned">0</span></p>
+                    <button class="powerup-btn">BUY</button>
+                </div>
+                <div class="powerup-card" data-powerup="shrink">
+                    <div class="powerup-icon" style="background: #FF00FF;">-</div>
+                    <h3>Shrink</h3>
+                    <p class="powerup-desc">Remove 3 tail segments</p>
+                    <p class="powerup-price">75 Coins</p>
+                    <p class="powerup-count">Owned: <span class="powerup-owned">0</span></p>
+                    <button class="powerup-btn">BUY</button>
+                </div>
+                <div class="powerup-card" data-powerup="magnet">
+                    <div class="powerup-icon" style="background: #FF4444;">M</div>
+                    <h3>Magnet</h3>
+                    <p class="powerup-desc">Attract food for 15s</p>
+                    <p class="powerup-price">100 Coins</p>
+                    <p class="powerup-count">Owned: <span class="powerup-owned">0</span></p>
+                    <button class="powerup-btn">BUY</button>
+                </div>
+                <div class="powerup-card" data-powerup="ghost">
+                    <div class="powerup-icon" style="background: #AAAAAA;">G</div>
+                    <h3>Ghost</h3>
+                    <p class="powerup-desc">Pass through walls 10s</p>
+                    <p class="powerup-price">125 Coins</p>
+                    <p class="powerup-count">Owned: <span class="powerup-owned">0</span></p>
+                    <button class="powerup-btn">BUY</button>
+                </div>
+            </div>
+            <button id="back-btn">BACK TO MENU</button>
+        </div>
+
+        <!-- Level Complete Screen -->
+        <div id="level-complete-screen" class="screen hidden">
+            <h1>LEVEL COMPLETE!</h1>
+            <div class="score-tally">
+                <p>Score: <span id="lc-score">0</span></p>
+                <p>Length: <span id="lc-length">0</span></p>
+                <p>Food Eaten: <span id="lc-food">0</span></p>
+                <p>Bonus: <span id="lc-bonus">0</span></p>
+                <p style="color: #00FF00; margin-top: 8px;">Total: <span id="lc-total">0</span></p>
+            </div>
+            <button id="next-level-btn">NEXT LEVEL</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="screen hidden">
+            <h1>GAME OVER</h1>
+            <p id="final-score"></p>
+            <p id="final-length"></p>
+            <p id="final-level"></p>
+            <div class="button-row">
+                <button id="restart-btn">TRY AGAIN</button>
+                <button id="menu-btn">MAIN MENU</button>
+            </div>
+        </div>
+
+        <!-- Victory Screen -->
+        <div id="victory-screen" class="screen hidden">
+            <h1>YOU WIN!</h1>
+            <p>All 10 levels conquered!</p>
+            <p>You are the Snake Master!</p>
+            <p id="victory-score"></p>
+            <div class="button-row">
+                <button id="play-again-btn">PLAY AGAIN</button>
+                <button id="victory-menu-btn">MAIN MENU</button>
+            </div>
+        </div>
+
+        <!-- Pause Overlay -->
+        <div id="pause-screen" class="screen hidden">
+            <h1>PAUSED</h1>
+            <p>Press SPACE to resume</p>
+            <button id="resume-btn">RESUME</button>
+            <button id="pause-menu-btn">MAIN MENU</button>
+        </div>
+    </div>
+    <script src="game.js"></script>
 </body>
 </html>
