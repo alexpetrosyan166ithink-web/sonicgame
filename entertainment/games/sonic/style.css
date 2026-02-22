@@ -423,14 +423,93 @@ body {
 
 /* Mobile Responsive */
 @media (max-width: 840px) {
-    #game-canvas-container canvas {
-        width: 100% !important;
-        height: auto !important;
+    body {
+        overflow: auto;
+        align-items: flex-start;
+        padding: 0;
     }
     #game-container {
+        width: 100vw;
         max-width: 100vw;
-        overflow: hidden;
+        border-width: 2px;
     }
+    #game-canvas-container {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 2 / 1;
+    }
+    #game-canvas-container canvas {
+        width: 100% !important;
+        height: 100% !important;
+    }
+    .screen {
+        width: 100%;
+        height: auto;
+        min-height: 100%;
+        position: relative;
+        padding: 20px 12px;
+        overflow-y: auto;
+    }
+    .screen h1 {
+        font-size: clamp(14px, 4vw, 24px);
+        margin-bottom: 10px;
+    }
+    .screen p {
+        font-size: clamp(7px, 2vw, 10px);
+    }
+    .level-count {
+        font-size: clamp(9px, 2.5vw, 12px) !important;
+    }
+    .controls {
+        padding: 8px 12px;
+        margin: 8px 0;
+        max-width: 100%;
+    }
+    .controls p, .controls strong {
+        font-size: clamp(6px, 1.8vw, 8px);
+    }
+    .screen button {
+        padding: 10px 20px;
+        font-size: clamp(9px, 2.5vw, 12px);
+        margin-top: 8px;
+    }
+    #coin-display, #coin-display-shop {
+        font-size: clamp(14px, 4vw, 24px);
+        margin: 8px 0;
+    }
+    .shop-section-title {
+        font-size: clamp(10px, 2.5vw, 14px);
+    }
+    #weapons-container {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 100%;
+        gap: 6px;
+    }
+    .weapon-icon { width: 32px; height: 32px; font-size: 16px; }
+    .weapon-card h3 { font-size: 7px; }
+    #skins-container {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 100%;
+        max-height: none;
+        gap: 6px;
+    }
+    .skin-card.ultimate { grid-column: span 2; }
+    .skin-preview { width: 44px; height: 44px; }
+    .skin-card h3 { font-size: clamp(8px, 2vw, 14px); }
+    .skin-card.ultimate h3 { font-size: clamp(10px, 2.5vw, 16px); }
+    .skin-power { font-size: clamp(6px, 1.5vw, 10px) !important; }
+    .skin-price { font-size: clamp(7px, 1.8vw, 12px) !important; }
+    .skin-btn { font-size: clamp(7px, 1.8vw, 12px) !important; }
+    .button-row {
+        flex-direction: column;
+        gap: 8px;
+        width: 80%;
+    }
+    .button-row button { width: 100%; }
+    .breadcrumb { padding: 6px 10px; }
+    .breadcrumb a { font-size: 8px; }
+    #ui { font-size: 9px; }
+    #music-btn { font-size: 8px !important; padding: 6px 12px !important; }
 }
 @media (pointer: coarse) {
     #game-container {
