@@ -3,14 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Educational - Alex Games</title>
-    <meta name="description" content="Educational activities - grammar quizzes, learning games, and more.">
+    <title>Free Educational Games & Grammar Quizzes Online | Alex Games</title>
+    <meta name="description" content="Free educational games and interactive grammar quizzes for kids and students. Learn grammar, spelling, and language skills while having fun at alexgames.am">
+    <meta name="keywords" content="educational games, grammar quizzes, free learning games, kids education, grammar practice, English grammar quiz, online learning, student games">
+    <meta name="author" content="Alex Games">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://alexgames.am/educational/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://alexgames.am/educational/">
+    <meta property="og:title" content="Free Educational Games & Grammar Quizzes Online">
+    <meta property="og:description" content="Free educational games and interactive grammar quizzes for kids and students. Learn while having fun!">
+    <meta property="og:image" content="https://alexgames.am/assets/images/game-thumbnails/educational-thumb.svg">
+    <meta property="og:site_name" content="Alex Games">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free Educational Games & Grammar Quizzes | Alex Games">
+    <meta name="twitter:description" content="Free educational games and interactive grammar quizzes for kids and students.">
+    <meta name="twitter:image" content="https://alexgames.am/assets/images/game-thumbnails/educational-thumb.svg">
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="../assets/styles/portal.css">
     <link rel="stylesheet" href="../assets/styles/game-card.css">
+
+    <!-- Schema.org - BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://alexgames.am/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Educational",
+                "item": "https://alexgames.am/educational/"
+            }
+        ]
+    }
+    </script>
+
+    <!-- Schema.org - CollectionPage -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Educational Games & Quizzes",
+        "description": "Free educational games and interactive grammar quizzes for kids and students.",
+        "url": "https://alexgames.am/educational/",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "Alex Games",
+            "url": "https://alexgames.am/"
+        },
+        "mainEntity": {
+            "@type": "ItemList",
+            "numberOfItems": 1,
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "item": {
+                        "@type": "Quiz",
+                        "name": "Grammar Quizzes",
+                        "description": "Test your grammar skills with fun interactive quizzes and challenges.",
+                        "url": "https://alexgames.am/educational/grammar-quizzes/",
+                        "educationalLevel": "Beginner",
+                        "learningResourceType": "Quiz"
+                    }
+                }
+            ]
+        }
+    }
+    </script>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="breadcrumb">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="../" class="back-link">&#8592; BACK TO HOME</a>
     </nav>
 
@@ -22,13 +98,13 @@
 
     <!-- Activities Grid -->
     <main>
-        <section class="games-grid">
+        <section class="games-grid" aria-label="Educational activities">
             <!-- Grammar Quizzes (Coming Soon) -->
-            <a href="grammar-quizzes/" class="game-card" data-status="coming-soon">
+            <a href="grammar-quizzes/" class="game-card" data-status="coming-soon" aria-label="Grammar Quizzes - Coming Soon">
                 <div class="game-card__thumbnail">
-                    <img src="../assets/images/game-thumbnails/grammar-thumb.svg" alt="Grammar Quizzes">
+                    <img src="../assets/images/game-thumbnails/grammar-thumb.svg" alt="Grammar Quizzes - Interactive English grammar practice" width="400" height="300" loading="lazy">
                     <div class="game-card__overlay">
-                        <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                        <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true">
                             <rect x="25" y="45" width="50" height="40" rx="5" fill="currentColor"/>
                             <path d="M35,45 V30 A15,15 0 0,1 65,30 V45" fill="none" stroke="currentColor" stroke-width="6"/>
                         </svg>

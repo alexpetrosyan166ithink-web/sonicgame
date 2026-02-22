@@ -3,10 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alex Games - Learning & Fun Portal</title>
-    <meta name="description" content="An educational and entertainment portal featuring retro arcade games and interactive quizzes.">
+    <title>Alex Games - Free Online Retro Arcade Games & Educational Quizzes</title>
+    <meta name="description" content="Play free retro arcade games online - Sonic Runner, Mario Adventure, Snake, Racing & Battle Tanks. Plus educational grammar quizzes for kids and students at alexgames.am">
+    <meta name="keywords" content="free online games, retro arcade games, educational games, grammar quizzes, Sonic runner, Mario game, Snake game, racing game, tank game, kids games, browser games">
+    <meta name="author" content="Alex Games">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://alexgames.am/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://alexgames.am/">
+    <meta property="og:title" content="Alex Games - Free Online Retro Arcade Games & Educational Quizzes">
+    <meta property="og:description" content="Play free retro arcade games online - Sonic, Mario, Snake, Racing & Tanks. Plus educational grammar quizzes for kids and students.">
+    <meta property="og:image" content="https://alexgames.am/assets/images/game-thumbnails/entertainment-thumb.svg">
+    <meta property="og:site_name" content="Alex Games">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Alex Games - Free Online Retro Arcade Games & Educational Quizzes">
+    <meta name="twitter:description" content="Play free retro arcade games online - Sonic, Mario, Snake, Racing & Tanks. Plus educational grammar quizzes.">
+    <meta name="twitter:image" content="https://alexgames.am/assets/images/game-thumbnails/entertainment-thumb.svg">
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="assets/styles/portal.css">
     <link rel="stylesheet" href="assets/styles/game-card.css">
+
+    <!-- Schema.org - WebSite -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Alex Games",
+        "alternateName": "Alex Games - Learning & Fun Portal",
+        "url": "https://alexgames.am/",
+        "description": "Free online retro arcade games and educational quizzes for kids and students.",
+        "publisher": {
+            "@type": "Organization",
+            "name": "Alex Games",
+            "url": "https://alexgames.am/",
+            "sameAs": [
+                "https://www.facebook.com/61576186104908/"
+            ]
+        }
+    }
+    </script>
+
+    <!-- Schema.org - Organization -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Alex Games",
+        "url": "https://alexgames.am/",
+        "logo": "https://alexgames.am/assets/images/game-thumbnails/entertainment-thumb.svg",
+        "sameAs": [
+            "https://www.facebook.com/61576186104908/"
+        ]
+    }
+    </script>
+
+    <!-- Schema.org - BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://alexgames.am/"
+            }
+        ]
+    }
+    </script>
+
+    <!-- Schema.org - ItemList (Site Categories) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Alex Games Categories",
+        "description": "Browse entertainment games and educational activities",
+        "numberOfItems": 2,
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Entertainment - Retro Arcade Games",
+                "url": "https://alexgames.am/entertainment/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Educational - Grammar Quizzes & Learning",
+                "url": "https://alexgames.am/educational/"
+            }
+        ]
+    }
+    </script>
 </head>
 <body>
     <!-- Portal Header -->
@@ -17,35 +113,35 @@
 
     <!-- Category Selection -->
     <main>
-        <section class="category-grid">
+        <section class="category-grid" aria-label="Browse categories">
             <!-- Entertainment Category -->
-            <a href="entertainment/" class="category-card" data-category="entertainment">
+            <a href="entertainment/" class="category-card" data-category="entertainment" aria-label="Entertainment - Play retro arcade games">
                 <div class="category-card__thumbnail">
-                    <img src="assets/images/game-thumbnails/entertainment-thumb.svg" alt="Entertainment">
+                    <img src="assets/images/game-thumbnails/entertainment-thumb.svg" alt="Entertainment - Retro arcade games collection with controller icon" width="400" height="300" loading="eager">
                     <div class="category-card__overlay">
-                        <span class="category-card__icon">🎮</span>
+                        <span class="category-card__icon" aria-hidden="true">🎮</span>
                         <span class="category-card__action">EXPLORE</span>
                     </div>
                 </div>
                 <div class="category-card__content">
                     <h2>ENTERTAINMENT</h2>
-                    <p>Retro arcade games - Sonic, Mario, Snake, Racing & Tanks!</p>
+                    <p>Play free retro arcade games - Sonic Runner, Mario Adventure, Snake Classic, Turbo Racing & Battle Tanks!</p>
                     <span class="badge badge--new">5 GAMES</span>
                 </div>
             </a>
 
             <!-- Educational Category -->
-            <a href="educational/" class="category-card" data-category="educational">
+            <a href="educational/" class="category-card" data-category="educational" aria-label="Educational - Grammar quizzes and learning activities">
                 <div class="category-card__thumbnail">
-                    <img src="assets/images/game-thumbnails/educational-thumb.svg" alt="Educational">
+                    <img src="assets/images/game-thumbnails/educational-thumb.svg" alt="Educational - Grammar quizzes and learning activities with book icon" width="400" height="300" loading="eager">
                     <div class="category-card__overlay">
-                        <span class="category-card__icon">📚</span>
+                        <span class="category-card__icon" aria-hidden="true">📚</span>
                         <span class="category-card__action">EXPLORE</span>
                     </div>
                 </div>
                 <div class="category-card__content">
                     <h2>EDUCATIONAL</h2>
-                    <p>Learn while having fun with grammar quizzes and more!</p>
+                    <p>Learn while having fun with interactive grammar quizzes and educational challenges!</p>
                     <span class="badge badge--coming-soon">COMING SOON</span>
                 </div>
             </a>
@@ -54,8 +150,8 @@
 
     <!-- Social Links -->
     <div class="social-links">
-        <a href="https://www.facebook.com/61576186104908/" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Facebook">
-            <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <a href="https://www.facebook.com/61576186104908/" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Follow Alex Games on Facebook">
+            <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
             </svg>
             FOLLOW ME
