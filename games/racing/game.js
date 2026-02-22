@@ -278,23 +278,70 @@ function buildTrack(trackIdx) {
 function getTrackColors(scenery, dark) {
     switch (scenery) {
         case 'grass':
-            return { road: dark ? '#707070' : '#686868', grass: dark ? '#10AA10' : '#009A00', rumble: dark ? '#FF0000' : '#FFFFFF', lane: dark ? '#FFFFFF' : null };
+            return { road: dark ? '#7A6B5A' : '#6E604F', grass: dark ? '#10AA10' : '#009A00', rumble: dark ? '#FF0000' : '#FFFFFF', lane: dark ? '#FFFFFF' : null, rocks: ['#8B7D6B','#6B5D4D','#9E8E7E','#5A4E40'] };
         case 'desert':
-            return { road: dark ? '#808080' : '#757575', grass: dark ? '#C2A645' : '#B89830', rumble: dark ? '#FF8800' : '#FFFFFF', lane: dark ? '#FFFFFF' : null };
+            return { road: dark ? '#A08060' : '#907050', grass: dark ? '#C2A645' : '#B89830', rumble: dark ? '#FF8800' : '#FFFFFF', lane: dark ? '#FFFFFF' : null, rocks: ['#B89878','#C8A888','#987858','#D0B090'] };
         case 'forest':
-            return { road: dark ? '#606060' : '#585858', grass: dark ? '#0C7A0C' : '#086A08', rumble: dark ? '#FF0000' : '#FFFFFF', lane: dark ? '#FFFF00' : null };
+            return { road: dark ? '#605848' : '#565040', grass: dark ? '#0C7A0C' : '#086A08', rumble: dark ? '#FF0000' : '#FFFFFF', lane: dark ? '#FFFF00' : null, rocks: ['#706858','#504838','#807060','#403830'] };
         case 'mountain':
-            return { road: dark ? '#686868' : '#606060', grass: dark ? '#608060' : '#507050', rumble: dark ? '#FF0000' : '#FFFFFF', lane: dark ? '#FFFFFF' : null };
+            return { road: dark ? '#787068' : '#6E6660', grass: dark ? '#608060' : '#507050', rumble: dark ? '#FF0000' : '#FFFFFF', lane: dark ? '#FFFFFF' : null, rocks: ['#908880','#686060','#A09890','#585050'] };
         case 'night':
-            return { road: dark ? '#404040' : '#383838', grass: dark ? '#0A3A0A' : '#082A08', rumble: dark ? '#FFFF00' : '#000000', lane: dark ? '#FFFF00' : null };
+            return { road: dark ? '#3A3430' : '#302A28', grass: dark ? '#0A3A0A' : '#082A08', rumble: dark ? '#FFFF00' : '#000000', lane: dark ? '#FFFF00' : null, rocks: ['#484040','#282020','#383030','#504848'] };
         case 'coast':
-            return { road: dark ? '#707070' : '#686868', grass: dark ? '#DDB040' : '#CCA030', rumble: dark ? '#0088FF' : '#FFFFFF', lane: dark ? '#FFFFFF' : null };
+            return { road: dark ? '#8A7A60' : '#7E6E54', grass: dark ? '#DDB040' : '#CCA030', rumble: dark ? '#0088FF' : '#FFFFFF', lane: dark ? '#FFFFFF' : null, rocks: ['#A09070','#C0A888','#807060','#B0A080'] };
         case 'snow':
-            return { road: dark ? '#808890' : '#787880', grass: dark ? '#DDDDEE' : '#CCCCDD', rumble: dark ? '#0044FF' : '#FFFFFF', lane: dark ? '#FFFF00' : null };
+            return { road: dark ? '#9098A0' : '#888890', grass: dark ? '#DDDDEE' : '#CCCCDD', rumble: dark ? '#0044FF' : '#FFFFFF', lane: dark ? '#FFFF00' : null, rocks: ['#A0A8B0','#B8C0C8','#808888','#C8D0D8'] };
         case 'lava':
-            return { road: dark ? '#505050' : '#484848', grass: dark ? '#441100' : '#331000', rumble: dark ? '#FF4400' : '#FF8800', lane: dark ? '#FF0000' : null };
+            return { road: dark ? '#4A3A30' : '#3E3028', grass: dark ? '#441100' : '#331000', rumble: dark ? '#FF4400' : '#FF8800', lane: dark ? '#FF0000' : null, rocks: ['#5A4030','#3A2018','#6A5040','#482818'] };
         default:
-            return { road: dark ? '#707070' : '#686868', grass: dark ? '#10AA10' : '#009A00', rumble: dark ? '#FF0000' : '#FFFFFF', lane: dark ? '#FFFFFF' : null };
+            return { road: dark ? '#7A6B5A' : '#6E604F', grass: dark ? '#10AA10' : '#009A00', rumble: dark ? '#FF0000' : '#FFFFFF', lane: dark ? '#FFFFFF' : null, rocks: ['#8B7D6B','#6B5D4D','#9E8E7E','#5A4E40'] };
+    }
+}
+
+// Deterministic pseudo-random for rock placement (no flicker)
+function seededRand(seed) {
+    return ((seed * 9301 + 49297) % 233280) / 233280;
+}
+
+function drawRocksOnSegment(p1, p2, segIndex, rockColors) {
+    const avgW = (Math.abs(p1.screen.w) + Math.abs(p2.screen.w)) / 2;
+    if (avgW < 6) return; // too far away, skip
+
+    // More rocks for closer (wider) segments, fewer for distant
+    const numRocks = Math.min(14, Math.max(2, Math.floor(avgW / 10)));
+
+    for (let i = 0; i < numRocks; i++) {
+        const seed = segIndex * 31 + i * 7;
+        const rx = seededRand(seed);
+        const ry = seededRand(seed + 1000);
+        const rs = seededRand(seed + 2000);
+        const rc = seededRand(seed + 3000);
+
+        // Interpolate position between far (p2) and near (p1)
+        const t = ry;
+        const cx = p2.screen.x + (p1.screen.x - p2.screen.x) * t;
+        const cw = p2.screen.w + (p1.screen.w - p2.screen.w) * t;
+        const cy = p2.screen.y + (p1.screen.y - p2.screen.y) * t;
+
+        // Place rock across road width
+        const rockX = cx + (rx - 0.5) * cw * 1.8;
+        const rockSize = Math.max(1, avgW / 28 * (0.4 + rs * 0.7));
+        const rockH = Math.max(1, rockSize * (0.4 + rs * 0.3));
+
+        // Pick rock color
+        ctx.fillStyle = rockColors[Math.floor(rc * rockColors.length)];
+        ctx.fillRect(Math.round(rockX - rockSize / 2), Math.round(cy - rockH / 2), Math.round(rockSize), Math.round(rockH));
+
+        // Highlight edge (top-left shine)
+        if (rockSize > 2) {
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.fillRect(Math.round(rockX - rockSize / 2), Math.round(cy - rockH / 2), Math.max(1, Math.round(rockSize * 0.4)), Math.max(1, Math.round(rockH * 0.5)));
+        }
+        // Shadow edge (bottom-right)
+        if (rockSize > 3) {
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.fillRect(Math.round(rockX + rockSize * 0.1), Math.round(cy), Math.max(1, Math.round(rockSize * 0.4)), Math.max(1, Math.round(rockH * 0.4)));
+        }
     }
 }
 
@@ -415,6 +462,11 @@ function render() {
             p2.screen.x + p2.screen.w, p2.screen.y,
             p2.screen.x - p2.screen.w, p2.screen.y
         );
+
+        // Rock texture on road
+        if (c.rocks) {
+            drawRocksOnSegment(p1, p2, cur.seg.index, c.rocks);
+        }
 
         // Rumble strips
         const rw1 = p1.screen.w * 1.12;
