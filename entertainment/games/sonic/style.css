@@ -10,10 +10,10 @@ body {
     font-family: 'Press Start 2P', 'Arial', sans-serif;
     background: linear-gradient(180deg, #0044AA 0%, #0066CC 50%, #0088EE 100%);
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 #game-container {
@@ -427,11 +427,6 @@ body {
 
 /* Mobile Responsive */
 @media (max-width: 840px) {
-    body {
-        overflow: auto;
-        align-items: flex-start;
-        padding: 0;
-    }
     #game-container {
         width: 100vw;
         max-width: 100vw;

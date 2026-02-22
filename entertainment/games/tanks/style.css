@@ -10,10 +10,10 @@ body {
     font-family: 'Press Start 2P', 'Arial', sans-serif;
     background: linear-gradient(180deg, #0a1a0a 0%, #1a2e1a 50%, #0a1a0a 100%);
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 #game-container {
@@ -214,6 +214,7 @@ body {
     padding: 8px 16px;
     border-bottom: 2px solid #32CD32;
     text-align: left;
+    width: 100%;
 }
 
 .breadcrumb a {
@@ -230,11 +231,6 @@ body {
 
 /* Mobile Responsive */
 @media (max-width: 840px) {
-    body {
-        overflow: auto;
-        align-items: flex-start;
-        padding: 0;
-    }
     #game-container {
         width: 100vw;
         max-width: 100vw;
