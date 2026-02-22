@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alex Games - Retro Arcade Collection</title>
-    <meta name="description" content="A retro arcade gaming portal featuring Sonic Runner, Mario, Snake, Racing, and Tanks games.">
+    <title>Alex Games - Learning & Fun Portal</title>
+    <meta name="description" content="An educational and entertainment portal featuring retro arcade games and interactive grammar quizzes.">
     <link rel="stylesheet" href="assets/styles/portal.css">
     <link rel="stylesheet" href="assets/styles/game-card.css">
 </head>
@@ -12,101 +12,135 @@
     <!-- Portal Header -->
     <header class="portal-header">
         <h1 class="portal-title">ALEX GAMES</h1>
-        <p class="portal-subtitle">RETRO ARCADE COLLECTION</p>
+        <p class="portal-subtitle">LEARNING & FUN PORTAL</p>
     </header>
 
-    <!-- Games Grid -->
     <main>
-        <section class="games-grid">
-            <!-- Game 1: Sonic Runner (PLAYABLE) -->
-            <a href="games/sonic/" class="game-card" data-status="playable">
-                <div class="game-card__thumbnail">
-                    <img src="assets/images/game-thumbnails/sonic-thumb.svg" alt="Sonic Runner 3D">
-                    <div class="game-card__overlay">
-                        <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                            <polygon points="20,10 20,90 80,50"/>
-                        </svg>
-                        <span class="play-text">PLAY NOW</span>
+        <!-- Entertainment Section -->
+        <section class="category-section">
+            <div class="category-header">
+                <span class="category-icon">🎮</span>
+                <h2 class="category-title">ENTERTAINMENT</h2>
+            </div>
+            <div class="games-grid">
+                <!-- Game 1: Sonic Runner -->
+                <a href="entertainment/games/sonic/" class="game-card" data-status="playable">
+                    <div class="game-card__thumbnail">
+                        <img src="assets/images/game-thumbnails/sonic-thumb.svg" alt="Sonic Runner 3D">
+                        <div class="game-card__overlay">
+                            <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                                <polygon points="20,10 20,90 80,50"/>
+                            </svg>
+                            <span class="play-text">PLAY NOW</span>
+                        </div>
                     </div>
-                </div>
-                <div class="game-card__content">
-                    <h2>SONIC RUNNER</h2>
-                    <p>Fast-paced 3D endless runner with 15 zones, power-ups, and customizable skins!</p>
-                    <span class="badge badge--new">NEW</span>
-                </div>
-            </a>
+                    <div class="game-card__content">
+                        <h2>SONIC RUNNER</h2>
+                        <p>Fast-paced 3D endless runner with 15 zones, power-ups, and customizable skins!</p>
+                        <span class="badge badge--new">NEW</span>
+                    </div>
+                </a>
 
-            <!-- Game 2: Mario Adventure (PLAYABLE) -->
-            <a href="games/mario/" class="game-card" data-status="playable">
-                <div class="game-card__thumbnail">
-                    <img src="assets/images/game-thumbnails/mario-thumb.svg" alt="Mario Adventure">
-                    <div class="game-card__overlay">
-                        <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                            <polygon points="20,10 20,90 80,50"/>
-                        </svg>
-                        <span class="play-text">PLAY NOW</span>
+                <!-- Game 2: Mario Adventure -->
+                <a href="entertainment/games/mario/" class="game-card" data-status="playable">
+                    <div class="game-card__thumbnail">
+                        <img src="assets/images/game-thumbnails/mario-thumb.svg" alt="Mario Adventure">
+                        <div class="game-card__overlay">
+                            <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                                <polygon points="20,10 20,90 80,50"/>
+                            </svg>
+                            <span class="play-text">PLAY NOW</span>
+                        </div>
                     </div>
-                </div>
-                <div class="game-card__content">
-                    <h2>MARIO ADVENTURE</h2>
-                    <p>Classic platformer with coins, power-ups, and epic boss battles</p>
-                    <span class="badge badge--new">NEW</span>
-                </div>
-            </a>
+                    <div class="game-card__content">
+                        <h2>MARIO ADVENTURE</h2>
+                        <p>Classic platformer with coins, power-ups, and epic boss battles</p>
+                        <span class="badge badge--new">NEW</span>
+                    </div>
+                </a>
 
-            <!-- Game 3: Snake Classic (PLAYABLE) -->
-            <a href="games/snake/" class="game-card" data-status="playable">
-                <div class="game-card__thumbnail">
-                    <img src="assets/images/game-thumbnails/snake-thumb.svg" alt="Snake Classic">
-                    <div class="game-card__overlay">
-                        <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                            <polygon points="20,10 20,90 80,50"/>
-                        </svg>
-                        <span class="play-text">PLAY NOW</span>
+                <!-- Game 3: Snake Classic -->
+                <a href="entertainment/games/snake/" class="game-card" data-status="playable">
+                    <div class="game-card__thumbnail">
+                        <img src="assets/images/game-thumbnails/snake-thumb.svg" alt="Snake Classic">
+                        <div class="game-card__overlay">
+                            <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                                <polygon points="20,10 20,90 80,50"/>
+                            </svg>
+                            <span class="play-text">PLAY NOW</span>
+                        </div>
                     </div>
-                </div>
-                <div class="game-card__content">
-                    <h2>SNAKE CLASSIC</h2>
-                    <p>Retro Nokia-style snake game with modern twists and power-ups</p>
-                    <span class="badge badge--new">NEW</span>
-                </div>
-            </a>
+                    <div class="game-card__content">
+                        <h2>SNAKE CLASSIC</h2>
+                        <p>Retro Nokia-style snake game with modern twists and power-ups</p>
+                        <span class="badge badge--new">NEW</span>
+                    </div>
+                </a>
 
-            <!-- Game 4: Turbo Racing (PLAYABLE) -->
-            <a href="games/racing/" class="game-card" data-status="playable">
-                <div class="game-card__thumbnail">
-                    <img src="assets/images/game-thumbnails/racing-thumb.svg" alt="Turbo Racing">
-                    <div class="game-card__overlay">
-                        <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                            <polygon points="20,10 20,90 80,50"/>
-                        </svg>
-                        <span class="play-text">PLAY NOW</span>
+                <!-- Game 4: Turbo Racing -->
+                <a href="entertainment/games/racing/" class="game-card" data-status="playable">
+                    <div class="game-card__thumbnail">
+                        <img src="assets/images/game-thumbnails/racing-thumb.svg" alt="Turbo Racing">
+                        <div class="game-card__overlay">
+                            <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                                <polygon points="20,10 20,90 80,50"/>
+                            </svg>
+                            <span class="play-text">PLAY NOW</span>
+                        </div>
                     </div>
-                </div>
-                <div class="game-card__content">
-                    <h2>TURBO RACING</h2>
-                    <p>High-speed arcade racing with drifting, boosts, and multiplayer</p>
-                    <span class="badge badge--new">NEW</span>
-                </div>
-            </a>
+                    <div class="game-card__content">
+                        <h2>TURBO RACING</h2>
+                        <p>High-speed arcade racing with drifting, boosts, and multiplayer</p>
+                        <span class="badge badge--new">NEW</span>
+                    </div>
+                </a>
 
-            <!-- Game 5: Battle Tanks (PLAYABLE) -->
-            <a href="games/tanks/" class="game-card" data-status="playable">
-                <div class="game-card__thumbnail">
-                    <img src="assets/images/game-thumbnails/tanks-thumb.svg" alt="Battle Tanks">
-                    <div class="game-card__overlay">
-                        <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                            <polygon points="20,10 20,90 80,50"/>
-                        </svg>
-                        <span class="play-text">PLAY NOW</span>
+                <!-- Game 5: Battle Tanks -->
+                <a href="entertainment/games/tanks/" class="game-card" data-status="playable">
+                    <div class="game-card__thumbnail">
+                        <img src="assets/images/game-thumbnails/tanks-thumb.svg" alt="Battle Tanks">
+                        <div class="game-card__overlay">
+                            <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                                <polygon points="20,10 20,90 80,50"/>
+                            </svg>
+                            <span class="play-text">PLAY NOW</span>
+                        </div>
                     </div>
-                </div>
-                <div class="game-card__content">
-                    <h2>BATTLE TANKS</h2>
-                    <p>Strategic tank warfare with destructible terrain and upgrades</p>
-                    <span class="badge badge--new">NEW</span>
-                </div>
-            </a>
+                    <div class="game-card__content">
+                        <h2>BATTLE TANKS</h2>
+                        <p>Strategic tank warfare with destructible terrain and upgrades</p>
+                        <span class="badge badge--new">NEW</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Educational Section -->
+        <section class="category-section">
+            <div class="category-header">
+                <span class="category-icon">📚</span>
+                <h2 class="category-title">EDUCATIONAL</h2>
+            </div>
+            <div class="games-grid">
+                <!-- Grammar Quizzes (Coming Soon) -->
+                <a href="educational/grammar-quizzes/" class="game-card" data-status="coming-soon">
+                    <div class="game-card__thumbnail">
+                        <img src="assets/images/game-thumbnails/grammar-thumb.svg" alt="Grammar Quizzes">
+                        <div class="game-card__overlay">
+                            <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                                <rect x="25" y="45" width="50" height="40" rx="5" fill="currentColor"/>
+                                <path d="M35,45 V30 A15,15 0 0,1 65,30 V45" fill="none" stroke="currentColor" stroke-width="6"/>
+                            </svg>
+                            <span class="lock-text">COMING SOON</span>
+                        </div>
+                    </div>
+                    <div class="game-card__content">
+                        <h2>GRAMMAR QUIZZES</h2>
+                        <p>Test your grammar skills with fun interactive quizzes and challenges</p>
+                        <span class="badge badge--coming-soon">COMING SOON</span>
+                    </div>
+                </a>
+            </div>
         </section>
     </main>
 
