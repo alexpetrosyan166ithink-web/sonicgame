@@ -3,99 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Battle Tanks - Coming Soon</title>
-    <link rel="stylesheet" href="../../assets/styles/portal.css">
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            text-align: center;
-            padding: 2rem;
-        }
-
-        .coming-soon-container {
-            background: rgba(0, 0, 0, 0.8);
-            border: 4px solid #228B22;
-            border-radius: 8px;
-            padding: 3rem 2rem;
-            max-width: 600px;
-            box-shadow: 4px 4px 0px #000;
-        }
-
-        .game-title {
-            font-size: clamp(24px, 5vw, 48px);
-            color: #32CD32;
-            text-shadow: 3px 3px 0px #006600, 4px 4px 0px #000;
-            margin-bottom: 1.5rem;
-            letter-spacing: 2px;
-        }
-
-        .coming-soon-text {
-            font-size: clamp(14px, 3vw, 24px);
-            color: #00FFFF;
-            text-shadow: 2px 2px 0px #000;
-            margin-bottom: 2rem;
-            letter-spacing: 2px;
-        }
-
-        .description {
-            font-size: clamp(8px, 1.5vw, 12px);
-            color: #FFFFFF;
-            line-height: 2;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-        }
-
-        .back-link {
-            display: inline-block;
-            padding: 12px 30px;
-            font-size: clamp(10px, 2vw, 14px);
-            font-family: 'Press Start 2P', monospace;
-            background: #DD0000;
-            color: #FFFFFF;
-            border: 4px solid #FFFFFF;
-            text-decoration: none;
-            box-shadow: 4px 4px 0px #000;
-            transition: all 0.1s;
-        }
-
-        .back-link:hover {
-            background: #FF2222;
-            transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0px #000;
-        }
-
-        .back-link:active {
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0px #000;
-        }
-
-        .icon {
-            font-size: 64px;
-            margin-bottom: 1.5rem;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.1); }
-        }
-    </style>
+    <title>Battle Tanks - Retro Arcade</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="coming-soon-container">
-        <div class="icon">🛡️</div>
-        <h1 class="game-title">BATTLE TANKS</h1>
-        <p class="coming-soon-text">COMING SOON</p>
-        <p class="description">
-            Strategic tank combat awaits!<br>
-            Destroy enemies, upgrade your tank,<br>
-            and dominate the battlefield!
-        </p>
-        <a href="../../" class="back-link">← BACK TO GAMES</a>
+    <div class="breadcrumb">
+        <a href="../../">&#8592; BACK TO GAMES</a>
     </div>
+    <div id="game-container">
+        <canvas id="game-canvas" width="800" height="400"></canvas>
+        <div id="ui">
+            <div id="ui-score">SCORE 0</div>
+            <div id="ui-level">LEVEL 1</div>
+            <div id="ui-lives">LIVES 3</div>
+            <div id="ui-enemies">ENEMIES 0</div>
+            <div id="ui-highscore">HI 0</div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen">
+            <h1>BATTLE TANKS</h1>
+            <p class="level-count">20 LEVELS OF TANK WARFARE!</p>
+            <div class="controls">
+                <p><strong>ARROW KEYS</strong> or <strong>WASD</strong> - Move</p>
+                <p><strong>SPACE</strong> - Fire</p>
+            </div>
+            <p class="mission-info">Destroy all enemies and protect your base!</p>
+            <button id="start-btn">START GAME</button>
+            <div class="button-row">
+                <button id="music-btn">MUSIC ON</button>
+            </div>
+        </div>
+
+        <!-- Level Complete Screen -->
+        <div id="level-complete-screen" class="screen hidden">
+            <h1>LEVEL COMPLETE!</h1>
+            <div class="score-tally">
+                <p>Enemies Destroyed: <span id="lc-enemies">0</span></p>
+                <p>Score: <span id="lc-score">0</span></p>
+                <p>Bonus: <span id="lc-bonus">0</span></p>
+                <p class="total-line">Total: <span id="lc-total">0</span></p>
+            </div>
+            <button id="next-level-btn">NEXT LEVEL</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="screen hidden">
+            <h1>GAME OVER</h1>
+            <p id="go-reason"></p>
+            <p id="go-score"></p>
+            <p id="go-level"></p>
+            <div class="button-row">
+                <button id="restart-btn">TRY AGAIN</button>
+                <button id="menu-btn">MAIN MENU</button>
+            </div>
+        </div>
+
+        <!-- Victory Screen -->
+        <div id="victory-screen" class="screen hidden">
+            <h1>VICTORY!</h1>
+            <p>All 20 levels conquered!</p>
+            <p>You are the Tank Commander!</p>
+            <p id="victory-score"></p>
+            <div class="button-row">
+                <button id="play-again-btn">PLAY AGAIN</button>
+                <button id="victory-menu-btn">MAIN MENU</button>
+            </div>
+        </div>
+
+        <!-- Pause Screen -->
+        <div id="pause-screen" class="screen hidden">
+            <h1>PAUSED</h1>
+            <p>Press ESC to resume</p>
+            <button id="resume-btn">RESUME</button>
+            <button id="pause-menu-btn">MAIN MENU</button>
+        </div>
+    </div>
+    <script src="game.js"></script>
 </body>
 </html>
