@@ -267,6 +267,49 @@ body {
 }
 
 /* ============================================
+   SOCIAL LINKS
+   ============================================ */
+.social-links {
+    text-align: center;
+    margin-top: var(--spacing-xl);
+}
+
+.social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    font-family: var(--font-primary);
+    font-size: clamp(8px, 1.5vw, 12px);
+    color: var(--color-white);
+    text-decoration: none;
+    background: #1877F2;
+    border: var(--border-width) solid #1877F2;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-default);
+    transition: all 0.3s ease;
+    letter-spacing: 2px;
+}
+
+.social-link:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-hover);
+    background: #166FE5;
+    border-color: var(--color-accent-cyan);
+}
+
+.social-link:active {
+    transform: translate(2px, 2px);
+    box-shadow: var(--shadow-active);
+}
+
+.social-icon {
+    width: 20px;
+    height: 20px;
+    fill: var(--color-white);
+}
+
+/* ============================================
    PORTAL FOOTER
    ============================================ */
 .portal-footer {
