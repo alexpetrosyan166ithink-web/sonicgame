@@ -1,295 +1,277 @@
-# 🎮 ALEX GAMES - Retro Arcade Collection
+# ALEX GAMES - Learning & Fun Portal
 
-A nostalgic gaming portal featuring classic arcade-style games built with modern web technologies. Experience the golden age of gaming with pixel-perfect graphics, retro soundtracks, and addictive gameplay.
+A pyramid-structured web portal featuring retro arcade games and interactive educational quizzes. Built with vanilla HTML, CSS, and JavaScript — no frameworks, no build tools.
 
-🌐 **Live Demo:** [alexgames.am](https://alexgames.am)
-
----
-
-## 🕹️ Featured Games
-
-### ⚡ Sonic Runner 3D - **[PLAY NOW](https://alexgames.am/games/sonic/)**
-A fast-paced 3D endless runner featuring everyone's favorite blue hedgehog!
-
-**Features:**
-- 🎨 Next-gen 3D graphics powered by Three.js
-- 🏃 15 challenging zones with increasing difficulty
-- 💫 Ball Mode for 2X speed boosts
-- 🔫 6 unique weapons (Ring Shot, Fireball, Lightning, Laser, Star, Ice)
-- 👕 6 customizable skins with special powers
-- 🏆 Collectible rings and power-ups
-- 🎵 Retro chip-tune soundtrack
-- 💾 Progress saving with localStorage
-
-**Controls:**
-- `SPACE` or `CLICK` - Jump
-- `S` or `DOWN ARROW` - Ball Mode (2X Speed)
-- `A` or `X` - Shoot Energy Rings
-- `LEFT/RIGHT ARROWS` - Move Between Lanes
-
-### 🍄 Mario Adventure - *Coming Soon*
-Classic platformer action with coins, power-ups, and epic boss battles.
-
-### 🐍 Snake Classic - *Coming Soon*
-The legendary mobile game returns with modern twists and power-ups.
-
-### 🏎️ Turbo Racing - *Coming Soon*
-High-speed arcade racing with drifting, boosts, and multiplayer support.
-
-### 🛡️ Battle Tanks - *Coming Soon*
-Strategic tank warfare with destructible terrain and upgrades.
+**Live:** [alexgames.am](https://alexgames.am)
+**Facebook:** [Follow Alex Games](https://www.facebook.com/61576186104908/)
 
 ---
 
-## ✨ Features
+## Site Structure (Pyramid Architecture)
 
-### Portal Features
-- 📱 **Fully Responsive Design** - Works seamlessly on mobile, tablet, and desktop
-- 🎨 **Retro Aesthetic** - Authentic pixel art and classic gaming vibes
-- 🎯 **Interactive Game Cards** - Hover effects and smooth animations
-- 🚀 **Fast Loading** - Zero dependencies, vanilla CSS only
-- 🔗 **Breadcrumb Navigation** - Easy navigation between games and portal
-- 💫 **Progressive Enhancement** - Add new games easily
+```
+Home (alexgames.am)
+├── Entertainment (/entertainment/)
+│   ├── Sonic Runner 3D    (/entertainment/games/sonic/)
+│   ├── Mario Adventure    (/entertainment/games/mario/)
+│   ├── Snake Classic      (/entertainment/games/snake/)
+│   ├── Turbo Racing       (/entertainment/games/racing/)
+│   └── Battle Tanks       (/entertainment/games/tanks/)
+└── Educational (/educational/)
+    └── Grammar Quizzes    (/educational/grammar-quizzes/)
+        ├── Parts of Speech
+        ├── Verb Tenses
+        ├── Punctuation
+        ├── Sentence Structure
+        └── Commonly Confused Words
+```
 
-### Technical Features
-- ⚡ Static site hosted on GitHub Pages
-- 🎮 No build process required
-- 🎨 Modern CSS (Grid, Flexbox, Custom Properties)
-- 📐 Mobile-first responsive design
-- 🖼️ SVG graphics for crisp visuals
-- 💾 Local storage for game progress
-- 🎵 Web Audio API for sound effects
-
----
-
-## 🛠️ Tech Stack
-
-**Frontend:**
-- HTML5
-- CSS3 (Vanilla - no frameworks)
-  - CSS Grid for responsive layouts
-  - CSS Custom Properties for theming
-  - Flexbox for component layouts
-- JavaScript (ES6+)
-- Three.js (3D rendering for Sonic game)
-
-**Typography:**
-- [Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P) - Authentic retro pixel font
-
-**Hosting:**
-- GitHub Pages
-- Custom domain: `alexgames.am`
+**Home page** shows two category cards. Clicking a category opens its landing page listing all items within. Each item links to the actual game or quiz.
 
 ---
 
-## 📁 Project Structure
+## Entertainment - Retro Arcade Games
+
+### Sonic Runner 3D
+3D endless runner powered by Three.js with 15 zones, 6 weapons, 6 skins, and a shop system.
+
+**Controls:** Space=Jump, S/Down=Spin Dash, A/X=Shoot, Left/Right=Change Lane
+
+### Mario Adventure
+2D platformer with 5 worlds, coins, power-ups (mushroom, fire flower, star), boss battles, and a character/powerup shop.
+
+**Controls:** Arrows/A/D=Move, Space/W=Jump, Shift/S=Run, F/X=Fireball
+
+### Snake Classic
+Retro Nokia-style snake with modern power-ups, speed boosts, and progressive difficulty.
+
+**Controls:** Arrows/WASD=Direction, Space=Pause
+
+### Turbo Racing
+Top-down 2D arcade racing with nitro boosts, drifting, and AI opponents.
+
+**Controls:** Up/W=Gas, Down/S=Brake, Left/Right=Steer, Space=Nitro
+
+### Battle Tanks
+Battle City-style strategic tank warfare with destructible terrain, upgrades, and enemy waves.
+
+**Controls:** Arrows/WASD=Move, Space=Fire, Escape=Pause
+
+---
+
+## Educational - Grammar Quizzes
+
+5 interactive grammar quizzes, 10 multiple-choice questions each, built with a shared quiz engine.
+
+### Quiz Topics
+
+| Quiz | What It Tests |
+|------|--------------|
+| **Parts of Speech** | Nouns, verbs, adjectives, adverbs, pronouns, prepositions |
+| **Verb Tenses** | Past/present/future simple, continuous, present perfect |
+| **Punctuation** | Commas, apostrophes, semicolons, colons, quotation marks |
+| **Sentence Structure** | Fragments, run-ons, subject-verb agreement, compound/complex sentences |
+| **Commonly Confused Words** | their/there/they're, your/you're, its/it's, then/than, affect/effect, to/too |
+
+### Gamification Features
+
+- **Correct answer:** Green highlight + ascending chime (Web Audio API) + random happy emoji from 10 characters + encouraging phrase
+- **Wrong answer:** Red shake animation + buzzer sound + funny emoji reaction + shows correct answer
+- **Progress bar** and live score counter
+- **Pass (7+/10):** Confetti celebration + trophy + victory fanfare
+- **Fail (<7/10):** Encouraging message + specific study tips based on which topics were missed
+
+### Quiz Engine Architecture
+- `quiz-engine.js` — shared engine handling rendering, scoring, sounds, animations, results
+- `style.css` — shared retro quiz styling
+- Each quiz page passes its question data as a JS object to `new QuizEngine({...})`
+- Sounds generated via Web Audio API (no audio files needed)
+- Fully mobile-friendly with large tap targets
+
+---
+
+## Mobile Touch Controls
+
+All 5 games support mobile devices with virtual on-screen controls:
+
+| Game | D-Pad | Action Buttons |
+|------|-------|---------------|
+| Sonic | Left/Right | Jump, Spin, Shoot |
+| Mario | Left/Right | Jump, Run, Fire |
+| Snake | 4-direction + Swipe | Pause |
+| Racing | 4-direction | Nitro |
+| Tanks | 4-direction | Fire |
+
+- Controls auto-detected via `@media (pointer: coarse)` — only shown on touch devices
+- Canvas scales responsively to fit mobile screens
+- Snake also supports swipe gestures on the canvas
+- Shared `mobile-touch.js` injects controls and maps touches to each game's key system
+
+---
+
+## SEO
+
+Every page includes:
+- Keyword-rich `<title>` and `<meta description>`
+- Open Graph tags (Facebook sharing)
+- Twitter Card meta tags
+- `<link rel="canonical">` URLs
+- `<meta name="robots" content="index, follow">`
+- Descriptive `alt` text with keywords on all images
+- `aria-label` attributes for accessibility
+
+### Schema.org Structured Data (JSON-LD)
+
+| Page | Schemas |
+|------|---------|
+| Home | WebSite, Organization, BreadcrumbList, ItemList |
+| Entertainment | BreadcrumbList, CollectionPage, ItemList with 5x VideoGame |
+| Educational | BreadcrumbList, CollectionPage, ItemList with Quiz |
+| Grammar Quizzes Hub | BreadcrumbList, ItemList with 5x Quiz |
+| Each Quiz | BreadcrumbList, Quiz |
+
+### Technical SEO Files
+- `robots.txt` — allows all crawlers, references sitemap
+- `sitemap.xml` — all 14 pages with priority hierarchy (1.0 home → 0.7 leaf pages)
+
+---
+
+## Project Files
 
 ```
 alexgames.am/
-├── index.html                      # Portal landing page
-├── CNAME                           # Custom domain configuration
+├── index.html                              # Home - 2 category cards
+├── CNAME                                   # Custom domain (alexgames.am)
+├── robots.txt                              # Search engine crawler rules
+├── sitemap.xml                             # All 14 pages for search engines
+├── README.md
 ├── assets/
 │   ├── styles/
-│   │   ├── portal.css             # Global portal styles
-│   │   └── game-card.css          # Game card component
+│   │   ├── portal.css                      # Global styles + category cards
+│   │   ├── game-card.css                   # Game card component
+│   │   └── mobile-controls.css             # Virtual D-pad & action buttons
+│   ├── js/
+│   │   └── mobile-touch.js                 # Shared touch control system
 │   └── images/
-│       ├── game-thumbnails/       # Game preview images
+│       ├── game-thumbnails/
 │       │   ├── sonic-thumb.svg
 │       │   ├── mario-thumb.svg
 │       │   ├── snake-thumb.svg
 │       │   ├── racing-thumb.svg
-│       │   └── tanks-thumb.svg
+│       │   ├── tanks-thumb.svg
+│       │   ├── grammar-thumb.svg
+│       │   ├── entertainment-thumb.svg
+│       │   └── educational-thumb.svg
 │       └── icons/
-│           ├── play-icon.svg      # Play button icon
-│           └── lock-icon.svg      # Coming soon icon
-├── games/
-│   ├── sonic/                     # Sonic Runner 3D (playable)
-│   │   ├── index.html
-│   │   ├── game.js
-│   │   ├── style.css
-│   │   └── sonic.svg
-│   ├── mario/                     # Coming soon placeholder
-│   │   └── index.html
-│   ├── snake/                     # Coming soon placeholder
-│   │   └── index.html
-│   ├── racing/                    # Coming soon placeholder
-│   │   └── index.html
-│   └── tanks/                     # Coming soon placeholder
-│       └── index.html
-└── README.md
+│           ├── play-icon.svg
+│           └── lock-icon.svg
+├── entertainment/
+│   ├── index.html                          # Entertainment landing - 5 game cards
+│   └── games/
+│       ├── sonic/
+│       │   ├── index.html
+│       │   ├── game.js                     # Three.js 3D game
+│       │   ├── style.css
+│       │   └── sonic.svg
+│       ├── mario/
+│       │   ├── index.html
+│       │   ├── game.js                     # 2D Canvas platformer
+│       │   └── style.css
+│       ├── snake/
+│       │   ├── index.html
+│       │   ├── game.js                     # 2D Canvas snake
+│       │   └── style.css
+│       ├── racing/
+│       │   ├── index.html
+│       │   ├── game.js                     # 2D Canvas racing
+│       │   └── style.css
+│       └── tanks/
+│           ├── index.html
+│           ├── game.js                     # 2D Canvas tank battle
+│           └── style.css
+└── educational/
+    ├── index.html                          # Educational landing - quiz cards
+    └── grammar-quizzes/
+        ├── index.html                      # Quiz hub - 5 quiz cards
+        ├── quiz-engine.js                  # Shared quiz logic & sounds
+        ├── style.css                       # Shared quiz styling
+        ├── parts-of-speech/index.html      # Quiz 1: 10 questions
+        ├── tenses/index.html               # Quiz 2: 10 questions
+        ├── punctuation/index.html          # Quiz 3: 10 questions
+        ├── sentence-structure/index.html   # Quiz 4: 10 questions
+        └── confused-words/index.html       # Quiz 5: 10 questions
 ```
 
 ---
 
-## 🎯 Design Philosophy
+## Tech Stack
 
-### Retro Gaming Aesthetic
-- **Color Palette:** Deep blues, gold accents, cyan highlights
-- **Typography:** Monospace pixel fonts with text shadows
-- **Borders:** Thick 4px borders with drop shadows
-- **Animations:** Smooth transitions with retro feel
-
-### Responsive Breakpoints
-- **Mobile:** 320px-767px (1 column)
-- **Tablet:** 768px-1023px (2 columns)
-- **Desktop:** 1024px+ (3 columns)
+- **HTML5** — semantic markup
+- **CSS3** — Grid, Flexbox, Custom Properties, media queries, animations
+- **JavaScript ES6+** — no frameworks
+- **Three.js** — 3D rendering (Sonic game only)
+- **Web Audio API** — retro sound effects (games + quizzes)
+- **Google Fonts** — Press Start 2P (retro pixel font)
+- **GitHub Pages** — static hosting
+- **Custom domain** — alexgames.am
 
 ---
 
-## 🚀 Quick Start
+## Design System
 
-### Playing Games
-1. Visit [alexgames.am](https://alexgames.am)
-2. Click on any game card with "PLAY NOW" status
-3. Enjoy!
+- **Colors:** Primary blue (#0044AA), Gold (#FFD700), Cyan (#00FFFF), Red (#DD0000)
+- **Font:** Press Start 2P (monospace pixel)
+- **Borders:** 4px solid with offset drop shadows
+- **Animations:** fadeInUp, fadeInDown, pulse, shake, confetti
+- **Responsive:** Mobile (1 col) → Tablet 768px (2 col) → Desktop 1024px (3 col)
 
-### Local Development
+---
+
+## Local Development
+
 ```bash
-# Clone the repository
 git clone https://github.com/alexpetrosyan166ithink-web/sonicgame.git
-
-# Navigate to project
 cd sonicgame
-
-# Open in browser (no build step needed!)
-# Just open index.html in your browser
-# Or use a simple HTTP server:
 python -m http.server 8000
-# Then visit http://localhost:8000
+# Visit http://localhost:8000
 ```
 
----
-
-## 🎮 Game Development Guide
-
-### Adding a New Game
-
-1. **Create game directory:**
-   ```bash
-   mkdir -p games/your-game-name
-   ```
-
-2. **Add game files:**
-   ```
-   games/your-game-name/
-   ├── index.html
-   ├── game.js
-   └── style.css
-   ```
-
-3. **Create thumbnail:**
-   - Add `your-game-thumb.svg` to `assets/images/game-thumbnails/`
-   - Recommended size: 400x300px aspect ratio
-
-4. **Update portal:**
-   - Edit `index.html`
-   - Change game card from "coming-soon" to "playable"
-   - Update `href` to point to your game directory
-
-5. **Add breadcrumb navigation:**
-   ```html
-   <div class="breadcrumb">
-       <a href="../../">← BACK TO GAMES</a>
-   </div>
-   ```
+No build step, no npm install, no dependencies to manage.
 
 ---
 
-## 📊 Browser Support
+## Adding New Content
 
-- ✅ Chrome (latest)
-- ✅ Firefox (latest)
-- ✅ Safari (latest)
-- ✅ Edge (latest)
-- ✅ Mobile browsers (iOS Safari, Chrome Mobile)
+### Adding a Game
+1. Create folder at `entertainment/games/your-game/`
+2. Add `index.html`, `game.js`, `style.css`
+3. Add thumbnail SVG to `assets/images/game-thumbnails/`
+4. Add game card to `entertainment/index.html`
+5. Add mobile touch init script after `game.js`
+6. Add URL to `sitemap.xml`
 
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Here's how you can help:
-
-1. **Report bugs** - Open an issue describing the problem
-2. **Suggest features** - Share your ideas for new games or features
-3. **Submit pull requests** - Contribute code improvements
-4. **Share feedback** - Let us know what you think!
-
-### Development Guidelines
-- Maintain retro gaming aesthetic
-- Keep code simple and readable
-- No build dependencies (keep it static!)
-- Test on mobile devices
-- Follow existing code style
+### Adding a Quiz
+1. Create folder at `educational/grammar-quizzes/your-quiz/`
+2. Create `index.html` that loads `../quiz-engine.js` and `../style.css`
+3. Call `new QuizEngine({...})` with your questions array
+4. Add quiz card to `educational/grammar-quizzes/index.html`
+5. Add URL to `sitemap.xml`
 
 ---
 
-## 📜 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
----
-
-## 🎨 Credits
+## Credits
 
 **Development:** Alex Petrosyan
-**AI Assistant:** Claude Sonnet 4.5 (Anthropic)
-
-**Fonts:**
-- Press Start 2P by CodeMan38
-
-**Libraries:**
-- Three.js for 3D rendering
-
-**Inspiration:**
-- Classic Sonic the Hedgehog games
-- Retro arcade gaming culture
-- 8-bit and 16-bit era graphics
-
----
-
-## 🔮 Roadmap
-
-### Phase 1 - Current ✅
-- [x] Portal landing page
-- [x] Sonic Runner 3D (fully playable)
-- [x] Responsive design
-- [x] Custom domain setup
-- [x] Coming soon placeholders
-
-### Phase 2 - Near Future
-- [ ] Mario Adventure game
-- [ ] Snake Classic game
-- [ ] High scores leaderboard
-- [ ] Sound effects toggle
-- [ ] Favicon and meta tags
-
-### Phase 3 - Future Plans
-- [ ] Racing game
-- [ ] Tanks game
-- [ ] Multiplayer support
-- [ ] Achievement system
-- [ ] User profiles
-- [ ] Game statistics dashboard
-
----
-
-## 📞 Contact
-
-**Website:** [alexgames.am](https://alexgames.am)
-**GitHub:** [View Repository](https://github.com/alexpetrosyan166ithink-web/sonicgame)
-
----
-
-## 🎉 Acknowledgments
-
-Thanks to all retro gaming enthusiasts who inspired this project. Special thanks to the open-source community for amazing tools and libraries.
+**AI Assistant:** Claude (Anthropic)
+**Font:** Press Start 2P by CodeMan38
+**3D Engine:** Three.js
 
 ---
 
 <div align="center">
 
-**Built with ❤️ and pixels**
+**Built with pixels**
 
-⭐ Star this repo if you enjoyed playing!
+[alexgames.am](https://alexgames.am)
 
 </div>
