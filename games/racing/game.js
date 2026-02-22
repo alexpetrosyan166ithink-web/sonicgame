@@ -133,6 +133,7 @@ let armorActive = false;
 let magnetRange = 0;
 let crashed = false;
 let crashTimer = 0;
+let crashInvincible = 0;
 let frameCount = 0;
 let countdownTimer = 0;
 let countdownPhase = 0;
@@ -386,9 +387,7 @@ function render() {
         cumCurveX += seg.curve * (n > 0 ? 1 : 0);
     }
 
-    // Draw back-to-front
-    let clipY = CANVAS_H;
-
+    // Draw back-to-front (painter's algorithm — closer segments overdraw farther ones)
     for (let n = DRAW_DIST - 1; n > 0; n--) {
         const cur = projected[n];
         const prev = projected[n - 1];
@@ -397,12 +396,12 @@ function render() {
         const p1 = prev.p;
         const p2 = cur.p;
 
-        // Skip segments above clip line (behind hills)
-        if (p2.screen.y >= clipY) continue;
-
         const c = cur.seg.color;
         const drawH = p1.screen.y - p2.screen.y;
         if (drawH <= 0) continue;
+
+        // Skip segments entirely above or below canvas
+        if (p1.screen.y < 0 && p2.screen.y < 0) continue;
 
         // Grass
         ctx.fillStyle = c.grass;
@@ -447,8 +446,6 @@ function render() {
                 );
             }
         }
-
-        clipY = Math.min(clipY, p2.screen.y);
     }
 
     // Draw coins on track
@@ -510,6 +507,9 @@ function drawSky() {
 }
 
 function drawPlayerCar() {
+    // Flicker during invincibility
+    if (crashInvincible > 0 && Math.floor(crashInvincible / 4) % 2 === 0) return;
+
     const carData = carStats[equippedCar] || carStats.racer;
     const cx = CANVAS_W / 2;
     const cy = CANVAS_H - 20;
@@ -648,11 +648,18 @@ function update() {
         return;
     }
 
+    // Crash invincibility cooldown
+    if (crashInvincible > 0) crashInvincible--;
+
     // Crash recovery
     if (crashed) {
         crashTimer--;
-        playerSpeed *= 0.94;
-        if (crashTimer <= 0) { crashed = false; playerSpeed = 0; }
+        playerSpeed *= 0.96;
+        if (crashTimer <= 0) {
+            crashed = false;
+            crashInvincible = 90; // 1.5 seconds of invincibility after crash
+            if (playerSpeed < 5) playerSpeed = 5; // keep some momentum so player can keep going
+        }
         position += playerSpeed;
         if (position >= trackLength) position -= trackLength;
         if (position < 0) position += trackLength;
@@ -752,12 +759,12 @@ function update() {
         const segDiff = Math.abs(carSeg - playerSeg);
         if (segDiff < 3 || segDiff > segments.length - 3) {
             if (Math.abs(car.x - playerX) < 0.4) {
-                if (!crashed && !armorActive) {
+                if (!crashed && crashInvincible <= 0 && !armorActive) {
                     crashed = true;
-                    crashTimer = 60;
-                    playerSpeed *= 0.2;
+                    crashTimer = 45;
+                    playerSpeed *= 0.4;
                     playSFX('crash');
-                } else if (armorActive) {
+                } else if (!crashed && armorActive) {
                     armorActive = false;
                     car.x += car.x < playerX ? -0.8 : 0.8;
                     playSFX('crash');
@@ -833,6 +840,7 @@ function loadTrack(idx) {
     raceCoins = 0;
     crashed = false;
     crashTimer = 0;
+    crashInvincible = 0;
     nitroActive = false;
     nitroTimer = 0;
     armorActive = false;
