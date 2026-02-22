@@ -17,18 +17,21 @@
  * }
  */
 
+// Store script src at parse time (document.currentScript is only available during initial script execution)
+var _mobileTouchScriptSrc = (document.currentScript && document.currentScript.src) || '';
+
 function initMobileControls(config) {
     // Only show on touch devices
     if (!('ontouchstart' in window) && !navigator.maxTouchPoints) return;
 
-    // Load CSS
+    // Load CSS - compute path from this script's location
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    // Determine relative path to assets
-    const depth = window.location.pathname.split('/').filter(Boolean).length;
-    let prefix = '';
-    for (let i = 0; i < depth; i++) prefix += '../';
-    link.href = prefix + 'assets/styles/mobile-controls.css';
+    if (_mobileTouchScriptSrc) {
+        link.href = _mobileTouchScriptSrc.replace('js/mobile-touch.js', 'styles/mobile-controls.css');
+    } else {
+        link.href = '../../../assets/styles/mobile-controls.css';
+    }
     document.head.appendChild(link);
 
     const container = document.createElement('div');
@@ -73,7 +76,16 @@ function initMobileControls(config) {
     container.appendChild(rightSide);
     document.body.appendChild(container);
 
-    // Touch handlers - map to keys object
+    // Add active class as fallback for CSS media query detection
+    container.classList.add('active');
+
+    // Add bottom padding to game container so controls don't cover gameplay
+    const gameContainer = document.getElementById('game-container');
+    if (gameContainer) {
+        gameContainer.style.paddingBottom = '150px';
+    }
+
+    // Touch handlers - map to keys object AND dispatch keyboard events
     function handleTouch(el, isDown) {
         const key = el.dataset.key;
         if (!key) return;
@@ -82,7 +94,18 @@ function initMobileControls(config) {
             config.keys[key] = isDown;
         }
 
-        // For event-based games (like Sonic)
+        // Dispatch real keyboard events so event-based games (Snake, etc.) respond
+        try {
+            const eventType = isDown ? 'keydown' : 'keyup';
+            document.dispatchEvent(new KeyboardEvent(eventType, {
+                code: key,
+                key: key === 'Space' ? ' ' : key.replace('Arrow', '').replace('Key', ''),
+                bubbles: true,
+                cancelable: true
+            }));
+        } catch(e) {}
+
+        // For event-based games (like Sonic) - call action functions directly
         if (isDown && config.actions && config.actions[key]) {
             config.actions[key]();
         }
@@ -113,6 +136,19 @@ function initMobileControls(config) {
         }, { passive: false });
 
         el.addEventListener('touchcancel', (e) => {
+            handleTouch(el, false);
+        });
+
+        // Also handle mouse events for testing in desktop browsers
+        el.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            handleTouch(el, true);
+        });
+        el.addEventListener('mouseup', (e) => {
+            e.preventDefault();
+            handleTouch(el, false);
+        });
+        el.addEventListener('mouseleave', (e) => {
             handleTouch(el, false);
         });
     });

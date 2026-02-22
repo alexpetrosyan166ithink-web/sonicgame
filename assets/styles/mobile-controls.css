@@ -3,16 +3,6 @@
    Only visible on touch devices
    ============================================ */
 
-/* Responsive Canvas */
-#game-canvas, #game-canvas-container {
-    max-width: 100vw;
-    width: 100%;
-    height: auto !important;
-}
-#game-canvas {
-    display: block;
-}
-
 /* Mobile Controls Container */
 .mobile-controls {
     display: none;
@@ -25,6 +15,7 @@
     pointer-events: none;
     justify-content: space-between;
     align-items: flex-end;
+    box-sizing: border-box;
 }
 
 /* Show on touch devices */
@@ -32,9 +23,11 @@
     .mobile-controls {
         display: flex !important;
     }
-    #game-container {
-        padding-bottom: 140px;
-    }
+}
+
+/* Also show when JS adds the active class (fallback) */
+.mobile-controls.active {
+    display: flex !important;
 }
 
 /* D-Pad (Left side) */
@@ -62,6 +55,7 @@
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     user-select: none;
+    -webkit-user-select: none;
 }
 .dpad-btn:active, .dpad-btn.pressed {
     background: rgba(255, 215, 0, 0.6);
@@ -87,7 +81,7 @@
     justify-content: flex-end;
     align-items: flex-end;
     pointer-events: auto;
-    max-width: 180px;
+    max-width: 200px;
 }
 
 .action-btn {
@@ -108,6 +102,7 @@
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     user-select: none;
+    -webkit-user-select: none;
 }
 .action-btn:active, .action-btn.pressed {
     background: rgba(0, 255, 255, 0.55);
@@ -130,8 +125,8 @@
 /* Landscape adjustments */
 @media (max-height: 500px) and (pointer: coarse) {
     .dpad-btn { width: 40px; height: 40px; font-size: 14px; }
+    .dpad { grid-template-columns: 40px 40px 40px; grid-template-rows: 40px 40px 40px; }
     .action-btn { width: 50px; height: 50px; font-size: 7px; }
     .action-btn.primary { width: 56px; height: 56px; }
     .mobile-controls { padding: 6px; }
-    #game-container { padding-bottom: 110px; }
 }

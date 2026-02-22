@@ -397,14 +397,10 @@ body {
 }
 
 .breadcrumb {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 1000;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.9);
     padding: 8px 16px;
-    border: 2px solid #00FF00;
-    border-radius: 4px;
+    border-bottom: 2px solid #00FF00;
+    text-align: left;
 }
 
 .breadcrumb a {
@@ -496,14 +492,10 @@ body {
     .button-row button { width: 100%; }
     .score-tally { padding: 8px 14px; }
     .score-tally p { font-size: 8px; }
-    .breadcrumb { padding: 6px 10px; }
-    .breadcrumb a { font-size: 8px; }
+    .breadcrumb { padding: 6px 10px; text-align: center; }
+    .breadcrumb a { font-size: 7px; }
     #ui { font-size: 9px; }
     #music-btn { font-size: 8px !important; padding: 6px 12px !important; }
     #mode-btn { font-size: 8px !important; padding: 6px 12px !important; }
 }
-@media (pointer: coarse) {
-    #game-container {
-        padding-bottom: 140px;
-    }
-}
+/* Touch device padding handled by mobile-touch.js */
