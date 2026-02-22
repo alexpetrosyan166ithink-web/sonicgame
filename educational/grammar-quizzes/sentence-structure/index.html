@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentence Structure Quiz - Free Grammar Practice | Alex Games</title>
+    <meta name="description" content="Practice sentence fragments, run-on sentences, and subject-verb agreement with this interactive grammar quiz. Free for students.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://alexgames.am/educational/grammar-quizzes/sentence-structure/">
+    <meta property="og:title" content="Sentence Structure Quiz - Free Grammar Practice">
+    <meta property="og:description" content="Master sentence fragments, run-ons, and subject-verb agreement!">
+    <meta property="og:url" content="https://alexgames.am/educational/grammar-quizzes/sentence-structure/">
+    <meta property="og:site_name" content="Alex Games">
+    <meta property="og:type" content="website">
+    <link rel="stylesheet" href="../style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Quiz",
+        "name": "Sentence Structure Quiz",
+        "description": "Practice fragments, run-ons, and subject-verb agreement.",
+        "educationalLevel": "Beginner",
+        "learningResourceType": "Quiz",
+        "url": "https://alexgames.am/educational/grammar-quizzes/sentence-structure/"
+    }
+    </script>
+</head>
+<body>
+    <nav class="breadcrumb">
+        <a href="../" class="back-link">&#8592; BACK TO QUIZZES</a>
+    </nav>
+    <div class="quiz-container" id="quiz-root"></div>
+    <script src="../quiz-engine.js"></script>
+    <script>
+    new QuizEngine({
+        title: "SENTENCE STRUCTURE",
+        subtitle: "Fragments, Run-Ons & Agreement",
+        tips: {
+            "fragments": "Review sentence fragments — a complete sentence needs a subject AND a verb expressing a complete thought.",
+            "run-ons": "Review run-on sentences — two independent clauses need a period, semicolon, or conjunction between them.",
+            "subject-verb": "Review subject-verb agreement — singular subjects take singular verbs (he runs), plural subjects take plural verbs (they run).",
+            "compound": "Review compound sentences — use FANBOYS conjunctions (for, and, nor, but, or, yet, so) with a comma to join clauses.",
+            "complex": "Review complex sentences — they contain one independent clause and at least one dependent clause."
+        },
+        questions: [
+            {
+                question: "Which of the following is a <strong>sentence fragment</strong>?",
+                options: ["A) She went to the store.", "B) Running through the park.", "C) The dog barked loudly.", "D) I enjoy reading books."],
+                answer: 1,
+                topic: "fragments"
+            },
+            {
+                question: "Which is a <strong>run-on sentence</strong>?",
+                options: ["A) I like pizza, and she likes pasta.", "B) I like pizza she likes pasta.", "C) I like pizza. She likes pasta.", "D) I like pizza; she likes pasta."],
+                answer: 1,
+                topic: "run-ons"
+            },
+            {
+                question: "Choose the sentence with correct <strong>subject-verb agreement</strong>:",
+                options: ["A) The dogs runs in the park.", "B) The dogs run in the park.", "C) The dogs is running in the park.", "D) The dogs has run in the park."],
+                answer: 1,
+                topic: "subject-verb"
+            },
+            {
+                question: "Which sentence is a <strong>complete sentence</strong>?",
+                options: ["A) Because she was tired.", "B) After the big game.", "C) The cat slept on the mat.", "D) While walking to school."],
+                answer: 2,
+                topic: "fragments"
+            },
+            {
+                question: "Fix the run-on: \"I was tired I went to bed early.\"",
+                options: ["A) I was tired, I went to bed early.", "B) I was tired; I went to bed early.", "C) I was tired I, went to bed early.", "D) I was tired and went, to bed early."],
+                answer: 1,
+                topic: "run-ons"
+            },
+            {
+                question: "Choose the correct verb: \"Each of the students ___ a pencil.\"",
+                options: ["A) have", "B) has", "C) are having", "D) were having"],
+                answer: 1,
+                topic: "subject-verb"
+            },
+            {
+                question: "Which is a <strong>compound sentence</strong>?",
+                options: ["A) I went to school.", "B) Because I was late, I ran.", "C) I was late, so I ran to school.", "D) Running late to school."],
+                answer: 2,
+                topic: "compound"
+            },
+            {
+                question: "Which sentence has a <strong>subject-verb agreement</strong> error?",
+                options: ["A) She walks to school.", "B) They walk to school.", "C) He walk to school.", "D) We walk to school."],
+                answer: 2,
+                topic: "subject-verb"
+            },
+            {
+                question: "Which is a <strong>complex sentence</strong>?",
+                options: ["A) I ate dinner.", "B) I ate dinner, and she ate lunch.", "C) After I ate dinner, I watched TV.", "D) I ate dinner she watched TV."],
+                answer: 2,
+                topic: "complex"
+            },
+            {
+                question: "Which is NOT a sentence fragment?",
+                options: ["A) Sitting by the window.", "B) When the bell rings.", "C) The bell rings at noon.", "D) Because of the rain."],
+                answer: 2,
+                topic: "fragments"
+            }
+        ]
+    });
+    </script>
+</body>
+</html>

@@ -51,6 +51,36 @@
     <url>
         <loc>https://alexgames.am/educational/grammar-quizzes/</loc>
         <lastmod>2026-02-22</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://alexgames.am/educational/grammar-quizzes/parts-of-speech/</loc>
+        <lastmod>2026-02-22</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://alexgames.am/educational/grammar-quizzes/tenses/</loc>
+        <lastmod>2026-02-22</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://alexgames.am/educational/grammar-quizzes/punctuation/</loc>
+        <lastmod>2026-02-22</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://alexgames.am/educational/grammar-quizzes/sentence-structure/</loc>
+        <lastmod>2026-02-22</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://alexgames.am/educational/grammar-quizzes/confused-words/</loc>
+        <lastmod>2026-02-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>

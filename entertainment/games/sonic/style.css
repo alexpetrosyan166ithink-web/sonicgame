@@ -420,3 +420,20 @@ body {
     0%, 100% { background: #0066FF; }
     50% { background: #0088FF; }
 }
+
+/* Mobile Responsive */
+@media (max-width: 840px) {
+    #game-canvas-container canvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+    #game-container {
+        max-width: 100vw;
+        overflow: hidden;
+    }
+}
+@media (pointer: coarse) {
+    #game-container {
+        padding-bottom: 140px;
+    }
+}

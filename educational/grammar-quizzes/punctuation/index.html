@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punctuation Quiz - Free Grammar Practice | Alex Games</title>
+    <meta name="description" content="Master commas, apostrophes, semicolons, and periods with this fun punctuation quiz. Free interactive grammar practice for students.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://alexgames.am/educational/grammar-quizzes/punctuation/">
+    <meta property="og:title" content="Punctuation Quiz - Free Grammar Practice">
+    <meta property="og:description" content="Master commas, apostrophes, and semicolons with this fun interactive quiz!">
+    <meta property="og:url" content="https://alexgames.am/educational/grammar-quizzes/punctuation/">
+    <meta property="og:site_name" content="Alex Games">
+    <meta property="og:type" content="website">
+    <link rel="stylesheet" href="../style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Quiz",
+        "name": "Punctuation Quiz",
+        "description": "Master commas, apostrophes, semicolons, and periods.",
+        "educationalLevel": "Beginner",
+        "learningResourceType": "Quiz",
+        "url": "https://alexgames.am/educational/grammar-quizzes/punctuation/"
+    }
+    </script>
+</head>
+<body>
+    <nav class="breadcrumb">
+        <a href="../" class="back-link">&#8592; BACK TO QUIZZES</a>
+    </nav>
+    <div class="quiz-container" id="quiz-root"></div>
+    <script src="../quiz-engine.js"></script>
+    <script>
+    new QuizEngine({
+        title: "PUNCTUATION",
+        subtitle: "Commas, Apostrophes & More",
+        tips: {
+            "commas": "Review comma rules — use commas in lists, after introductory phrases, and before conjunctions in compound sentences.",
+            "apostrophes": "Review apostrophes — used for possession (dog's bone) and contractions (don't = do not).",
+            "semicolons": "Review semicolons — used to join two related independent clauses without a conjunction.",
+            "periods": "Review periods and end punctuation — periods end statements, question marks end questions.",
+            "quotation": "Review quotation marks — punctuation goes inside quotes in American English.",
+            "colons": "Review colons — used before lists or explanations that follow a complete sentence."
+        },
+        questions: [
+            {
+                question: "Which sentence uses commas <strong>correctly</strong>?",
+                options: ["A) I bought apples oranges and bananas.", "B) I bought apples, oranges, and bananas.", "C) I bought, apples oranges and bananas.", "D) I bought apples oranges, and bananas."],
+                answer: 1,
+                topic: "commas"
+            },
+            {
+                question: "Which is the correct use of an <strong>apostrophe</strong>?",
+                options: ["A) The dog's are playing.", "B) The dogs bone is big.", "C) The dog's bone is big.", "D) The dogs' is playing."],
+                answer: 2,
+                topic: "apostrophes"
+            },
+            {
+                question: "Where should the <strong>semicolon</strong> go? \"I love reading ___ it helps me relax.\"",
+                options: ["A) I love reading, it helps me relax.", "B) I love reading; it helps me relax.", "C) I love reading: it helps me relax.", "D) I love reading. it helps me relax."],
+                answer: 1,
+                topic: "semicolons"
+            },
+            {
+                question: "Which sentence has <strong>correct punctuation</strong>?",
+                options: ["A) \"Where are you going?\" she asked.", "B) \"Where are you going\" she asked?", "C) \"Where are you going\", she asked.", "D) Where are you going? \"she asked.\""],
+                answer: 0,
+                topic: "quotation"
+            },
+            {
+                question: "Which sentence correctly uses an <strong>apostrophe for contraction</strong>?",
+                options: ["A) They dont like pizza.", "B) They do'nt like pizza.", "C) They don't like pizza.", "D) They don,t like pizza."],
+                answer: 2,
+                topic: "apostrophes"
+            },
+            {
+                question: "Which sentence needs a <strong>comma</strong>?",
+                options: ["A) After dinner we watched a movie.", "B) The cat sat on the mat.", "C) I like pizza.", "D) She runs fast."],
+                answer: 0,
+                topic: "commas"
+            },
+            {
+                question: "Choose the sentence with correct <strong>end punctuation</strong>:",
+                options: ["A) What time is it.", "B) What time is it?", "C) What time is it!", "D) What time is it;"],
+                answer: 1,
+                topic: "periods"
+            },
+            {
+                question: "Which use of the <strong>colon</strong> is correct?",
+                options: ["A) I need: eggs, milk, and bread.", "B) I need the following: eggs, milk, and bread.", "C) I: need eggs, milk, and bread.", "D) I need the following, eggs: milk, and bread."],
+                answer: 1,
+                topic: "colons"
+            },
+            {
+                question: "The <strong>children's</strong> toys were everywhere. What does the apostrophe show?",
+                options: ["A) Plural", "B) Contraction", "C) Possession", "D) Nothing — it's wrong"],
+                answer: 2,
+                topic: "apostrophes"
+            },
+            {
+                question: "Which sentence uses a <strong>comma before a conjunction</strong> correctly?",
+                options: ["A) I like tea, and she likes coffee.", "B) I like tea and, she likes coffee.", "C) I like, tea and she likes coffee.", "D) I like tea and she, likes coffee."],
+                answer: 0,
+                topic: "commas"
+            }
+        ]
+    });
+    </script>
+</body>
+</html>

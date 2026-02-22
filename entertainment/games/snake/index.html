@@ -166,5 +166,23 @@
         </div>
     </div>
     <script src="game.js"></script>
+    <script src="../../../assets/js/mobile-touch.js"></script>
+    <script>
+    window.addEventListener("load", () => {
+        initMobileControls({
+            keys: keys,
+            dpad: true,
+            swipe: true,
+            onSwipe: (dir) => {
+                const fakeEvent = { code: dir === "up" ? "ArrowUp" : dir === "down" ? "ArrowDown" : dir === "left" ? "ArrowLeft" : "ArrowRight", preventDefault: () => {} };
+                document.dispatchEvent(new KeyboardEvent("keydown", { code: fakeEvent.code }));
+                setTimeout(() => document.dispatchEvent(new KeyboardEvent("keyup", { code: fakeEvent.code })), 100);
+            },
+            buttons: [
+                { label: "PAUSE", key: "Space", primary: true }
+            ]
+        });
+    });
+    </script>
 </body>
 </html>

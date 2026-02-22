@@ -3,96 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grammar Quizzes - Free Interactive English Grammar Practice | Alex Games</title>
-    <meta name="description" content="Coming soon! Free interactive grammar quizzes for kids and students. Practice English grammar, spelling, and language skills with fun challenges at alexgames.am">
-    <meta name="keywords" content="grammar quizzes, English grammar practice, free grammar test, kids grammar quiz, learn grammar online, interactive quiz">
-    <meta name="author" content="Alex Games">
+    <title>Grammar Quizzes - Free Interactive English Practice | Alex Games</title>
+    <meta name="description" content="5 free interactive grammar quizzes: Parts of Speech, Verb Tenses, Punctuation, Sentence Structure, and Commonly Confused Words. Fun gamified learning!">
+    <meta name="keywords" content="grammar quizzes, English grammar practice, parts of speech quiz, verb tenses quiz, punctuation quiz, free grammar test">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://alexgames.am/educational/grammar-quizzes/">
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
+    <meta property="og:title" content="Grammar Quizzes - Free Interactive English Practice">
+    <meta property="og:description" content="5 free interactive grammar quizzes with sounds, animations, and instant feedback!">
     <meta property="og:url" content="https://alexgames.am/educational/grammar-quizzes/">
-    <meta property="og:title" content="Grammar Quizzes - Free Interactive English Grammar Practice">
-    <meta property="og:description" content="Coming soon! Free interactive grammar quizzes for kids and students. Practice grammar with fun challenges.">
-    <meta property="og:image" content="https://alexgames.am/assets/images/game-thumbnails/grammar-thumb.svg">
     <meta property="og:site_name" content="Alex Games">
-
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Grammar Quizzes - Free Grammar Practice | Alex Games">
-    <meta name="twitter:description" content="Coming soon! Free interactive grammar quizzes for kids and students.">
-    <meta name="twitter:image" content="https://alexgames.am/assets/images/game-thumbnails/grammar-thumb.svg">
-
-    <!-- Stylesheets -->
+    <meta property="og:type" content="website">
     <link rel="stylesheet" href="../../assets/styles/portal.css">
-
-    <!-- Schema.org - BreadcrumbList -->
+    <link rel="stylesheet" href="../../assets/styles/game-card.css">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
         "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "https://alexgames.am/"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "Educational",
-                "item": "https://alexgames.am/educational/"
-            },
-            {
-                "@type": "ListItem",
-                "position": 3,
-                "name": "Grammar Quizzes",
-                "item": "https://alexgames.am/educational/grammar-quizzes/"
-            }
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://alexgames.am/" },
+            { "@type": "ListItem", "position": 2, "name": "Educational", "item": "https://alexgames.am/educational/" },
+            { "@type": "ListItem", "position": 3, "name": "Grammar Quizzes", "item": "https://alexgames.am/educational/grammar-quizzes/" }
         ]
     }
     </script>
-
-    <style>
-        .coming-soon-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 60vh;
-            text-align: center;
-            padding: var(--spacing-lg);
-        }
-        .coming-soon-icon {
-            font-size: 64px;
-            margin-bottom: var(--spacing-md);
-        }
-        .coming-soon-container h1 {
-            font-size: clamp(16px, 4vw, 32px);
-            color: var(--color-accent-gold);
-            text-shadow: 3px 3px 0px var(--color-black);
-            margin-bottom: var(--spacing-md);
-        }
-        .coming-soon-container p {
-            font-size: clamp(8px, 1.5vw, 12px);
-            color: var(--color-accent-cyan);
-            line-height: 2;
-            max-width: 600px;
-        }
-    </style>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Grammar Quizzes",
+        "numberOfItems": 5,
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "item": { "@type": "Quiz", "name": "Parts of Speech", "url": "https://alexgames.am/educational/grammar-quizzes/parts-of-speech/" } },
+            { "@type": "ListItem", "position": 2, "item": { "@type": "Quiz", "name": "Verb Tenses", "url": "https://alexgames.am/educational/grammar-quizzes/tenses/" } },
+            { "@type": "ListItem", "position": 3, "item": { "@type": "Quiz", "name": "Punctuation", "url": "https://alexgames.am/educational/grammar-quizzes/punctuation/" } },
+            { "@type": "ListItem", "position": 4, "item": { "@type": "Quiz", "name": "Sentence Structure", "url": "https://alexgames.am/educational/grammar-quizzes/sentence-structure/" } },
+            { "@type": "ListItem", "position": 5, "item": { "@type": "Quiz", "name": "Commonly Confused Words", "url": "https://alexgames.am/educational/grammar-quizzes/confused-words/" } }
+        ]
+    }
+    </script>
 </head>
 <body>
     <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="../" class="back-link">&#8592; BACK TO EDUCATIONAL</a>
     </nav>
+
+    <header class="portal-header">
+        <h1 class="portal-title">📝 GRAMMAR QUIZZES</h1>
+        <p class="portal-subtitle">CHOOSE A QUIZ TO START</p>
+    </header>
+
     <main>
-        <div class="coming-soon-container">
-            <div class="coming-soon-icon" aria-hidden="true">📝</div>
-            <h1>GRAMMAR QUIZZES</h1>
-            <p>Coming soon! Test your English grammar skills with fun interactive quizzes. Practice parts of speech, sentence structure, punctuation, and more!</p>
-        </div>
+        <section class="games-grid" aria-label="Available quizzes">
+            <a href="parts-of-speech/" class="game-card" data-status="playable" aria-label="Parts of Speech Quiz">
+                <div class="game-card__thumbnail">
+                    <img src="../../assets/images/game-thumbnails/grammar-thumb.svg" alt="Parts of Speech Quiz" width="400" height="300" loading="lazy">
+                    <div class="game-card__overlay">
+                        <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><polygon points="20,10 20,90 80,50"/></svg>
+                        <span class="play-text">START</span>
+                    </div>
+                </div>
+                <div class="game-card__content">
+                    <h2>PARTS OF SPEECH</h2>
+                    <p>Identify nouns, verbs, adjectives, adverbs, and more!</p>
+                    <span class="badge badge--new">10 Qs</span>
+                </div>
+            </a>
+
+            <a href="tenses/" class="game-card" data-status="playable" aria-label="Verb Tenses Quiz">
+                <div class="game-card__thumbnail">
+                    <img src="../../assets/images/game-thumbnails/grammar-thumb.svg" alt="Verb Tenses Quiz" width="400" height="300" loading="lazy">
+                    <div class="game-card__overlay">
+                        <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><polygon points="20,10 20,90 80,50"/></svg>
+                        <span class="play-text">START</span>
+                    </div>
+                </div>
+                <div class="game-card__content">
+                    <h2>VERB TENSES</h2>
+                    <p>Master past, present, and future tense forms!</p>
+                    <span class="badge badge--new">10 Qs</span>
+                </div>
+            </a>
+
+            <a href="punctuation/" class="game-card" data-status="playable" aria-label="Punctuation Quiz">
+                <div class="game-card__thumbnail">
+                    <img src="../../assets/images/game-thumbnails/grammar-thumb.svg" alt="Punctuation Quiz" width="400" height="300" loading="lazy">
+                    <div class="game-card__overlay">
+                        <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><polygon points="20,10 20,90 80,50"/></svg>
+                        <span class="play-text">START</span>
+                    </div>
+                </div>
+                <div class="game-card__content">
+                    <h2>PUNCTUATION</h2>
+                    <p>Commas, apostrophes, semicolons, and quotation marks!</p>
+                    <span class="badge badge--new">10 Qs</span>
+                </div>
+            </a>
+
+            <a href="sentence-structure/" class="game-card" data-status="playable" aria-label="Sentence Structure Quiz">
+                <div class="game-card__thumbnail">
+                    <img src="../../assets/images/game-thumbnails/grammar-thumb.svg" alt="Sentence Structure Quiz" width="400" height="300" loading="lazy">
+                    <div class="game-card__overlay">
+                        <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><polygon points="20,10 20,90 80,50"/></svg>
+                        <span class="play-text">START</span>
+                    </div>
+                </div>
+                <div class="game-card__content">
+                    <h2>SENTENCE STRUCTURE</h2>
+                    <p>Fragments, run-ons, and subject-verb agreement!</p>
+                    <span class="badge badge--new">10 Qs</span>
+                </div>
+            </a>
+
+            <a href="confused-words/" class="game-card" data-status="playable" aria-label="Commonly Confused Words Quiz">
+                <div class="game-card__thumbnail">
+                    <img src="../../assets/images/game-thumbnails/grammar-thumb.svg" alt="Commonly Confused Words Quiz" width="400" height="300" loading="lazy">
+                    <div class="game-card__overlay">
+                        <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><polygon points="20,10 20,90 80,50"/></svg>
+                        <span class="play-text">START</span>
+                    </div>
+                </div>
+                <div class="game-card__content">
+                    <h2>CONFUSED WORDS</h2>
+                    <p>Their/there/they're, your/you're, its/it's and more!</p>
+                    <span class="badge badge--new">10 Qs</span>
+                </div>
+            </a>
+        </section>
     </main>
+
+    <footer class="portal-footer">
+        <p>&copy; 2026 Alex Games. All Rights Reserved.</p>
+    </footer>
 </body>
 </html>

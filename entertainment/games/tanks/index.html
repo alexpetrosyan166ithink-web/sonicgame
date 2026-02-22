@@ -80,5 +80,17 @@
         </div>
     </div>
     <script src="game.js"></script>
+    <script src="../../../assets/js/mobile-touch.js"></script>
+    <script>
+    window.addEventListener("load", () => {
+        initMobileControls({
+            keys: keys,
+            dpad: true,
+            buttons: [
+                { label: "FIRE", key: "Space", primary: true }
+            ]
+        });
+    });
+    </script>
 </body>
 </html>

@@ -418,3 +418,20 @@ body {
 .breadcrumb a:hover {
     color: #00FFFF;
 }
+
+/* Mobile Responsive */
+@media (max-width: 840px) {
+    #game-canvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+    #game-container {
+        max-width: 100vw;
+        overflow: hidden;
+    }
+}
+@media (pointer: coarse) {
+    #game-container {
+        padding-bottom: 140px;
+    }
+}
