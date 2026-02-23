@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Math Quiz - Free Math Practice | Alex Games</title>
+    <meta name="description" content="Test your math skills with this fun interactive quiz covering arithmetic, fractions, percentages, and basic algebra. Free math practice for students.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://alexgames.am/educational/math-quizzes/basic-math/">
+    <meta property="og:title" content="Basic Math Quiz - Free Math Practice">
+    <meta property="og:description" content="Test your arithmetic, fractions, percentages, and algebra skills in this fun interactive quiz!">
+    <meta property="og:url" content="https://alexgames.am/educational/math-quizzes/basic-math/">
+    <meta property="og:site_name" content="Alex Games">
+    <meta property="og:type" content="website">
+    <link rel="stylesheet" href="../style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Quiz",
+        "name": "Basic Math Quiz",
+        "description": "Test your math skills with arithmetic, fractions, percentages, and basic algebra.",
+        "educationalLevel": "Beginner",
+        "learningResourceType": "Quiz",
+        "url": "https://alexgames.am/educational/math-quizzes/basic-math/"
+    }
+    </script>
+</head>
+<body>
+    <nav class="breadcrumb">
+        <a href="../" class="back-link">&#8592; BACK TO QUIZZES</a>
+    </nav>
+    <div class="quiz-container" id="quiz-root"></div>
+    <script src="../quiz-engine.js"></script>
+    <script>
+    new QuizEngine({
+        title: "BASIC MATH",
+        subtitle: "Arithmetic, Fractions, Percentages & Algebra",
+        tips: {
+            "arithmetic": "Practice basic arithmetic — addition, subtraction, multiplication, and division with larger numbers.",
+            "fractions": "Review fractions — how to add, subtract, multiply, and simplify fractions (e.g. 1/2 + 1/4 = 3/4).",
+            "percentages": "Review percentages — remember that 'percent' means 'per hundred' (e.g. 25% = 25/100 = 0.25).",
+            "algebra": "Practice basic algebra — solving for unknown variables by isolating x on one side of the equation.",
+            "order-of-operations": "Remember PEMDAS/BODMAS — Parentheses first, then Exponents, then Multiplication/Division, then Addition/Subtraction.",
+            "decimals": "Review decimal operations — line up decimal points when adding/subtracting, count total decimal places when multiplying."
+        },
+        questions: [
+            {
+                question: "What is <strong>144 ÷ 12</strong>?",
+                options: ["A) 11", "B) 12", "C) 13", "D) 14"],
+                answer: 1,
+                topic: "arithmetic"
+            },
+            {
+                question: "What is <strong>1/4 + 1/2</strong>?",
+                options: ["A) 1/6", "B) 2/6", "C) 3/4", "D) 1/3"],
+                answer: 2,
+                topic: "fractions"
+            },
+            {
+                question: "What is <strong>25%</strong> of <strong>200</strong>?",
+                options: ["A) 25", "B) 40", "C) 50", "D) 75"],
+                answer: 2,
+                topic: "percentages"
+            },
+            {
+                question: "Solve for <strong>x</strong>: &nbsp; <strong>3x + 6 = 21</strong>",
+                options: ["A) x = 3", "B) x = 5", "C) x = 7", "D) x = 9"],
+                answer: 1,
+                topic: "algebra"
+            },
+            {
+                question: "What is <strong>8 × 7 + 6</strong>?",
+                options: ["A) 56", "B) 62", "C) 104", "D) 50"],
+                answer: 1,
+                topic: "order-of-operations"
+            },
+            {
+                question: "What is <strong>3/5</strong> of <strong>40</strong>?",
+                options: ["A) 20", "B) 24", "C) 28", "D) 15"],
+                answer: 1,
+                topic: "fractions"
+            },
+            {
+                question: "What is <strong>0.75 + 1.5</strong>?",
+                options: ["A) 2.0", "B) 2.15", "C) 2.25", "D) 1.75"],
+                answer: 2,
+                topic: "decimals"
+            },
+            {
+                question: "If a shirt costs <strong>$40</strong> and is <strong>20% off</strong>, what is the sale price?",
+                options: ["A) $28", "B) $30", "C) $32", "D) $36"],
+                answer: 2,
+                topic: "percentages"
+            },
+            {
+                question: "What is <strong>(4 + 3) × 2 - 5</strong>?",
+                options: ["A) 4", "B) 9", "C) 11", "D) 6"],
+                answer: 1,
+                topic: "order-of-operations"
+            },
+            {
+                question: "Solve for <strong>x</strong>: &nbsp; <strong>2x - 8 = 12</strong>",
+                options: ["A) x = 8", "B) x = 10", "C) x = 4", "D) x = 2"],
+                answer: 1,
+                topic: "algebra"
+            }
+        ]
+    });
+    </script>
+</body>
+</html>
