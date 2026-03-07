@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fractions & Decimals Quiz - Free Math Practice | Alex Games</title>
+    <meta name="description" content="Test your skills with fractions and decimals in this fun interactive quiz. Practice simplifying, converting, adding, and comparing fractions and decimals.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://alexgames.am/educational/math-quizzes/fractions-decimals/">
+    <meta property="og:title" content="Fractions & Decimals Quiz - Free Math Practice">
+    <meta property="og:description" content="Master fractions and decimals with this fun interactive quiz featuring instant feedback!">
+    <meta property="og:url" content="https://alexgames.am/educational/math-quizzes/fractions-decimals/">
+    <meta property="og:site_name" content="Alex Games">
+    <meta property="og:type" content="website">
+    <link rel="stylesheet" href="../style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Quiz",
+        "name": "Fractions & Decimals Quiz",
+        "description": "Test your skills with fractions and decimals including simplifying, converting, and operations.",
+        "educationalLevel": "Intermediate",
+        "learningResourceType": "Quiz",
+        "url": "https://alexgames.am/educational/math-quizzes/fractions-decimals/"
+    }
+    </script>
+</head>
+<body>
+    <nav class="breadcrumb">
+        <a href="../" class="back-link">&#8592; BACK TO QUIZZES</a>
+    </nav>
+    <div class="quiz-container" id="quiz-root"></div>
+    <script src="../quiz-engine.js"></script>
+    <script>
+    new QuizEngine({
+        title: "FRACTIONS & DECIMALS",
+        subtitle: "Simplify, Convert, Compare & Calculate",
+        tips: {
+            "simplifying": "To simplify a fraction, divide numerator and denominator by their greatest common factor (GCF).",
+            "converting": "Fraction to decimal: divide numerator by denominator. Decimal to fraction: use place value (0.75 = 75/100 = 3/4).",
+            "adding": "To add fractions, find a common denominator first. Then add the numerators and keep the denominator.",
+            "comparing": "Convert fractions to the same denominator (or to decimals) to compare them easily.",
+            "multiplying": "Multiply numerators together and denominators together. Then simplify the result."
+        },
+        questions: [
+            {
+                question: "What is <strong>3/4</strong> as a decimal?",
+                options: ["A) 0.25", "B) 0.50", "C) 0.75", "D) 0.34"],
+                answer: 2,
+                topic: "converting"
+            },
+            {
+                question: "Simplify the fraction <strong>12/18</strong>.",
+                options: ["A) 6/9", "B) 2/3", "C) 4/6", "D) 3/4"],
+                answer: 1,
+                topic: "simplifying"
+            },
+            {
+                question: "What is <strong>1/3 + 1/6</strong>?",
+                options: ["A) 2/9", "B) 1/2", "C) 2/6", "D) 1/3"],
+                answer: 1,
+                topic: "adding"
+            },
+            {
+                question: "Which is greater: <strong>3/5</strong> or <strong>2/3</strong>?",
+                options: ["A) 3/5", "B) 2/3", "C) They are equal", "D) Cannot compare"],
+                answer: 1,
+                topic: "comparing"
+            },
+            {
+                question: "What is <strong>0.125</strong> as a fraction in simplest form?",
+                options: ["A) 1/4", "B) 1/8", "C) 1/5", "D) 3/25"],
+                answer: 1,
+                topic: "converting"
+            },
+            {
+                question: "What is <strong>2/5 × 3/4</strong>?",
+                options: ["A) 6/20", "B) 5/9", "C) 3/10", "D) 6/9"],
+                answer: 2,
+                topic: "multiplying"
+            },
+            {
+                question: "What is <strong>3/8 + 5/8</strong>?",
+                options: ["A) 8/16", "B) 8/8", "C) 1", "D) Both B and C"],
+                answer: 3,
+                topic: "adding"
+            },
+            {
+                question: "Which decimal is equivalent to <strong>7/20</strong>?",
+                options: ["A) 0.35", "B) 0.70", "C) 0.27", "D) 0.37"],
+                answer: 0,
+                topic: "converting"
+            },
+            {
+                question: "Simplify <strong>24/36</strong> to its lowest terms.",
+                options: ["A) 4/6", "B) 8/12", "C) 2/3", "D) 12/18"],
+                answer: 2,
+                topic: "simplifying"
+            },
+            {
+                question: "Put these in order from smallest to largest: <strong>0.5, 1/3, 3/8</strong>",
+                options: ["A) 1/3, 3/8, 0.5", "B) 3/8, 1/3, 0.5", "C) 0.5, 3/8, 1/3", "D) 1/3, 0.5, 3/8"],
+                answer: 0,
+                topic: "comparing"
+            }
+        ]
+    });
+    </script>
+</body>
+</html>
