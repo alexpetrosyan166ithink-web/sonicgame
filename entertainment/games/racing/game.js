@@ -11,6 +11,7 @@ const CANVAS_H = 400;
 // 2D physics
 const MAX_SPEED = 4;
 const ACCEL = 0.08;
+const ROAD_RECOVERY_ACCEL = 0.16;  // faster accel when recovering from off-road
 const DECEL = -0.02;
 const BRAKE = -0.12;
 const TURN_SPEED = 0.05;
@@ -19,7 +20,7 @@ const OFF_ROAD_MAX = 1.5;
 
 // Track
 const TRACK_HALF_WIDTH = 40;
-const CAMERA_ZOOM = 3.0;
+const CAMERA_ZOOM = 1.8;
 const WAYPOINT_ADVANCE_DIST = 30;
 const COIN_COLLECT_DIST = 18;
 const CAR_COLLISION_DIST = 16;
@@ -144,6 +145,8 @@ let magnetRange = 0;
 let crashed = false;
 let crashTimer = 0;
 let crashInvincible = 0;
+let wasOffRoad = false;
+let particles = [];
 let frameCount = 0;
 let countdownTimer = 0;
 let countdownPhase = 0;
@@ -471,9 +474,11 @@ function render() {
     ctx.scale(CAMERA_ZOOM, CAMERA_ZOOM);
     ctx.translate(-playerX, -playerY);
 
+    drawGrassDetail(colors);
     drawScenery(colors);
     drawTrack(colors);
     drawCoins();
+    drawParticles();
     drawAICars();
     drawPlayerCar();
 
@@ -490,26 +495,78 @@ function render() {
     }
 
     if (nitroActive) drawNitroOverlay();
+
+    // Speed lines at high speed
+    if (playerSpeed > MAX_SPEED * 0.75) {
+        const intensity = (playerSpeed - MAX_SPEED * 0.75) / (MAX_SPEED * 0.5);
+        ctx.strokeStyle = `rgba(255,255,255,${intensity * 0.15})`;
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 6; i++) {
+            const sx = Math.random() * CANVAS_W;
+            const sy = Math.random() * CANVAS_H;
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
+            ctx.lineTo(sx - 20 - Math.random() * 30, sy);
+            ctx.stroke();
+        }
+    }
+}
+
+function drawGrassDetail(colors) {
+    // Draw subtle grass texture patches near the track
+    const scenery = TRACK_DATA[currentTrack].scenery;
+    if (scenery === 'night' || scenery === 'lava') return;
+    const wn = waypoints.length;
+    for (let i = 0; i < wn; i += 8) {
+        const wp = waypoints[i];
+        const next = waypoints[(i + 1) % wn];
+        const dx = next.x - wp.x;
+        const dy = next.y - wp.y;
+        const len = Math.sqrt(dx * dx + dy * dy) || 1;
+        const nx = -dy / len;
+        const ny = dx / len;
+        // Grass tufts on both sides
+        for (let side = -1; side <= 1; side += 2) {
+            const dist = TRACK_HALF_WIDTH + 8 + (i * 7 % 15);
+            const gx = wp.x + nx * dist * side;
+            const gy = wp.y + ny * dist * side;
+            ctx.fillStyle = scenery === 'desert' ? 'rgba(160,140,60,0.3)' :
+                           scenery === 'snow' ? 'rgba(200,200,220,0.3)' :
+                           'rgba(0,80,0,0.25)';
+            ctx.beginPath();
+            ctx.arc(gx, gy, 3 + (i % 4), 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
 }
 
 function drawTrack(colors) {
     const wn = waypoints.length;
     if (wn < 2) return;
 
-    // Track surface
-    ctx.fillStyle = colors.road;
-    ctx.beginPath();
-    ctx.moveTo(trackLeftEdge[0].x, trackLeftEdge[0].y);
-    for (let i = 1; i < wn; i++) ctx.lineTo(trackLeftEdge[i].x, trackLeftEdge[i].y);
-    ctx.closePath();
-    for (let i = wn - 1; i >= 0; i--) ctx.lineTo(trackRightEdge[i].x, trackRightEdge[i].y);
-    ctx.closePath();
-    ctx.fill();
-
-    // Better approach: draw as quad strips
-    ctx.fillStyle = colors.road;
+    // Track shadow (gives depth)
     for (let i = 0; i < wn; i++) {
         const j = (i + 1) % wn;
+        const shadowOff = 3;
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.beginPath();
+        ctx.moveTo(trackLeftEdge[i].x + shadowOff, trackLeftEdge[i].y + shadowOff);
+        ctx.lineTo(trackLeftEdge[j].x + shadowOff, trackLeftEdge[j].y + shadowOff);
+        ctx.lineTo(trackRightEdge[j].x + shadowOff, trackRightEdge[j].y + shadowOff);
+        ctx.lineTo(trackRightEdge[i].x + shadowOff, trackRightEdge[i].y + shadowOff);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    // Track surface with slight gradient per quad
+    for (let i = 0; i < wn; i++) {
+        const j = (i + 1) % wn;
+        // Alternate road shading for subtle texture
+        const shade = (i % 6 < 3) ? 0 : 8;
+        const r = parseInt(colors.road.slice(1, 3), 16) + shade;
+        const g = parseInt(colors.road.slice(3, 5), 16) + shade;
+        const b = parseInt(colors.road.slice(5, 7), 16) + shade;
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
         ctx.beginPath();
         ctx.moveTo(trackLeftEdge[i].x, trackLeftEdge[i].y);
         ctx.lineTo(trackLeftEdge[j].x, trackLeftEdge[j].y);
@@ -519,38 +576,50 @@ function drawTrack(colors) {
         ctx.fill();
     }
 
-    // Curb/rumble strips (alternating)
+    // Road edge highlight (lighter inner border)
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let i = 0; i < wn; i++) {
+        if (i === 0) ctx.moveTo(trackLeftEdge[i].x, trackLeftEdge[i].y);
+        else ctx.lineTo(trackLeftEdge[i].x, trackLeftEdge[i].y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    ctx.beginPath();
+    for (let i = 0; i < wn; i++) {
+        if (i === 0) ctx.moveTo(trackRightEdge[i].x, trackRightEdge[i].y);
+        else ctx.lineTo(trackRightEdge[i].x, trackRightEdge[i].y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+
+    // Curb/rumble strips (alternating) — wider and more vivid
+    const curbWidth = 0.1;
     for (let i = 0; i < wn; i += 2) {
         const j = (i + 1) % wn;
-        const k = (i + 2) % wn;
-        // Left curb
         ctx.fillStyle = colors.rumble;
+        // Left curb
         ctx.beginPath();
         ctx.moveTo(trackLeftEdge[i].x, trackLeftEdge[i].y);
         ctx.lineTo(trackLeftEdge[j].x, trackLeftEdge[j].y);
-        const lnx1 = trackLeftEdge[j].x + (trackLeftEdge[j].x - trackRightEdge[j].x) * 0.08;
-        const lny1 = trackLeftEdge[j].y + (trackLeftEdge[j].y - trackRightEdge[j].y) * 0.08;
-        const lnx0 = trackLeftEdge[i].x + (trackLeftEdge[i].x - trackRightEdge[i].x) * 0.08;
-        const lny0 = trackLeftEdge[i].y + (trackLeftEdge[i].y - trackRightEdge[i].y) * 0.08;
-        ctx.lineTo(lnx1, lny1);
-        ctx.lineTo(lnx0, lny0);
+        ctx.lineTo(trackLeftEdge[j].x + (trackLeftEdge[j].x - trackRightEdge[j].x) * curbWidth,
+                   trackLeftEdge[j].y + (trackLeftEdge[j].y - trackRightEdge[j].y) * curbWidth);
+        ctx.lineTo(trackLeftEdge[i].x + (trackLeftEdge[i].x - trackRightEdge[i].x) * curbWidth,
+                   trackLeftEdge[i].y + (trackLeftEdge[i].y - trackRightEdge[i].y) * curbWidth);
         ctx.closePath();
         ctx.fill();
-
         // Right curb
         ctx.beginPath();
         ctx.moveTo(trackRightEdge[i].x, trackRightEdge[i].y);
         ctx.lineTo(trackRightEdge[j].x, trackRightEdge[j].y);
-        const rnx1 = trackRightEdge[j].x + (trackRightEdge[j].x - trackLeftEdge[j].x) * 0.08;
-        const rny1 = trackRightEdge[j].y + (trackRightEdge[j].y - trackLeftEdge[j].y) * 0.08;
-        const rnx0 = trackRightEdge[i].x + (trackRightEdge[i].x - trackLeftEdge[i].x) * 0.08;
-        const rny0 = trackRightEdge[i].y + (trackRightEdge[i].y - trackLeftEdge[i].y) * 0.08;
-        ctx.lineTo(rnx1, rny1);
-        ctx.lineTo(rnx0, rny0);
+        ctx.lineTo(trackRightEdge[j].x + (trackRightEdge[j].x - trackLeftEdge[j].x) * curbWidth,
+                   trackRightEdge[j].y + (trackRightEdge[j].y - trackLeftEdge[j].y) * curbWidth);
+        ctx.lineTo(trackRightEdge[i].x + (trackRightEdge[i].x - trackLeftEdge[i].x) * curbWidth,
+                   trackRightEdge[i].y + (trackRightEdge[i].y - trackLeftEdge[i].y) * curbWidth);
         ctx.closePath();
         ctx.fill();
     }
-    // White curb strips (alternating with rumble)
     for (let i = 1; i < wn; i += 2) {
         const j = (i + 1) % wn;
         ctx.fillStyle = colors.curb;
@@ -558,31 +627,44 @@ function drawTrack(colors) {
         ctx.beginPath();
         ctx.moveTo(trackLeftEdge[i].x, trackLeftEdge[i].y);
         ctx.lineTo(trackLeftEdge[j].x, trackLeftEdge[j].y);
-        const lnx1 = trackLeftEdge[j].x + (trackLeftEdge[j].x - trackRightEdge[j].x) * 0.08;
-        const lny1 = trackLeftEdge[j].y + (trackLeftEdge[j].y - trackRightEdge[j].y) * 0.08;
-        const lnx0 = trackLeftEdge[i].x + (trackLeftEdge[i].x - trackRightEdge[i].x) * 0.08;
-        const lny0 = trackLeftEdge[i].y + (trackLeftEdge[i].y - trackRightEdge[i].y) * 0.08;
-        ctx.lineTo(lnx1, lny1);
-        ctx.lineTo(lnx0, lny0);
+        ctx.lineTo(trackLeftEdge[j].x + (trackLeftEdge[j].x - trackRightEdge[j].x) * curbWidth,
+                   trackLeftEdge[j].y + (trackLeftEdge[j].y - trackRightEdge[j].y) * curbWidth);
+        ctx.lineTo(trackLeftEdge[i].x + (trackLeftEdge[i].x - trackRightEdge[i].x) * curbWidth,
+                   trackLeftEdge[i].y + (trackLeftEdge[i].y - trackRightEdge[i].y) * curbWidth);
         ctx.closePath();
         ctx.fill();
         // Right
         ctx.beginPath();
         ctx.moveTo(trackRightEdge[i].x, trackRightEdge[i].y);
         ctx.lineTo(trackRightEdge[j].x, trackRightEdge[j].y);
-        const rnx1 = trackRightEdge[j].x + (trackRightEdge[j].x - trackLeftEdge[j].x) * 0.08;
-        const rny1 = trackRightEdge[j].y + (trackRightEdge[j].y - trackLeftEdge[j].y) * 0.08;
-        const rnx0 = trackRightEdge[i].x + (trackRightEdge[i].x - trackLeftEdge[i].x) * 0.08;
-        const rny0 = trackRightEdge[i].y + (trackRightEdge[i].y - trackLeftEdge[i].y) * 0.08;
-        ctx.lineTo(rnx1, rny1);
-        ctx.lineTo(rnx0, rny0);
+        ctx.lineTo(trackRightEdge[j].x + (trackRightEdge[j].x - trackLeftEdge[j].x) * curbWidth,
+                   trackRightEdge[j].y + (trackRightEdge[j].y - trackLeftEdge[j].y) * curbWidth);
+        ctx.lineTo(trackRightEdge[i].x + (trackRightEdge[i].x - trackLeftEdge[i].x) * curbWidth,
+                   trackRightEdge[i].y + (trackRightEdge[i].y - trackLeftEdge[i].y) * curbWidth);
         ctx.closePath();
         ctx.fill();
     }
 
-    // Dashed center line
+    // Lane markings — dashed white lines at 1/3 and 2/3 of road width
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 0.8;
+    ctx.setLineDash([6, 10]);
+    for (let lane = 1; lane <= 2; lane++) {
+        const t = lane / 3;
+        ctx.beginPath();
+        for (let i = 0; i < wn; i++) {
+            const lx = trackLeftEdge[i].x + (trackRightEdge[i].x - trackLeftEdge[i].x) * t;
+            const ly = trackLeftEdge[i].y + (trackRightEdge[i].y - trackLeftEdge[i].y) * t;
+            if (i === 0) ctx.moveTo(lx, ly);
+            else ctx.lineTo(lx, ly);
+        }
+        ctx.closePath();
+        ctx.stroke();
+    }
+
+    // Center dashed line (brighter)
     ctx.strokeStyle = colors.center;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.2;
     ctx.setLineDash([8, 8]);
     ctx.beginPath();
     for (let i = 0; i < wn; i++) {
@@ -594,7 +676,7 @@ function drawTrack(colors) {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Start/finish line
+    // Start/finish line — full checkered flag pattern
     const s0 = waypoints[0];
     const s1 = waypoints[1];
     const sdx = s1.x - s0.x;
@@ -602,178 +684,340 @@ function drawTrack(colors) {
     const slen = Math.sqrt(sdx * sdx + sdy * sdy) || 1;
     const snx = -sdy / slen * TRACK_HALF_WIDTH;
     const sny = sdx / slen * TRACK_HALF_WIDTH;
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 3;
-    ctx.setLineDash([]);
-    ctx.beginPath();
-    ctx.moveTo(s0.x + snx, s0.y + sny);
-    ctx.lineTo(s0.x - snx, s0.y - sny);
-    ctx.stroke();
+    const fdx = sdx / slen;
+    const fdy = sdy / slen;
 
-    // Checkered pattern on start line
-    const steps = 8;
-    for (let s = 0; s < steps; s++) {
-        const t = s / steps;
-        const lx = s0.x + snx * (1 - 2 * t);
-        const ly = s0.y + sny * (1 - 2 * t);
-        ctx.fillStyle = s % 2 === 0 ? '#FFFFFF' : '#000000';
-        ctx.fillRect(lx - 3, ly - 3, 6, 6);
+    // Draw 2-row checkered pattern
+    const checkerCols = 10;
+    const checkerRows = 2;
+    for (let row = 0; row < checkerRows; row++) {
+        for (let col = 0; col < checkerCols; col++) {
+            const t1 = col / checkerCols;
+            const t2 = (col + 1) / checkerCols;
+            const r1 = (row - 1) * 3;
+            const r2 = (row) * 3;
+            const cx1 = s0.x + snx * (1 - 2 * t1) + fdx * r1;
+            const cy1 = s0.y + sny * (1 - 2 * t1) + fdy * r1;
+            const cx2 = s0.x + snx * (1 - 2 * t2) + fdx * r1;
+            const cy2 = s0.y + sny * (1 - 2 * t2) + fdy * r1;
+            const cx3 = s0.x + snx * (1 - 2 * t2) + fdx * r2;
+            const cy3 = s0.y + sny * (1 - 2 * t2) + fdy * r2;
+            const cx4 = s0.x + snx * (1 - 2 * t1) + fdx * r2;
+            const cy4 = s0.y + sny * (1 - 2 * t1) + fdy * r2;
+            ctx.fillStyle = (row + col) % 2 === 0 ? '#FFFFFF' : '#111111';
+            ctx.beginPath();
+            ctx.moveTo(cx1, cy1);
+            ctx.lineTo(cx2, cy2);
+            ctx.lineTo(cx3, cy3);
+            ctx.lineTo(cx4, cy4);
+            ctx.closePath();
+            ctx.fill();
+        }
     }
 }
 
 function drawScenery(colors) {
     sceneryObjects.forEach(obj => {
         const s = obj.size;
+        // Shadow for all objects
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.beginPath();
+        ctx.ellipse(obj.x + 2, obj.y + s * 0.3, s * 0.5, s * 0.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+
         switch (obj.type) {
             case 'tree':
-                ctx.fillStyle = '#4B2F0A';
-                ctx.fillRect(obj.x - 2, obj.y - 2, 4, 8);
-                ctx.fillStyle = '#228B22';
+                // Trunk with gradient look
+                ctx.fillStyle = '#5C3A1E';
+                ctx.fillRect(obj.x - 2.5, obj.y - 2, 5, 10);
+                ctx.fillStyle = '#3D2510';
+                ctx.fillRect(obj.x - 2.5, obj.y - 2, 2, 10);
+                // Canopy layers
+                ctx.fillStyle = '#1A7A1A';
                 ctx.beginPath();
-                ctx.arc(obj.x, obj.y - 4, s * 0.7, 0, Math.PI * 2);
+                ctx.arc(obj.x, obj.y - 5, s * 0.8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#22A022';
+                ctx.beginPath();
+                ctx.arc(obj.x - 2, obj.y - 6, s * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+                // Highlight
+                ctx.fillStyle = '#30C030';
+                ctx.beginPath();
+                ctx.arc(obj.x - 1, obj.y - 7, s * 0.25, 0, Math.PI * 2);
                 ctx.fill();
                 break;
             case 'pine':
             case 'pine_snow':
-                ctx.fillStyle = '#4B2F0A';
-                ctx.fillRect(obj.x - 1.5, obj.y, 3, 7);
-                ctx.fillStyle = obj.type === 'pine_snow' ? '#446644' : '#0B5B0B';
-                ctx.beginPath();
-                ctx.moveTo(obj.x, obj.y - s);
-                ctx.lineTo(obj.x - s * 0.5, obj.y + 2);
-                ctx.lineTo(obj.x + s * 0.5, obj.y + 2);
-                ctx.closePath();
-                ctx.fill();
-                if (obj.type === 'pine_snow') {
-                    ctx.fillStyle = '#FFFFFF';
+                ctx.fillStyle = '#5C3A1E';
+                ctx.fillRect(obj.x - 2, obj.y, 4, 8);
+                // Multi-layer pine
+                const pineColor = obj.type === 'pine_snow' ? '#3A6B3A' : '#0B5B0B';
+                for (let layer = 0; layer < 3; layer++) {
+                    const ly = obj.y - s * 0.3 * layer;
+                    const lw = s * 0.6 - layer * s * 0.12;
+                    ctx.fillStyle = pineColor;
                     ctx.beginPath();
-                    ctx.moveTo(obj.x, obj.y - s);
-                    ctx.lineTo(obj.x - s * 0.3, obj.y - s * 0.3);
-                    ctx.lineTo(obj.x + s * 0.3, obj.y - s * 0.3);
+                    ctx.moveTo(obj.x, ly - s * 0.4);
+                    ctx.lineTo(obj.x - lw, ly + 3);
+                    ctx.lineTo(obj.x + lw, ly + 3);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                if (obj.type === 'pine_snow') {
+                    ctx.fillStyle = '#EEEEFF';
+                    ctx.beginPath();
+                    ctx.moveTo(obj.x, obj.y - s * 0.9);
+                    ctx.lineTo(obj.x - s * 0.25, obj.y - s * 0.5);
+                    ctx.lineTo(obj.x + s * 0.25, obj.y - s * 0.5);
                     ctx.closePath();
                     ctx.fill();
                 }
                 break;
             case 'bush':
+                ctx.fillStyle = '#1D6B1D';
+                ctx.beginPath();
+                ctx.arc(obj.x + 2, obj.y, s * 0.4, 0, Math.PI * 2);
+                ctx.fill();
                 ctx.fillStyle = '#2D8B2D';
                 ctx.beginPath();
                 ctx.arc(obj.x, obj.y, s * 0.5, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.fillStyle = '#3DAB3D';
+                ctx.beginPath();
+                ctx.arc(obj.x - 1, obj.y - 1, s * 0.25, 0, Math.PI * 2);
+                ctx.fill();
                 break;
             case 'flower':
-                ctx.fillStyle = '#2D8B2D';
+                // Stem
+                ctx.strokeStyle = '#228B22';
+                ctx.lineWidth = 1.5;
                 ctx.beginPath();
-                ctx.arc(obj.x, obj.y, 3, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = ['#FF4488', '#FFDD00', '#FF8844'][Math.floor(obj.size) % 3];
+                ctx.moveTo(obj.x, obj.y + 3);
+                ctx.lineTo(obj.x, obj.y - 2);
+                ctx.stroke();
+                // Petals
+                const fColor = ['#FF4488', '#FFDD00', '#FF8844', '#AA44FF'][Math.floor(obj.size) % 4];
+                for (let p = 0; p < 5; p++) {
+                    const pa = p * Math.PI * 2 / 5;
+                    ctx.fillStyle = fColor;
+                    ctx.beginPath();
+                    ctx.arc(obj.x + Math.cos(pa) * 2.5, obj.y - 2 + Math.sin(pa) * 2.5, 1.8, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.fillStyle = '#FFFF00';
                 ctx.beginPath();
-                ctx.arc(obj.x, obj.y - 2, 2, 0, Math.PI * 2);
+                ctx.arc(obj.x, obj.y - 2, 1.2, 0, Math.PI * 2);
                 ctx.fill();
                 break;
             case 'cactus':
                 ctx.fillStyle = '#2D6B2D';
-                ctx.fillRect(obj.x - 2, obj.y - s, 4, s);
-                ctx.fillRect(obj.x - 6, obj.y - s * 0.7, 4, s * 0.3);
-                ctx.fillRect(obj.x + 2, obj.y - s * 0.5, 4, s * 0.3);
+                // Main body rounded
+                ctx.beginPath();
+                ctx.moveTo(obj.x - 3, obj.y);
+                ctx.lineTo(obj.x - 3, obj.y - s + 2);
+                ctx.quadraticCurveTo(obj.x, obj.y - s - 2, obj.x + 3, obj.y - s + 2);
+                ctx.lineTo(obj.x + 3, obj.y);
+                ctx.closePath();
+                ctx.fill();
+                // Arms
+                ctx.fillRect(obj.x - 7, obj.y - s * 0.7, 5, 3);
+                ctx.fillRect(obj.x - 7, obj.y - s * 0.7, 3, s * 0.35);
+                ctx.fillRect(obj.x + 2, obj.y - s * 0.5, 5, 3);
+                ctx.fillRect(obj.x + 4, obj.y - s * 0.5, 3, s * 0.3);
+                // Highlight
+                ctx.fillStyle = '#3D8B3D';
+                ctx.fillRect(obj.x - 1, obj.y - s + 3, 2, s * 0.6);
                 break;
             case 'rock':
             case 'boulder':
             case 'rock_lava':
-                ctx.fillStyle = obj.type === 'rock_lava' ? '#553322' : '#888888';
+                const baseColor = obj.type === 'rock_lava' ? '#553322' : '#888888';
+                const highColor = obj.type === 'rock_lava' ? '#774433' : '#AAAAAA';
+                const lowColor = obj.type === 'rock_lava' ? '#332211' : '#555555';
+                ctx.fillStyle = baseColor;
                 ctx.beginPath();
-                ctx.ellipse(obj.x, obj.y, s * 0.5, s * 0.35, 0, 0, Math.PI * 2);
+                ctx.ellipse(obj.x, obj.y, s * 0.55, s * 0.4, 0, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = obj.type === 'rock_lava' ? '#442211' : '#666666';
+                // Highlight
+                ctx.fillStyle = highColor;
                 ctx.beginPath();
-                ctx.ellipse(obj.x - 1, obj.y - 1, s * 0.3, s * 0.2, 0, 0, Math.PI * 2);
+                ctx.ellipse(obj.x - 1, obj.y - 2, s * 0.3, s * 0.2, -0.3, 0, Math.PI * 2);
+                ctx.fill();
+                // Dark side
+                ctx.fillStyle = lowColor;
+                ctx.beginPath();
+                ctx.ellipse(obj.x + 2, obj.y + 1, s * 0.25, s * 0.15, 0.2, 0, Math.PI * 2);
                 ctx.fill();
                 break;
             case 'skull':
-                ctx.fillStyle = '#DDCCBB';
+                ctx.fillStyle = '#EEDDCC';
                 ctx.beginPath();
-                ctx.arc(obj.x, obj.y, 4, 0, Math.PI * 2);
+                ctx.arc(obj.x, obj.y, 5, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = '#000';
-                ctx.fillRect(obj.x - 2, obj.y - 1, 1.5, 1.5);
-                ctx.fillRect(obj.x + 0.5, obj.y - 1, 1.5, 1.5);
+                ctx.fillStyle = '#DCC8B0';
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y + 3, 3, 0, Math.PI);
+                ctx.fill();
+                ctx.fillStyle = '#222';
+                ctx.beginPath(); ctx.arc(obj.x - 2, obj.y - 1, 1.2, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(obj.x + 2, obj.y - 1, 1.2, 0, Math.PI * 2); ctx.fill();
                 break;
             case 'mushroom':
                 ctx.fillStyle = '#8B6B3D';
-                ctx.fillRect(obj.x - 1, obj.y - 1, 2, 5);
-                ctx.fillStyle = '#DD3333';
+                ctx.fillRect(obj.x - 1.5, obj.y, 3, 6);
+                ctx.fillStyle = '#DD2222';
                 ctx.beginPath();
-                ctx.arc(obj.x, obj.y - 2, 4, Math.PI, 0);
+                ctx.arc(obj.x, obj.y - 1, 5, Math.PI, 0);
                 ctx.fill();
+                ctx.fillStyle = '#FF4444';
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y - 1, 5, Math.PI, Math.PI + 0.8);
+                ctx.fill();
+                // Spots
                 ctx.fillStyle = '#FFFFFF';
-                ctx.beginPath();
-                ctx.arc(obj.x - 1, obj.y - 3, 1, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(obj.x - 2, obj.y - 3, 1.3, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(obj.x + 1.5, obj.y - 2.5, 1, 0, Math.PI * 2); ctx.fill();
                 break;
             case 'palm':
-                ctx.fillStyle = '#8B6B3D';
-                ctx.fillRect(obj.x - 2, obj.y - 2, 4, 12);
+                // Curved trunk
+                ctx.strokeStyle = '#8B6B3D';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(obj.x, obj.y + 6);
+                ctx.quadraticCurveTo(obj.x + 3, obj.y - 3, obj.x + 1, obj.y - 8);
+                ctx.stroke();
+                ctx.strokeStyle = '#A07840';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(obj.x - 1, obj.y + 6);
+                ctx.quadraticCurveTo(obj.x + 2, obj.y - 3, obj.x, obj.y - 8);
+                ctx.stroke();
+                // Fronds
                 ctx.fillStyle = '#228B22';
-                for (let a = 0; a < 5; a++) {
-                    const pa = a * Math.PI * 2 / 5;
+                for (let a = 0; a < 6; a++) {
+                    const pa = a * Math.PI / 3 - Math.PI / 6;
+                    ctx.save();
+                    ctx.translate(obj.x + 1, obj.y - 8);
+                    ctx.rotate(pa);
                     ctx.beginPath();
-                    ctx.ellipse(obj.x + Math.cos(pa) * 5, obj.y - 5 + Math.sin(pa) * 3, 6, 2, pa, 0, Math.PI * 2);
+                    ctx.ellipse(6, 0, 8, 2.5, 0, 0, Math.PI * 2);
                     ctx.fill();
+                    ctx.restore();
                 }
+                // Coconuts
+                ctx.fillStyle = '#5C3A1E';
+                ctx.beginPath(); ctx.arc(obj.x, obj.y - 7, 1.5, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(obj.x + 2, obj.y - 6.5, 1.5, 0, Math.PI * 2); ctx.fill();
                 break;
             case 'umbrella':
                 ctx.fillStyle = '#8B6B3D';
-                ctx.fillRect(obj.x - 1, obj.y - 1, 2, 8);
-                ctx.fillStyle = ['#FF4444', '#4444FF', '#FFFF00'][Math.floor(obj.size) % 3];
+                ctx.fillRect(obj.x - 1, obj.y - 1, 2, 10);
+                const uColor = ['#FF4444', '#4444FF', '#FFFF00'][Math.floor(obj.size) % 3];
+                ctx.fillStyle = uColor;
                 ctx.beginPath();
-                ctx.arc(obj.x, obj.y - 1, 6, Math.PI, 0);
+                ctx.arc(obj.x, obj.y - 1, 7, Math.PI, 0);
+                ctx.fill();
+                // Stripe
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y - 1, 7, Math.PI + 0.5, Math.PI + 1.2);
+                ctx.lineTo(obj.x, obj.y - 1);
+                ctx.closePath();
                 ctx.fill();
                 break;
             case 'lamp':
-                ctx.fillStyle = '#444444';
-                ctx.fillRect(obj.x - 1, obj.y - 1, 2, 10);
+                ctx.fillStyle = '#555555';
+                ctx.fillRect(obj.x - 1.5, obj.y - 1, 3, 12);
+                ctx.fillStyle = '#666666';
+                ctx.fillRect(obj.x - 3, obj.y - 2, 6, 2);
+                // Glow
+                ctx.fillStyle = 'rgba(255,255,100,0.15)';
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y - 1, 12, 0, Math.PI * 2);
+                ctx.fill();
                 ctx.fillStyle = '#FFFF88';
                 ctx.beginPath();
-                ctx.arc(obj.x, obj.y - 2, 3, 0, Math.PI * 2);
+                ctx.arc(obj.x, obj.y - 1, 3.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#FFFFCC';
+                ctx.beginPath();
+                ctx.arc(obj.x - 0.5, obj.y - 1.5, 1.5, 0, Math.PI * 2);
                 ctx.fill();
                 break;
             case 'snowman':
+                ctx.fillStyle = '#F0F0F8';
+                ctx.beginPath(); ctx.arc(obj.x, obj.y + 3, 6, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#E8E8F0';
+                ctx.beginPath(); ctx.arc(obj.x, obj.y - 3, 4.5, 0, Math.PI * 2); ctx.fill();
                 ctx.fillStyle = '#FFFFFF';
-                ctx.beginPath(); ctx.arc(obj.x, obj.y + 2, 5, 0, Math.PI * 2); ctx.fill();
-                ctx.beginPath(); ctx.arc(obj.x, obj.y - 4, 3.5, 0, Math.PI * 2); ctx.fill();
-                ctx.beginPath(); ctx.arc(obj.x, obj.y - 9, 2.5, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(obj.x, obj.y - 9, 3, 0, Math.PI * 2); ctx.fill();
+                // Eyes
+                ctx.fillStyle = '#111';
+                ctx.beginPath(); ctx.arc(obj.x - 1.2, obj.y - 9.5, 0.6, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(obj.x + 1.2, obj.y - 9.5, 0.6, 0, Math.PI * 2); ctx.fill();
+                // Carrot nose
                 ctx.fillStyle = '#FF6600';
-                ctx.fillRect(obj.x, obj.y - 9.5, 3, 1);
+                ctx.beginPath();
+                ctx.moveTo(obj.x, obj.y - 8.5);
+                ctx.lineTo(obj.x + 4, obj.y - 8);
+                ctx.lineTo(obj.x, obj.y - 7.5);
+                ctx.closePath();
+                ctx.fill();
+                // Buttons
+                ctx.fillStyle = '#222';
+                for (let b = 0; b < 3; b++) {
+                    ctx.beginPath(); ctx.arc(obj.x, obj.y - 1 + b * 2.5, 0.7, 0, Math.PI * 2); ctx.fill();
+                }
                 break;
             case 'flame':
-                ctx.fillStyle = '#FF4400';
+                // Animated-looking flame
+                const flicker = Math.sin(frameCount * 0.2 + obj.x) * 1.5;
+                ctx.fillStyle = '#FF2200';
                 ctx.beginPath();
-                ctx.moveTo(obj.x, obj.y - s);
-                ctx.lineTo(obj.x - 3, obj.y + 2);
+                ctx.moveTo(obj.x + flicker, obj.y - s * 1.1);
+                ctx.quadraticCurveTo(obj.x - 4, obj.y - s * 0.3, obj.x - 3, obj.y + 2);
                 ctx.lineTo(obj.x + 3, obj.y + 2);
-                ctx.closePath();
+                ctx.quadraticCurveTo(obj.x + 4, obj.y - s * 0.3, obj.x + flicker, obj.y - s * 1.1);
                 ctx.fill();
                 ctx.fillStyle = '#FFAA00';
                 ctx.beginPath();
-                ctx.moveTo(obj.x, obj.y - s * 0.6);
-                ctx.lineTo(obj.x - 2, obj.y + 2);
+                ctx.moveTo(obj.x + flicker * 0.5, obj.y - s * 0.7);
+                ctx.quadraticCurveTo(obj.x - 2, obj.y - s * 0.1, obj.x - 2, obj.y + 2);
                 ctx.lineTo(obj.x + 2, obj.y + 2);
-                ctx.closePath();
+                ctx.quadraticCurveTo(obj.x + 2, obj.y - s * 0.1, obj.x + flicker * 0.5, obj.y - s * 0.7);
+                ctx.fill();
+                ctx.fillStyle = '#FFEE66';
+                ctx.beginPath();
+                ctx.ellipse(obj.x, obj.y, 1.5, 2, 0, 0, Math.PI * 2);
                 ctx.fill();
                 break;
             case 'crystal':
-                ctx.fillStyle = '#AA44FF';
+                // Multi-faceted crystal
+                ctx.fillStyle = '#8833CC';
                 ctx.beginPath();
-                ctx.moveTo(obj.x, obj.y - s);
-                ctx.lineTo(obj.x - 3, obj.y);
-                ctx.lineTo(obj.x, obj.y + 2);
-                ctx.lineTo(obj.x + 3, obj.y);
+                ctx.moveTo(obj.x, obj.y - s * 1.1);
+                ctx.lineTo(obj.x - 4, obj.y);
+                ctx.lineTo(obj.x - 2, obj.y + 3);
+                ctx.lineTo(obj.x + 2, obj.y + 3);
+                ctx.lineTo(obj.x + 4, obj.y);
                 ctx.closePath();
                 ctx.fill();
-                ctx.fillStyle = '#CC88FF';
+                // Light face
+                ctx.fillStyle = '#BB66FF';
                 ctx.beginPath();
-                ctx.moveTo(obj.x, obj.y - s);
-                ctx.lineTo(obj.x + 3, obj.y);
-                ctx.lineTo(obj.x, obj.y + 2);
+                ctx.moveTo(obj.x, obj.y - s * 1.1);
+                ctx.lineTo(obj.x + 4, obj.y);
+                ctx.lineTo(obj.x + 2, obj.y + 3);
+                ctx.lineTo(obj.x, obj.y);
+                ctx.closePath();
+                ctx.fill();
+                // Shine
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.beginPath();
+                ctx.moveTo(obj.x - 1, obj.y - s * 0.7);
+                ctx.lineTo(obj.x, obj.y - s * 1.1);
+                ctx.lineTo(obj.x + 1, obj.y - s * 0.6);
                 ctx.closePath();
                 ctx.fill();
                 break;
@@ -784,13 +1028,54 @@ function drawScenery(colors) {
 function drawCoins() {
     trackCoins.forEach(c => {
         if (c.collected) return;
+        // Spin effect — squash width with sine wave
+        const spin = Math.abs(Math.sin(frameCount * 0.08 + c.x * 0.1));
+        const rx = 5 * Math.max(0.2, spin);
+        const ry = 5;
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.25)';
+        ctx.beginPath();
+        ctx.ellipse(c.x + 1, c.y + 2, rx * 0.8, 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Coin body
         ctx.fillStyle = '#FFD700';
         ctx.beginPath();
-        ctx.arc(c.x, c.y, 5, 0, Math.PI * 2);
+        ctx.ellipse(c.x, c.y, rx, ry, 0, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = '#FFA500';
+        // Inner ring
+        ctx.strokeStyle = '#DAA520';
+        ctx.lineWidth = 0.8;
         ctx.beginPath();
-        ctx.arc(c.x - 1, c.y - 1, 2, 0, Math.PI * 2);
+        ctx.ellipse(c.x, c.y, rx * 0.7, ry * 0.7, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        // $ symbol
+        if (spin > 0.4) {
+            ctx.fillStyle = '#B8860B';
+            ctx.font = '5px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('$', c.x, c.y + 0.5);
+        }
+        // Highlight
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.beginPath();
+        ctx.ellipse(c.x - rx * 0.2, c.y - ry * 0.25, rx * 0.25, ry * 0.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+    });
+}
+
+function drawParticles() {
+    particles.forEach(p => {
+        const alpha = p.life / p.maxLife;
+        if (p.type === 'dirt') {
+            ctx.fillStyle = `rgba(139,115,85,${alpha * 0.7})`;
+        } else if (p.type === 'smoke') {
+            ctx.fillStyle = `rgba(200,200,200,${alpha * 0.4})`;
+        } else {
+            ctx.fillStyle = `rgba(255,255,255,${alpha * 0.5})`;
+        }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
     });
 }
@@ -802,25 +1087,75 @@ function drawAICars() {
         ctx.rotate(car.angle);
 
         // Shadow
-        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
         ctx.beginPath();
-        ctx.ellipse(1, 1, 8, 5, 0, 0, Math.PI * 2);
+        ctx.ellipse(2, 2, 10, 6, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Body
+        // Wheels (under body)
+        ctx.fillStyle = '#1A1A1A';
+        ctx.fillRect(-7, -6.5, 5, 2.5);
+        ctx.fillRect(-7, 4, 5, 2.5);
+        ctx.fillRect(3, -6.5, 5, 2.5);
+        ctx.fillRect(3, 4, 5, 2.5);
+        // Tire detail
+        ctx.fillStyle = '#333';
+        ctx.fillRect(-6, -6, 3, 1.5);
+        ctx.fillRect(-6, 4.5, 3, 1.5);
+        ctx.fillRect(4, -6, 3, 1.5);
+        ctx.fillRect(4, 4.5, 3, 1.5);
+
+        // Body — main shape
         ctx.fillStyle = car.color;
-        ctx.fillRect(-7, -4, 14, 8);
+        ctx.beginPath();
+        ctx.moveTo(-8, -4);
+        ctx.lineTo(7, -4);
+        ctx.quadraticCurveTo(9, -4, 9, -2);
+        ctx.lineTo(9, 2);
+        ctx.quadraticCurveTo(9, 4, 7, 4);
+        ctx.lineTo(-8, 4);
+        ctx.quadraticCurveTo(-9, 4, -9, 2);
+        ctx.lineTo(-9, -2);
+        ctx.quadraticCurveTo(-9, -4, -8, -4);
+        ctx.closePath();
+        ctx.fill();
+
+        // Darker bottom half for depth
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.fillRect(-8, 0, 16, 4);
 
         // Windshield
-        ctx.fillStyle = '#88CCFF';
-        ctx.fillRect(3, -2.5, 3, 5);
+        ctx.fillStyle = '#66BBEE';
+        ctx.beginPath();
+        ctx.moveTo(3, -3);
+        ctx.lineTo(6, -2.5);
+        ctx.lineTo(6, 2.5);
+        ctx.lineTo(3, 3);
+        ctx.closePath();
+        ctx.fill();
+        // Windshield glare
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.beginPath();
+        ctx.moveTo(3.5, -2.5);
+        ctx.lineTo(5, -2);
+        ctx.lineTo(5, -0.5);
+        ctx.lineTo(3.5, -1);
+        ctx.closePath();
+        ctx.fill();
 
-        // Wheels
-        ctx.fillStyle = '#111';
-        ctx.fillRect(-6, -5.5, 4, 2);
-        ctx.fillRect(-6, 3.5, 4, 2);
-        ctx.fillRect(2, -5.5, 4, 2);
-        ctx.fillRect(2, 3.5, 4, 2);
+        // Headlights
+        ctx.fillStyle = '#FFFF99';
+        ctx.beginPath(); ctx.arc(9, -2, 1.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(9, 2, 1.5, 0, Math.PI * 2); ctx.fill();
+
+        // Tail lights
+        ctx.fillStyle = '#FF2200';
+        ctx.fillRect(-9, -3, 1.5, 2);
+        ctx.fillRect(-9, 1, 1.5, 2);
+
+        // Body stripe
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.fillRect(-6, -1, 14, 2);
 
         ctx.restore();
     });
@@ -837,40 +1172,141 @@ function drawPlayerCar() {
     ctx.rotate(playerAngle);
 
     // Shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
     ctx.beginPath();
-    ctx.ellipse(1, 1, 9, 6, 0, 0, Math.PI * 2);
+    ctx.ellipse(2, 2, 11, 7, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Body
+    // Wheels (under body)
+    ctx.fillStyle = '#1A1A1A';
+    ctx.fillRect(-8, -7.5, 5.5, 3);
+    ctx.fillRect(-8, 4.5, 5.5, 3);
+    ctx.fillRect(3, -7.5, 5.5, 3);
+    ctx.fillRect(3, 4.5, 5.5, 3);
+    // Tire treads
+    ctx.fillStyle = '#2A2A2A';
+    ctx.fillRect(-7, -7, 3.5, 2);
+    ctx.fillRect(-7, 5, 3.5, 2);
+    ctx.fillRect(4, -7, 3.5, 2);
+    ctx.fillRect(4, 5, 3.5, 2);
+
+    // Body — rounded sporty shape
     ctx.fillStyle = carData.color;
-    ctx.fillRect(-8, -5, 16, 10);
+    ctx.beginPath();
+    ctx.moveTo(-9, -5);
+    ctx.lineTo(8, -5);
+    ctx.quadraticCurveTo(11, -5, 11, -3);
+    ctx.lineTo(11, 3);
+    ctx.quadraticCurveTo(11, 5, 8, 5);
+    ctx.lineTo(-9, 5);
+    ctx.quadraticCurveTo(-11, 5, -11, 3);
+    ctx.lineTo(-11, -3);
+    ctx.quadraticCurveTo(-11, -5, -9, -5);
+    ctx.closePath();
+    ctx.fill();
 
-    // Cabin
-    ctx.fillStyle = '#88CCFF';
-    ctx.fillRect(3, -3, 4, 6);
+    // Body shading — darker bottom half
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.beginPath();
+    ctx.moveTo(-10, 0);
+    ctx.lineTo(10, 0);
+    ctx.lineTo(10, 3);
+    ctx.quadraticCurveTo(10, 5, 8, 5);
+    ctx.lineTo(-9, 5);
+    ctx.quadraticCurveTo(-10, 5, -10, 3);
+    ctx.closePath();
+    ctx.fill();
 
-    // Wheels
-    ctx.fillStyle = '#111';
-    ctx.fillRect(-7, -6.5, 5, 2);
-    ctx.fillRect(-7, 4.5, 5, 2);
-    ctx.fillRect(3, -6.5, 5, 2);
-    ctx.fillRect(3, 4.5, 5, 2);
+    // Body highlight — top reflection
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.beginPath();
+    ctx.moveTo(-7, -4.5);
+    ctx.lineTo(6, -4.5);
+    ctx.quadraticCurveTo(8, -4.5, 8, -3);
+    ctx.lineTo(8, -2);
+    ctx.lineTo(-7, -2);
+    ctx.closePath();
+    ctx.fill();
 
-    // Headlights
-    ctx.fillStyle = '#FFFF88';
-    ctx.fillRect(7, -3, 2, 2);
-    ctx.fillRect(7, 1, 2, 2);
+    // Spoiler
+    ctx.fillStyle = carData.color;
+    ctx.fillRect(-12, -6, 3, 12);
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillRect(-12, -6, 1, 12);
 
-    // Nitro flames
+    // Windshield
+    ctx.fillStyle = '#5599CC';
+    ctx.beginPath();
+    ctx.moveTo(3, -3.5);
+    ctx.lineTo(7, -3);
+    ctx.lineTo(7, 3);
+    ctx.lineTo(3, 3.5);
+    ctx.closePath();
+    ctx.fill();
+    // Windshield glare
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.beginPath();
+    ctx.moveTo(4, -3);
+    ctx.lineTo(6, -2.5);
+    ctx.lineTo(6, -0.5);
+    ctx.lineTo(4, -1);
+    ctx.closePath();
+    ctx.fill();
+
+    // Headlights with glow
+    ctx.fillStyle = '#FFFFAA';
+    ctx.beginPath(); ctx.arc(10.5, -3, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(10.5, 3, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath(); ctx.arc(10.5, -3, 1, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(10.5, 3, 1, 0, Math.PI * 2); ctx.fill();
+
+    // Tail lights
+    ctx.fillStyle = '#FF1100';
+    ctx.beginPath(); ctx.arc(-10.5, -3.5, 1.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(-10.5, 3.5, 1.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#FF4422';
+    ctx.beginPath(); ctx.arc(-10.5, -3.5, 0.8, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(-10.5, 3.5, 0.8, 0, Math.PI * 2); ctx.fill();
+
+    // Racing stripe
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.fillRect(-8, -1.5, 18, 3);
+
+    // Armor glow
+    if (armorActive) {
+        ctx.strokeStyle = 'rgba(68,136,255,0.5)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 13, 8, 0, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    // Nitro flames — better exhaust
     if (nitroActive) {
-        for (let i = 0; i < 5; i++) {
-            const fx = -10 - Math.random() * 8;
+        for (let i = 0; i < 8; i++) {
+            const fx = -13 - Math.random() * 12;
             const fy = -3 + Math.random() * 6;
-            const fs = 2 + Math.random() * 3;
-            ctx.fillStyle = ['#FF4400', '#FFAA00', '#FFFF00'][Math.floor(Math.random() * 3)];
-            ctx.fillRect(fx, fy, fs, fs);
+            const fs = 1.5 + Math.random() * 4;
+            const colors = ['#FF2200', '#FF6600', '#FFAA00', '#FFEE00'];
+            ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+            ctx.beginPath();
+            ctx.arc(fx, fy, fs, 0, Math.PI * 2);
+            ctx.fill();
         }
+        // Glow
+        ctx.fillStyle = 'rgba(255,100,0,0.2)';
+        ctx.beginPath();
+        ctx.ellipse(-16, 0, 10, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // Exhaust smoke when moving (not nitro)
+    if (!nitroActive && playerSpeed > 1.5) {
+        ctx.fillStyle = `rgba(100,100,100,${0.1 + Math.random() * 0.1})`;
+        ctx.beginPath();
+        ctx.arc(-12 - Math.random() * 4, Math.random() * 3 - 1.5, 1.5 + Math.random() * 1.5, 0, Math.PI * 2);
+        ctx.fill();
     }
 
     ctx.restore();
@@ -997,9 +1433,17 @@ function update() {
     const accelRate = ACCEL * carData.accelMod;
     const handling = TURN_SPEED * carData.handling;
 
+    // Check road status
+    const onRoad = isOnTrack(playerX, playerY);
+
     // Acceleration / braking
     if (keys['ArrowUp'] || keys['KeyW']) {
-        playerSpeed += accelRate;
+        // Use recovery acceleration when coming back from off-road
+        if (onRoad && wasOffRoad && playerSpeed < MAX_SPEED * carData.topSpeed * 0.6) {
+            playerSpeed += ROAD_RECOVERY_ACCEL * carData.accelMod;
+        } else {
+            playerSpeed += accelRate;
+        }
     } else if (keys['ArrowDown'] || keys['KeyS']) {
         playerSpeed += BRAKE;
     } else {
@@ -1024,9 +1468,24 @@ function update() {
     playerY += Math.sin(playerAngle) * playerSpeed;
 
     // Off-road check
-    if (!isOnTrack(playerX, playerY)) {
+    if (!onRoad) {
         playerSpeed *= OFF_ROAD_FRICTION;
         if (playerSpeed > OFF_ROAD_MAX) playerSpeed = OFF_ROAD_MAX;
+        wasOffRoad = true;
+        // Spawn dirt particles
+        if (playerSpeed > 0.5 && frameCount % 3 === 0) {
+            spawnParticle(playerX - Math.cos(playerAngle) * 10, playerY - Math.sin(playerAngle) * 10, 'dirt');
+        }
+    } else {
+        if (wasOffRoad && playerSpeed >= MAX_SPEED * carData.topSpeed * 0.6) {
+            wasOffRoad = false;
+        }
+        // Tire smoke when turning fast
+        if (Math.abs(playerSpeed) > 2.5 && (keys['ArrowLeft'] || keys['KeyA'] || keys['ArrowRight'] || keys['KeyD'])) {
+            if (frameCount % 4 === 0) {
+                spawnParticle(playerX - Math.cos(playerAngle) * 8, playerY - Math.sin(playerAngle) * 8, 'smoke');
+            }
+        }
     }
 
     // Nitro timer
@@ -1053,8 +1512,35 @@ function update() {
     // Calculate position
     calculatePosition();
 
+    // Update particles
+    updateParticles();
+
     // HUD
     updateHUD();
+}
+
+function spawnParticle(x, y, type) {
+    particles.push({
+        x, y,
+        vx: (Math.random() - 0.5) * 1.5,
+        vy: (Math.random() - 0.5) * 1.5,
+        life: 20 + Math.random() * 15,
+        maxLife: 35,
+        size: 2 + Math.random() * 3,
+        type
+    });
+    if (particles.length > 60) particles.shift();
+}
+
+function updateParticles() {
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+        p.size *= 0.97;
+        if (p.life <= 0) particles.splice(i, 1);
+    }
 }
 
 function isOnTrack(x, y) {
@@ -1233,6 +1719,8 @@ function loadTrack(idx) {
     nitroTimer = 0;
     armorActive = false;
     magnetRange = 0;
+    wasOffRoad = false;
+    particles = [];
     frameCount = 0;
 
     // Apply upgrades
