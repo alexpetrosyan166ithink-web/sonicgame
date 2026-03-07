@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#AD1457"/>
+      <stop offset="100%" style="stop-color:#880E4F"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg)"/>
+  <!-- Pie chart - 3/4 -->
+  <circle cx="120" cy="120" r="55" fill="#E91E63" stroke="#F48FB1" stroke-width="3"/>
+  <path d="M120,120 L120,65 A55,55 0 0,1 175,120 Z" fill="#F8BBD0" stroke="#F48FB1" stroke-width="2"/>
+  <text x="120" y="128" text-anchor="middle" font-family="monospace" font-size="18" font-weight="bold" fill="white">3/4</text>
+  <!-- Fraction bar visual -->
+  <rect x="230" y="70" width="130" height="30" rx="4" fill="#4FC3F7" opacity="0.9"/>
+  <rect x="230" y="70" width="65" height="30" rx="4" fill="#0288D1"/>
+  <text x="295" y="92" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold" fill="white">1/2</text>
+  <rect x="230" y="110" width="130" height="30" rx="4" fill="#4FC3F7" opacity="0.9"/>
+  <rect x="230" y="110" width="97" height="30" rx="4" fill="#0288D1"/>
+  <text x="295" y="132" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold" fill="white">3/4</text>
+  <rect x="230" y="150" width="130" height="30" rx="4" fill="#4FC3F7" opacity="0.9"/>
+  <rect x="230" y="150" width="43" height="30" rx="4" fill="#0288D1"/>
+  <text x="295" y="172" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold" fill="white">1/3</text>
+  <!-- Decimal conversion arrow -->
+  <text x="110" y="210" text-anchor="middle" font-family="monospace" font-size="22" font-weight="bold" fill="#FFD54F">1/2</text>
+  <text x="170" y="210" text-anchor="middle" font-family="monospace" font-size="20" fill="#A5D6A7">→</text>
+  <text x="240" y="210" text-anchor="middle" font-family="monospace" font-size="22" font-weight="bold" fill="#A5D6A7">0.5</text>
+  <!-- Bottom text -->
+  <text x="200" y="265" text-anchor="middle" font-family="monospace" font-size="18" font-weight="bold" fill="#FFD54F" letter-spacing="2">FRACTIONS</text>
+  <!-- Sparkles -->
+  <text x="40" y="45" font-size="16" fill="#FFF176" opacity="0.5">✦</text>
+  <text x="365" y="40" font-size="14" fill="#FFF176" opacity="0.4">✦</text>
+  <text x="350" y="260" font-size="16" fill="#FFF176" opacity="0.4">✦</text>
+</svg>

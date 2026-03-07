@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#283593"/>
+      <stop offset="100%" style="stop-color:#1A237E"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg)"/>
+  <!-- Open book -->
+  <path d="M90,200 L90,70 C90,70 140,55 200,70 C260,55 310,70 310,70 L310,200" fill="none" stroke="#BCAAA4" stroke-width="3"/>
+  <line x1="200" y1="70" x2="200" y2="200" stroke="#BCAAA4" stroke-width="2"/>
+  <!-- Left page -->
+  <rect x="100" y="80" width="90" height="6" rx="2" fill="#90A4AE" opacity="0.5"/>
+  <rect x="100" y="95" width="85" height="6" rx="2" fill="#90A4AE" opacity="0.5"/>
+  <rect x="100" y="110" width="75" height="6" rx="2" fill="#90A4AE" opacity="0.4"/>
+  <rect x="100" y="125" width="88" height="6" rx="2" fill="#90A4AE" opacity="0.4"/>
+  <!-- Right page - equation -->
+  <text x="250" y="95" text-anchor="middle" font-family="monospace" font-size="14" fill="#FFD54F" font-weight="bold">$5 + $3</text>
+  <text x="250" y="118" text-anchor="middle" font-family="monospace" font-size="14" fill="#FFD54F" font-weight="bold">= ?</text>
+  <text x="250" y="148" text-anchor="middle" font-family="monospace" font-size="20" fill="#4CAF50" font-weight="bold">$8</text>
+  <!-- Apple icon (word problem visual) -->
+  <circle cx="140" cy="160" r="14" fill="#F44336"/>
+  <path d="M140,146 C140,146 143,138 148,140" fill="none" stroke="#4CAF50" stroke-width="2"/>
+  <!-- Clock icon -->
+  <circle cx="170" cy="162" r="12" fill="none" stroke="#4FC3F7" stroke-width="2"/>
+  <line x1="170" y1="155" x2="170" y2="162" stroke="#4FC3F7" stroke-width="2"/>
+  <line x1="170" y1="162" x2="176" y2="165" stroke="#4FC3F7" stroke-width="2"/>
+  <!-- Pencil -->
+  <line x1="310" y1="210" x2="340" y2="100" stroke="#FFD54F" stroke-width="6" stroke-linecap="round"/>
+  <line x1="310" y1="210" x2="340" y2="100" stroke="#FF9800" stroke-width="4" stroke-linecap="round"/>
+  <polygon points="308,216 312,216 310,224" fill="#FFD54F"/>
+  <!-- Bottom text -->
+  <text x="200" y="260" text-anchor="middle" font-family="monospace" font-size="20" font-weight="bold" fill="#FFD54F" letter-spacing="2">WORD PROBLEMS</text>
+  <!-- Question marks -->
+  <text x="50" y="60" font-family="monospace" font-size="24" font-weight="bold" fill="#CE93D8" opacity="0.5">?</text>
+  <text x="350" y="55" font-family="monospace" font-size="20" font-weight="bold" fill="#CE93D8" opacity="0.4">?</text>
+  <text x="40" y="250" font-size="14" fill="#FFF176" opacity="0.4">✦</text>
+  <text x="365" y="260" font-size="16" fill="#FFF176" opacity="0.4">✦</text>
+</svg>

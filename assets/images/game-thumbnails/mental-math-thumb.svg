@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#E65100"/>
+      <stop offset="100%" style="stop-color:#BF360C"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg)"/>
+  <!-- Brain outline -->
+  <path d="M200,60 C160,60 130,80 125,110 C118,108 108,115 108,130 C100,135 96,150 102,165 C96,175 98,195 115,205 C118,220 135,232 160,232 C170,240 185,245 200,245 C215,245 230,240 240,232 C265,232 282,220 285,205 C302,195 304,175 298,165 C304,150 300,135 292,130 C292,115 282,108 275,110 C270,80 240,60 200,60Z" fill="none" stroke="#FFD54F" stroke-width="4"/>
+  <!-- Brain division line -->
+  <path d="M200,65 C195,100 210,140 195,180 C205,210 200,240 200,245" fill="none" stroke="#FFD54F" stroke-width="2" opacity="0.6"/>
+  <!-- Lightning bolts -->
+  <polygon points="70,80 85,115 75,115 90,150 72,118 82,118" fill="#FFF176" opacity="0.9"/>
+  <polygon points="320,80 335,115 325,115 340,150 322,118 332,118" fill="#FFF176" opacity="0.9"/>
+  <!-- Flying numbers -->
+  <text x="55" y="60" font-family="monospace" font-size="20" font-weight="bold" fill="#4FC3F7" opacity="0.8" transform="rotate(-15,55,60)">7</text>
+  <text x="340" y="55" font-family="monospace" font-size="18" font-weight="bold" fill="#A5D6A7" opacity="0.8" transform="rotate(10,340,55)">×</text>
+  <text x="50" y="200" font-family="monospace" font-size="22" font-weight="bold" fill="#FF8A80" opacity="0.8">9</text>
+  <text x="345" y="210" font-family="monospace" font-size="18" font-weight="bold" fill="#CE93D8" opacity="0.8">3</text>
+  <text x="65" y="155" font-family="monospace" font-size="16" font-weight="bold" fill="#80CBC4" opacity="0.7">+</text>
+  <text x="330" y="160" font-family="monospace" font-size="16" font-weight="bold" fill="#FFCC80" opacity="0.7">−</text>
+  <!-- Bottom text -->
+  <text x="200" y="282" text-anchor="middle" font-family="monospace" font-size="20" font-weight="bold" fill="#FFD54F" letter-spacing="2">THINK FAST!</text>
+  <!-- Timer icon -->
+  <circle cx="200" cy="155" r="12" fill="none" stroke="white" stroke-width="2" opacity="0.5"/>
+  <line x1="200" y1="148" x2="200" y2="155" stroke="white" stroke-width="2" opacity="0.5"/>
+  <line x1="200" y1="155" x2="206" y2="158" stroke="white" stroke-width="2" opacity="0.5"/>
+</svg>

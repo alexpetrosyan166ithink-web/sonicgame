@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#7B1FA2"/>
+      <stop offset="100%" style="stop-color:#4A148C"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg)"/>
+  <!-- Colorful number blocks -->
+  <rect x="60" y="60" width="70" height="70" rx="12" fill="#F44336"/>
+  <text x="95" y="108" text-anchor="middle" font-family="monospace" font-size="40" font-weight="bold" fill="white">1</text>
+  <rect x="165" y="60" width="70" height="70" rx="12" fill="#4CAF50"/>
+  <text x="200" y="108" text-anchor="middle" font-family="monospace" font-size="40" font-weight="bold" fill="white">2</text>
+  <rect x="270" y="60" width="70" height="70" rx="12" fill="#2196F3"/>
+  <text x="305" y="108" text-anchor="middle" font-family="monospace" font-size="40" font-weight="bold" fill="white">3</text>
+  <!-- Plus signs between -->
+  <text x="130" y="108" text-anchor="middle" font-family="monospace" font-size="30" font-weight="bold" fill="#FFD54F">+</text>
+  <text x="235" y="108" text-anchor="middle" font-family="monospace" font-size="30" font-weight="bold" fill="#FFD54F">+</text>
+  <!-- Fun shapes row -->
+  <circle cx="90" cy="175" r="25" fill="#FF9800" opacity="0.8"/>
+  <rect x="155" y="150" width="50" height="50" rx="4" fill="#E91E63" opacity="0.8"/>
+  <polygon points="305,150 330,200 280,200" fill="#00BCD4" opacity="0.8"/>
+  <!-- Smiley face -->
+  <circle cx="200" cy="175" r="4" fill="white"/>
+  <text x="200" y="180" text-anchor="middle" font-size="14" fill="white">★</text>
+  <!-- Bottom text -->
+  <text x="200" y="260" text-anchor="middle" font-family="monospace" font-size="22" font-weight="bold" fill="#FFD54F" letter-spacing="2">KIDS MATH</text>
+  <!-- Sparkles -->
+  <text x="40" y="40" font-size="20" fill="#FFF176" opacity="0.6">✦</text>
+  <text x="360" y="45" font-size="16" fill="#FFF176" opacity="0.5">✦</text>
+  <text x="35" y="250" font-size="14" fill="#FFF176" opacity="0.4">✦</text>
+  <text x="365" y="255" font-size="18" fill="#FFF176" opacity="0.5">✦</text>
+</svg>
