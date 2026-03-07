@@ -11,7 +11,6 @@ const CANVAS_H = 400;
 // 2D physics
 const MAX_SPEED = 4;
 const ACCEL = 0.08;
-const ROAD_RECOVERY_ACCEL = 0.16;  // faster accel when recovering from off-road
 const DECEL = -0.02;
 const BRAKE = -0.12;
 const TURN_SPEED = 0.05;
@@ -1438,16 +1437,17 @@ function update() {
 
     // Acceleration / braking
     if (keys['ArrowUp'] || keys['KeyW']) {
-        // Use recovery acceleration when coming back from off-road
-        if (onRoad && wasOffRoad && playerSpeed < MAX_SPEED * carData.topSpeed * 0.6) {
-            playerSpeed += ROAD_RECOVERY_ACCEL * carData.accelMod;
-        } else {
-            playerSpeed += accelRate;
-        }
+        playerSpeed += accelRate;
     } else if (keys['ArrowDown'] || keys['KeyS']) {
         playerSpeed += BRAKE;
     } else {
         playerSpeed += DECEL;
+    }
+
+    // Road traction: on road, car naturally accelerates toward a cruising speed
+    if (onRoad && playerSpeed > 0 && playerSpeed < topSpeed) {
+        const roadBoost = (topSpeed - playerSpeed) * 0.04;
+        playerSpeed += roadBoost;
     }
 
     // Clamp speed
@@ -1477,9 +1477,7 @@ function update() {
             spawnParticle(playerX - Math.cos(playerAngle) * 10, playerY - Math.sin(playerAngle) * 10, 'dirt');
         }
     } else {
-        if (wasOffRoad && playerSpeed >= MAX_SPEED * carData.topSpeed * 0.6) {
-            wasOffRoad = false;
-        }
+        wasOffRoad = false;
         // Tire smoke when turning fast
         if (Math.abs(playerSpeed) > 2.5 && (keys['ArrowLeft'] || keys['KeyA'] || keys['ArrowRight'] || keys['KeyD'])) {
             if (frameCount % 4 === 0) {
