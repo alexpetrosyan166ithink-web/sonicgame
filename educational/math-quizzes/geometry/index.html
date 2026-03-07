@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometry Quiz - Free Geometry Practice | Alex Games</title>
+    <meta name="description" content="Test your geometry skills with this fun interactive quiz covering angles, areas, perimeters, and shapes. Free geometry practice for students.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://alexgames.am/educational/math-quizzes/geometry/">
+    <meta property="og:title" content="Geometry Quiz - Free Geometry Practice">
+    <meta property="og:description" content="Test your knowledge of angles, areas, perimeters, and shapes in this fun interactive quiz!">
+    <meta property="og:url" content="https://alexgames.am/educational/math-quizzes/geometry/">
+    <meta property="og:site_name" content="Alex Games">
+    <meta property="og:type" content="website">
+    <link rel="stylesheet" href="../style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Quiz",
+        "name": "Geometry Quiz",
+        "description": "Test your geometry skills with angles, areas, perimeters, and shapes.",
+        "educationalLevel": "Intermediate",
+        "learningResourceType": "Quiz",
+        "url": "https://alexgames.am/educational/math-quizzes/geometry/"
+    }
+    </script>
+</head>
+<body>
+    <nav class="breadcrumb">
+        <a href="../" class="back-link">&#8592; BACK TO QUIZZES</a>
+    </nav>
+    <div class="quiz-container" id="quiz-root"></div>
+    <script src="../quiz-engine.js"></script>
+    <script>
+    new QuizEngine({
+        title: "GEOMETRY",
+        subtitle: "Angles, Areas, Perimeters & Shapes",
+        tips: {
+            "angles": "Remember: acute < 90°, right = 90°, obtuse > 90°, straight = 180°. Angles in a triangle always add up to 180°.",
+            "area": "Area formulas — Rectangle: length × width, Triangle: ½ × base × height, Circle: π × r².",
+            "perimeter": "Perimeter is the total distance around a shape. Add up all the side lengths!",
+            "shapes": "Learn properties of shapes — number of sides, symmetry, and angle sums (e.g. quadrilateral = 360°).",
+            "volume": "Volume measures 3D space — Cube: side³, Rectangular prism: length × width × height."
+        },
+        questions: [
+            {
+                question: "What is the area of a rectangle with length <strong>8 cm</strong> and width <strong>5 cm</strong>?",
+                options: ["A) 13 cm²", "B) 26 cm²", "C) 40 cm²", "D) 45 cm²"],
+                answer: 2,
+                topic: "area"
+            },
+            {
+                question: "How many degrees are in a <strong>right angle</strong>?",
+                options: ["A) 45°", "B) 90°", "C) 180°", "D) 360°"],
+                answer: 1,
+                topic: "angles"
+            },
+            {
+                question: "What is the perimeter of a square with side length <strong>6 cm</strong>?",
+                options: ["A) 12 cm", "B) 18 cm", "C) 24 cm", "D) 36 cm"],
+                answer: 2,
+                topic: "perimeter"
+            },
+            {
+                question: "The three angles of a triangle add up to how many degrees?",
+                options: ["A) 90°", "B) 180°", "C) 270°", "D) 360°"],
+                answer: 1,
+                topic: "angles"
+            },
+            {
+                question: "What is the area of a triangle with base <strong>10 cm</strong> and height <strong>6 cm</strong>?",
+                options: ["A) 16 cm²", "B) 60 cm²", "C) 30 cm²", "D) 20 cm²"],
+                answer: 2,
+                topic: "area"
+            },
+            {
+                question: "How many sides does an <strong>octagon</strong> have?",
+                options: ["A) 6", "B) 7", "C) 8", "D) 10"],
+                answer: 2,
+                topic: "shapes"
+            },
+            {
+                question: "What is the volume of a cube with side length <strong>3 cm</strong>?",
+                options: ["A) 9 cm³", "B) 18 cm³", "C) 27 cm³", "D) 36 cm³"],
+                answer: 2,
+                topic: "volume"
+            },
+            {
+                question: "What type of angle is <strong>135°</strong>?",
+                options: ["A) Acute", "B) Right", "C) Obtuse", "D) Straight"],
+                answer: 2,
+                topic: "angles"
+            },
+            {
+                question: "What is the perimeter of a rectangle with length <strong>12 cm</strong> and width <strong>7 cm</strong>?",
+                options: ["A) 19 cm", "B) 38 cm", "C) 84 cm", "D) 42 cm"],
+                answer: 1,
+                topic: "perimeter"
+            },
+            {
+                question: "A shape has <strong>4 equal sides</strong> and <strong>4 right angles</strong>. What is it?",
+                options: ["A) Rectangle", "B) Rhombus", "C) Square", "D) Parallelogram"],
+                answer: 2,
+                topic: "shapes"
+            }
+        ]
+    });
+    </script>
+</body>
+</html>

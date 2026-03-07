@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Math Quiz - Fast Calculation Practice | Alex Games</title>
+    <meta name="description" content="Sharpen your mental math skills with this fun interactive quiz covering quick calculations, estimation, and number tricks. Free math practice!">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://alexgames.am/educational/math-quizzes/mental-math/">
+    <meta property="og:title" content="Mental Math Quiz - Fast Calculation Practice">
+    <meta property="og:description" content="Challenge your brain with quick calculations, estimation, and number tricks!">
+    <meta property="og:url" content="https://alexgames.am/educational/math-quizzes/mental-math/">
+    <meta property="og:site_name" content="Alex Games">
+    <meta property="og:type" content="website">
+    <link rel="stylesheet" href="../style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Quiz",
+        "name": "Mental Math Quiz",
+        "description": "Sharpen your mental math with quick calculations, estimation, and number tricks.",
+        "educationalLevel": "Intermediate",
+        "learningResourceType": "Quiz",
+        "url": "https://alexgames.am/educational/math-quizzes/mental-math/"
+    }
+    </script>
+</head>
+<body>
+    <nav class="breadcrumb">
+        <a href="../" class="back-link">&#8592; BACK TO QUIZZES</a>
+    </nav>
+    <div class="quiz-container" id="quiz-root"></div>
+    <script src="../quiz-engine.js"></script>
+    <script>
+    new QuizEngine({
+        title: "MENTAL MATH",
+        subtitle: "Quick Calculations, Estimation & Number Tricks",
+        tips: {
+            "multiplication": "Break big multiplications into smaller parts — e.g. 15 × 12 = 15 × 10 + 15 × 2 = 180.",
+            "addition": "Round numbers to the nearest 10 or 100 first, then adjust — e.g. 298 + 47 = 300 + 47 - 2 = 345.",
+            "subtraction": "For subtraction, try adding up from the smaller number — e.g. 1000 - 637: 637 + 3 = 640, +60 = 700, +300 = 1000, so the answer is 363.",
+            "estimation": "Round each number to the nearest easy value before calculating. Estimation is about being close, not exact!",
+            "number-sense": "Look for patterns and shortcuts — doubling, halving, and using friendly numbers like 10, 25, 50, and 100.",
+            "division": "Think of division as 'how many groups?' — e.g. 156 ÷ 12: 12 × 10 = 120, 12 × 3 = 36, so 10 + 3 = 13."
+        },
+        questions: [
+            {
+                question: "What is <strong>25 × 16</strong>?",
+                options: ["A) 350", "B) 375", "C) 400", "D) 425"],
+                answer: 2,
+                topic: "multiplication"
+            },
+            {
+                question: "What is <strong>999 + 456</strong>?",
+                options: ["A) 1,445", "B) 1,455", "C) 1,465", "D) 1,555"],
+                answer: 1,
+                topic: "addition"
+            },
+            {
+                question: "What is <strong>1,000 - 637</strong>?",
+                options: ["A) 373", "B) 363", "C) 337", "D) 463"],
+                answer: 1,
+                topic: "subtraction"
+            },
+            {
+                question: "Estimate: <strong>49 × 21</strong> is closest to?",
+                options: ["A) 800", "B) 900", "C) 1,000", "D) 1,100"],
+                answer: 2,
+                topic: "estimation"
+            },
+            {
+                question: "What is <strong>156 ÷ 12</strong>?",
+                options: ["A) 11", "B) 12", "C) 13", "D) 14"],
+                answer: 2,
+                topic: "division"
+            },
+            {
+                question: "What is <strong>half of 350</strong>?",
+                options: ["A) 165", "B) 170", "C) 175", "D) 180"],
+                answer: 2,
+                topic: "number-sense"
+            },
+            {
+                question: "What is <strong>15 × 15</strong>?",
+                options: ["A) 200", "B) 215", "C) 225", "D) 250"],
+                answer: 2,
+                topic: "multiplication"
+            },
+            {
+                question: "Estimate: <strong>312 + 489</strong> is closest to?",
+                options: ["A) 700", "B) 800", "C) 900", "D) 750"],
+                answer: 1,
+                topic: "estimation"
+            },
+            {
+                question: "What is <strong>75 × 4</strong>?",
+                options: ["A) 280", "B) 290", "C) 300", "D) 320"],
+                answer: 2,
+                topic: "multiplication"
+            },
+            {
+                question: "What is <strong>double 186</strong>?",
+                options: ["A) 362", "B) 372", "C) 382", "D) 352"],
+                answer: 1,
+                topic: "number-sense"
+            }
+        ]
+    });
+    </script>
+</body>
+</html>
