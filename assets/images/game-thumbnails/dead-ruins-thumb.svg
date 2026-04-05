@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <!-- Dark sky -->
+  <rect width="400" height="300" fill="#2a1f3d"/>
+  <rect width="400" height="160" fill="#3a2848"/>
+
+  <!-- Moon -->
+  <circle cx="320" cy="50" r="25" fill="#d4c9a8" opacity="0.8"/>
+  <circle cx="328" cy="45" r="22" fill="#3a2848"/>
+
+  <!-- Ground -->
+  <rect y="180" width="400" height="120" fill="#3d3529"/>
+  <rect y="185" width="400" height="115" fill="#2e2820"/>
+
+  <!-- Ruins - broken wall left -->
+  <rect x="30" y="120" width="60" height="65" fill="#5b5348"/>
+  <rect x="30" y="120" width="15" height="65" fill="#4a4238"/>
+  <polygon points="30,120 60,100 90,120" fill="#5b5348"/>
+
+  <!-- Ruins - pillar -->
+  <rect x="130" y="90" width="15" height="95" fill="#6b6358"/>
+  <rect x="125" y="85" width="25" height="10" fill="#7a6e5a"/>
+  <rect x="125" y="180" width="25" height="8" fill="#7a6e5a"/>
+
+  <!-- Broken pillar -->
+  <rect x="180" y="140" width="15" height="45" fill="#6b6358"/>
+  <rect x="190" y="170" width="20" height="10" fill="#5b5348" transform="rotate(15,200,175)"/>
+
+  <!-- Archway -->
+  <rect x="240" y="100" width="12" height="85" fill="#7a6e5a"/>
+  <rect x="310" y="100" width="12" height="85" fill="#7a6e5a"/>
+  <rect x="235" y="95" width="92" height="12" fill="#5b5348"/>
+
+  <!-- Player with gun -->
+  <rect x="185" y="155" width="10" height="20" fill="#4a3a2a"/>
+  <circle cx="190" cy="152" r="5" fill="#4a3a2a"/>
+  <line x1="195" y1="160" x2="215" y2="155" stroke="#2a2a2a" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Muzzle flash -->
+  <circle cx="218" cy="154" r="5" fill="#ffaa22" opacity="0.9"/>
+  <circle cx="218" cy="154" r="8" fill="#ff8800" opacity="0.4"/>
+
+  <!-- Zombie 1 -->
+  <rect x="260" y="148" width="10" height="22" fill="#3a4a2a"/>
+  <rect x="261" y="140" width="8" height="9" fill="#2a3520"/>
+  <circle cx="263" cy="143" r="1.5" fill="#aaff44"/>
+  <circle cx="267" cy="143" r="1.5" fill="#aaff44"/>
+  <line x1="255" y1="155" x2="260" y2="152" stroke="#3a4a2a" stroke-width="3"/>
+
+  <!-- Zombie 2 (tank - bigger) -->
+  <rect x="300" y="130" width="16" height="35" fill="#2a3a1a"/>
+  <rect x="302" y="120" width="12" height="12" fill="#1a2a10"/>
+  <circle cx="305" cy="124" r="2" fill="#aaff44"/>
+  <circle cx="311" cy="124" r="2" fill="#aaff44"/>
+  <line x1="290" y1="140" x2="300" y2="135" stroke="#2a3a1a" stroke-width="4"/>
+
+  <!-- Zombie 3 (approaching) -->
+  <rect x="350" y="150" width="9" height="18" fill="#3a4a2a" opacity="0.7"/>
+  <rect x="351" y="143" width="7" height="8" fill="#2a3520" opacity="0.7"/>
+  <circle cx="353" cy="146" r="1.2" fill="#aaff44" opacity="0.7"/>
+  <circle cx="356" cy="146" r="1.2" fill="#aaff44" opacity="0.7"/>
+
+  <!-- Medkit -->
+  <rect x="150" y="172" width="10" height="7" fill="#dddddd"/>
+  <rect x="153" y="173" width="4" height="5" fill="#cc2020"/>
+  <rect x="151" y="174.5" width="8" height="2" fill="#cc2020"/>
+
+  <!-- Blood splatter -->
+  <circle cx="235" cy="175" r="3" fill="#8a1010" opacity="0.6"/>
+  <circle cx="240" cy="178" r="2" fill="#8a1010" opacity="0.4"/>
+
+  <!-- Bullet trails -->
+  <line x1="218" y1="154" x2="258" y2="150" stroke="#ffcc44" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- Torch glow left -->
+  <circle cx="60" cy="115" r="15" fill="#c86030" opacity="0.15"/>
+  <rect x="57" y="108" width="6" height="12" fill="#3a2a18"/>
+  <polygon points="57,108 60,98 63,108" fill="#c86030"/>
+
+  <!-- Fog overlay -->
+  <rect y="160" width="400" height="140" fill="#1a0f1d" opacity="0.3"/>
+
+  <!-- Title text -->
+  <text x="200" y="280" font-family="monospace" font-size="22" font-weight="bold" fill="#cc2020" text-anchor="middle" stroke="#8a2020" stroke-width="1">DEAD RUINS</text>
+  <text x="200" y="295" font-family="monospace" font-size="10" fill="#8a7e6a" text-anchor="middle">ZOMBIE SURVIVAL</text>
+</svg>
