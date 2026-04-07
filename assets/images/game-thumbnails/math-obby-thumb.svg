@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <!-- Dark sky background -->
+  <defs>
+    <linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#000833"/>
+      <stop offset="40%" style="stop-color:#001466"/>
+      <stop offset="100%" style="stop-color:#0044AA"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#sky)"/>
+
+  <!-- Stars -->
+  <rect x="30" y="20" width="2" height="2" fill="#FFF" opacity="0.7"/>
+  <rect x="90" y="45" width="3" height="3" fill="#FFF" opacity="0.5"/>
+  <rect x="170" y="15" width="2" height="2" fill="#FFF" opacity="0.6"/>
+  <rect x="250" y="35" width="2" height="2" fill="#FFF" opacity="0.8"/>
+  <rect x="320" y="20" width="3" height="3" fill="#FFF" opacity="0.5"/>
+  <rect x="370" y="50" width="2" height="2" fill="#FFF" opacity="0.6"/>
+  <rect x="140" y="55" width="2" height="2" fill="#FFF" opacity="0.4"/>
+  <rect x="55" y="65" width="2" height="2" fill="#FFF" opacity="0.5"/>
+  <rect x="300" y="60" width="2" height="2" fill="#FFF" opacity="0.7"/>
+
+  <!-- Mountains background -->
+  <polygon points="0,250 60,160 120,250" fill="rgba(0,30,80,0.5)"/>
+  <polygon points="80,250 160,140 240,250" fill="rgba(0,25,70,0.5)"/>
+  <polygon points="220,250 310,170 400,250" fill="rgba(0,30,80,0.5)"/>
+
+  <!-- Ground platform -->
+  <rect x="0" y="250" width="130" height="50" fill="#2A5A1A"/>
+  <rect x="0" y="250" width="130" height="6" fill="#44AA22"/>
+
+  <!-- Floating platform 1 -->
+  <rect x="155" y="210" width="80" height="14" fill="#3A2A1A"/>
+  <rect x="155" y="210" width="80" height="4" fill="#5A4A2A"/>
+
+  <!-- Floating platform 2 (higher) -->
+  <rect x="270" y="170" width="70" height="14" fill="#3A2A1A"/>
+  <rect x="270" y="170" width="70" height="4" fill="#5A4A2A"/>
+
+  <!-- Gate platform -->
+  <rect x="345" y="220" width="55" height="14" fill="#554400"/>
+  <rect x="345" y="220" width="55" height="4" fill="#AA8800"/>
+
+  <!-- Math Gate (golden glowing barrier) -->
+  <rect x="355" y="160" width="36" height="60" fill="#FFD700" opacity="0.5"/>
+  <rect x="355" y="160" width="36" height="60" fill="none" stroke="#FFD700" stroke-width="3"/>
+  <!-- Gate corners -->
+  <rect x="355" y="160" width="5" height="5" fill="#FFD700"/>
+  <rect x="386" y="160" width="5" height="5" fill="#FFD700"/>
+  <rect x="355" y="215" width="5" height="5" fill="#FFD700"/>
+  <rect x="386" y="215" width="5" height="5" fill="#FFD700"/>
+  <!-- Question mark on gate -->
+  <text x="373" y="200" text-anchor="middle" font-family="monospace" font-size="28" font-weight="bold" fill="#FFF">?</text>
+  <!-- Energy beam above gate -->
+  <rect x="370" y="130" width="6" height="30" fill="#FFD700" opacity="0.25"/>
+  <rect x="371" y="110" width="4" height="20" fill="#FFD700" opacity="0.15"/>
+
+  <!-- Spikes on platform 1 -->
+  <polygon points="175,210 181,196 187,210" fill="#CC0000"/>
+  <polygon points="176,210 181,198 186,210" fill="#FF4444"/>
+  <polygon points="193,210 199,196 205,210" fill="#CC0000"/>
+  <polygon points="194,210 199,198 204,210" fill="#FF4444"/>
+
+  <!-- Coins -->
+  <rect x="170" y="185" width="10" height="10" fill="#FFD700" rx="1"/>
+  <rect x="172" y="186" width="3" height="8" fill="#FFEE66"/>
+  <rect x="215" y="185" width="10" height="10" fill="#FFD700" rx="1"/>
+  <rect x="217" y="186" width="3" height="8" fill="#FFEE66"/>
+  <rect x="290" y="145" width="10" height="10" fill="#FFD700" rx="1"/>
+  <rect x="292" y="146" width="3" height="8" fill="#FFEE66"/>
+
+  <!-- Player character (jumping between platforms) -->
+  <!-- Cape -->
+  <polygon points="82,172 74,186 88,184" fill="#DD2200"/>
+  <polygon points="82,174 76,184 87,183" fill="#BB1800"/>
+  <!-- Body -->
+  <rect x="82" y="170" width="16" height="12" fill="#3388FF"/>
+  <!-- Collar -->
+  <rect x="85" y="170" width="10" height="3" fill="#55AAFF"/>
+  <!-- Belt -->
+  <rect x="83" y="180" width="14" height="3" fill="#AA7700"/>
+  <rect x="88" y="180" width="4" height="3" fill="#FFD700"/>
+  <!-- Head -->
+  <rect x="84" y="160" width="12" height="10" fill="#FFCC88"/>
+  <!-- Hair -->
+  <rect x="84" y="159" width="12" height="3" fill="#553311"/>
+  <rect x="82" y="159" width="4" height="5" fill="#553311"/>
+  <!-- Eye -->
+  <rect x="92" y="163" width="3" height="3" fill="#000"/>
+  <rect x="92" y="163" width="2" height="2" fill="#FFF"/>
+  <!-- Legs (jumping pose) -->
+  <rect x="84" y="183" width="5" height="5" fill="#2255AA"/>
+  <rect x="93" y="183" width="5" height="5" fill="#2255AA"/>
+  <!-- Shoes -->
+  <rect x="83" y="187" width="7" height="3" fill="#DD0000"/>
+  <rect x="92" y="187" width="7" height="3" fill="#DD0000"/>
+  <!-- Backpack -->
+  <rect x="80" y="172" width="4" height="7" fill="#226622"/>
+
+  <!-- Jump particles under player -->
+  <rect x="86" y="192" width="3" height="3" fill="#88BBFF" opacity="0.7"/>
+  <rect x="92" y="194" width="2" height="2" fill="#AADDFF" opacity="0.5"/>
+  <rect x="82" y="195" width="2" height="2" fill="#55AAFF" opacity="0.6"/>
+  <rect x="95" y="191" width="3" height="3" fill="#88EEFF" opacity="0.4"/>
+  <rect x="79" y="193" width="2" height="2" fill="#FFD700" opacity="0.5"/>
+
+  <!-- Double jump ring -->
+  <ellipse cx="90" cy="190" rx="14" ry="4" fill="none" stroke="#88EEFF" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- Math equation floating in the air -->
+  <rect x="135" y="90" width="130" height="36" rx="6" fill="rgba(0,17,85,0.85)" stroke="#FFD700" stroke-width="2"/>
+  <text x="200" y="115" text-anchor="middle" font-family="monospace" font-size="18" font-weight="bold" fill="#FFF">12 x 7 = ?</text>
+  <!-- Small decorative brackets -->
+  <rect x="136" y="91" width="4" height="4" fill="#FFD700"/>
+  <rect x="260" y="91" width="4" height="4" fill="#FFD700"/>
+  <rect x="136" y="121" width="4" height="4" fill="#FFD700"/>
+  <rect x="260" y="121" width="4" height="4" fill="#FFD700"/>
+
+  <!-- Floating answer buttons -->
+  <rect x="145" y="133" width="50" height="20" rx="3" fill="rgba(0,68,170,0.8)" stroke="#0088EE" stroke-width="1.5"/>
+  <text x="170" y="148" text-anchor="middle" font-family="monospace" font-size="11" font-weight="bold" fill="#FFF">84</text>
+  <rect x="205" y="133" width="50" height="20" rx="3" fill="rgba(0,68,170,0.8)" stroke="#0088EE" stroke-width="1.5"/>
+  <text x="230" y="148" text-anchor="middle" font-family="monospace" font-size="11" font-weight="bold" fill="#FFF">91</text>
+
+  <!-- Flag at the end -->
+  <rect x="385" y="180" width="3" height="40" fill="#999"/>
+  <polygon points="388,180 400,188 388,196" fill="#FFD700"/>
+
+  <!-- Lava/danger at bottom -->
+  <rect x="130" y="270" width="215" height="30" fill="rgba(255,40,0,0.3)"/>
+  <rect x="135" y="278" width="10" height="8" fill="rgba(255,100,0,0.5)" rx="2"/>
+  <rect x="200" y="280" width="8" height="6" fill="rgba(255,80,0,0.5)" rx="2"/>
+  <rect x="280" y="276" width="12" height="8" fill="rgba(255,100,0,0.4)" rx="2"/>
+  <rect x="170" y="282" width="6" height="6" fill="rgba(255,120,0,0.4)" rx="2"/>
+  <rect x="240" y="279" width="8" height="7" fill="rgba(255,90,0,0.5)" rx="2"/>
+
+  <!-- Moving platform indicator (arrows) -->
+  <rect x="270" y="170" width="70" height="14" fill="none" stroke="rgba(100,150,255,0.3)" stroke-width="1"/>
+
+  <!-- Title -->
+  <text x="200" y="285" text-anchor="middle" font-family="monospace" font-size="22" font-weight="bold" fill="#FFD700" stroke="#000" stroke-width="2.5" paint-order="stroke">MATH OBBY</text>
+</svg>
