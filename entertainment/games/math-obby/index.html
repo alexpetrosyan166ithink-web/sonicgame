@@ -656,6 +656,24 @@
             transform: translate(-1px,-1px);
             box-shadow: 4px 4px 0px #000;
         }
+
+        .music-toggle {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            padding: 4px 10px;
+            background: rgba(0,0,0,0.5);
+            color: #888;
+            border: 2px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-shadow: 1px 1px 0px #000;
+        }
+        .music-toggle.active {
+            color: #00FF66;
+            border-color: #00FF66;
+            background: rgba(0,60,30,0.5);
+        }
     </style>
 </head>
 <body>
@@ -663,6 +681,7 @@
     <nav class="game-nav">
         <a href="../../" class="back-link">&#8592; BACK TO GAMES</a>
         <span class="game-title">MATH OBBY</span>
+        <button class="music-toggle" id="musicToggle" title="Toggle Music">♪ OFF</button>
     </nav>
 
     <!-- HUD -->
@@ -771,11 +790,287 @@
 
         // ---- ZOOM / MOBILE DETECTION ----
         const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.innerWidth <= 768;
-        let ZOOM = isMobile ? 1.0 : 1.2; // 20% zoom on desktop
+        let ZOOM = isMobile ? 1.0 : 1.44; // 44% zoom on desktop
 
         if (isMobile) {
             document.body.classList.add('mobile-layout');
         }
+
+        // ============================================
+        //  PROCEDURAL CHIPTUNE MUSIC ENGINE
+        // ============================================
+        let audioCtx = null;
+        let musicEnabled = false;
+        let musicPlaying = false;
+        let musicInterval = null;
+        let musicGain = null;
+        let sfxGain = null;
+        let currentMusicLevel = -1;
+
+        function initAudio() {
+            if (audioCtx) return;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            musicGain = audioCtx.createGain();
+            musicGain.gain.value = 0.25;
+            musicGain.connect(audioCtx.destination);
+            sfxGain = audioCtx.createGain();
+            sfxGain.gain.value = 0.35;
+            sfxGain.connect(audioCtx.destination);
+        }
+
+        // Note frequency helper
+        function noteFreq(note, octave) {
+            var notes = { C:0, 'C#':1, D:2, 'D#':3, E:4, F:5, 'F#':6, G:7, 'G#':8, A:9, 'A#':10, B:11 };
+            var n = notes[note];
+            if (n === undefined) return 0;
+            return 440 * Math.pow(2, (n - 9) / 12 + (octave - 4));
+        }
+
+        // Level themes: melody notes, bass notes, tempo
+        var MUSIC_THEMES = [
+            { // Level 1: Upbeat happy (C major)
+                melody: ['C5','E5','G5','A5','G5','E5','C5','D5','E5','F5','G5','A5','G5','F5','E5','D5'],
+                bass:   ['C3','C3','G3','G3','A3','A3','F3','G3','C3','C3','G3','G3','F3','F3','G3','G3'],
+                tempo: 180
+            },
+            { // Level 2: Slightly darker (A minor)
+                melody: ['A4','C5','E5','A5','G5','E5','D5','C5','B4','C5','D5','E5','C5','B4','A4','G4'],
+                bass:   ['A2','A2','E3','E3','F3','F3','D3','E3','A2','A2','E3','E3','D3','D3','E3','E3'],
+                tempo: 160
+            },
+            { // Level 3: Intense/driving (E minor)
+                melody: ['E5','G5','B5','E5','D5','B4','A4','G4','F#4','G4','A4','B4','D5','C5','B4','A4'],
+                bass:   ['E2','E2','B2','B2','C3','C3','A2','B2','E2','E2','G2','G2','A2','A2','B2','B2'],
+                tempo: 200
+            },
+            { // Level 4: Mysterious/deep (D minor)
+                melody: ['D5','F5','A5','D5','C5','A4','G4','F4','E4','F4','G4','A4','C5','B4','A4','G4'],
+                bass:   ['D2','D2','A2','A2','B2','B2','G2','A2','D2','D2','F2','F2','G2','G2','A2','A2'],
+                tempo: 140
+            },
+            { // Level 5: Epic/boss-fight (F# minor, faster)
+                melody: ['F#5','A5','C#6','F#5','E5','C#5','B4','A4','G#4','A4','B4','C#5','E5','D5','C#5','B4'],
+                bass:   ['F#2','F#2','C#3','C#3','D3','D3','B2','C#3','F#2','F#2','A2','A2','B2','B2','C#3','C#3'],
+                tempo: 220
+            }
+        ];
+
+        function parseNote(str) {
+            var m = str.match(/^([A-G]#?)(\d)$/);
+            if (!m) return 0;
+            return noteFreq(m[1], parseInt(m[2]));
+        }
+
+        var musicStep = 0;
+
+        function playMusicStep(theme) {
+            if (!audioCtx || !musicEnabled) return;
+            var now = audioCtx.currentTime;
+            var stepDur = 60 / theme.tempo;
+
+            // Melody (square wave)
+            var mFreq = parseNote(theme.melody[musicStep % 16]);
+            if (mFreq > 0) {
+                var mOsc = audioCtx.createOscillator();
+                var mEnv = audioCtx.createGain();
+                mOsc.type = 'square';
+                mOsc.frequency.value = mFreq;
+                mEnv.gain.setValueAtTime(0.18, now);
+                mEnv.gain.exponentialRampToValueAtTime(0.001, now + stepDur * 0.8);
+                mOsc.connect(mEnv);
+                mEnv.connect(musicGain);
+                mOsc.start(now);
+                mOsc.stop(now + stepDur * 0.85);
+            }
+
+            // Bass (sawtooth)
+            var bFreq = parseNote(theme.bass[musicStep % 16]);
+            if (bFreq > 0) {
+                var bOsc = audioCtx.createOscillator();
+                var bEnv = audioCtx.createGain();
+                bOsc.type = 'sawtooth';
+                bOsc.frequency.value = bFreq;
+                bEnv.gain.setValueAtTime(0.12, now);
+                bEnv.gain.exponentialRampToValueAtTime(0.001, now + stepDur * 0.9);
+                bOsc.connect(bEnv);
+                bEnv.connect(musicGain);
+                bOsc.start(now);
+                bOsc.stop(now + stepDur * 0.95);
+            }
+
+            // Hi-hat (noise) on even steps
+            if (musicStep % 2 === 0) {
+                var bufSize = audioCtx.sampleRate * 0.05;
+                var nBuf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+                var data = nBuf.getChannelData(0);
+                for (var i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+                var noise = audioCtx.createBufferSource();
+                noise.buffer = nBuf;
+                var nEnv = audioCtx.createGain();
+                nEnv.gain.setValueAtTime(0.06, now);
+                nEnv.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+                noise.connect(nEnv);
+                nEnv.connect(musicGain);
+                noise.start(now);
+                noise.stop(now + 0.05);
+            }
+
+            // Kick on beat 0,4,8,12
+            if (musicStep % 4 === 0) {
+                var kOsc = audioCtx.createOscillator();
+                var kEnv = audioCtx.createGain();
+                kOsc.type = 'sine';
+                kOsc.frequency.setValueAtTime(150, now);
+                kOsc.frequency.exponentialRampToValueAtTime(30, now + 0.1);
+                kEnv.gain.setValueAtTime(0.2, now);
+                kEnv.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                kOsc.connect(kEnv);
+                kEnv.connect(musicGain);
+                kOsc.start(now);
+                kOsc.stop(now + 0.15);
+            }
+
+            musicStep = (musicStep + 1) % 16;
+        }
+
+        function startMusic(level) {
+            if (!musicEnabled) return;
+            initAudio();
+            stopMusic();
+            currentMusicLevel = level;
+            musicStep = 0;
+            var theme = MUSIC_THEMES[level] || MUSIC_THEMES[0];
+            var interval = (60 / theme.tempo) * 1000;
+            musicPlaying = true;
+            playMusicStep(theme);
+            musicInterval = setInterval(function() { playMusicStep(theme); }, interval);
+        }
+
+        function stopMusic() {
+            musicPlaying = false;
+            if (musicInterval) { clearInterval(musicInterval); musicInterval = null; }
+        }
+
+        function toggleMusic() {
+            initAudio();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            musicEnabled = !musicEnabled;
+            var btn = document.getElementById('musicToggle');
+            if (musicEnabled) {
+                btn.textContent = '\u266A ON';
+                btn.classList.add('active');
+                if (gameState === 'playing') startMusic(currentLevel);
+            } else {
+                btn.textContent = '\u266A OFF';
+                btn.classList.remove('active');
+                stopMusic();
+            }
+        }
+
+        // SFX functions
+        function playSfxJump() {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') return;
+            var now = audioCtx.currentTime;
+            var osc = audioCtx.createOscillator();
+            var env = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(300, now);
+            osc.frequency.exponentialRampToValueAtTime(600, now + 0.08);
+            env.gain.setValueAtTime(0.15, now);
+            env.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+            osc.connect(env);
+            env.connect(sfxGain);
+            osc.start(now);
+            osc.stop(now + 0.12);
+        }
+
+        function playSfxCoin() {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') return;
+            var now = audioCtx.currentTime;
+            var osc = audioCtx.createOscillator();
+            var env = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(988, now);
+            osc.frequency.setValueAtTime(1319, now + 0.06);
+            env.gain.setValueAtTime(0.15, now);
+            env.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+            osc.connect(env);
+            env.connect(sfxGain);
+            osc.start(now);
+            osc.stop(now + 0.18);
+        }
+
+        function playSfxCorrect() {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') return;
+            var now = audioCtx.currentTime;
+            var notes = [523, 659, 784];
+            notes.forEach(function(f, i) {
+                var osc = audioCtx.createOscillator();
+                var env = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.value = f;
+                env.gain.setValueAtTime(0, now + i * 0.1);
+                env.gain.linearRampToValueAtTime(0.12, now + i * 0.1 + 0.02);
+                env.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.15);
+                osc.connect(env);
+                env.connect(sfxGain);
+                osc.start(now + i * 0.1);
+                osc.stop(now + i * 0.1 + 0.18);
+            });
+        }
+
+        function playSfxWrong() {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') return;
+            var now = audioCtx.currentTime;
+            var osc = audioCtx.createOscillator();
+            var env = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(200, now);
+            osc.frequency.exponentialRampToValueAtTime(80, now + 0.3);
+            env.gain.setValueAtTime(0.15, now);
+            env.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            osc.connect(env);
+            env.connect(sfxGain);
+            osc.start(now);
+            osc.stop(now + 0.4);
+        }
+
+        function playSfxDeath() {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') return;
+            var now = audioCtx.currentTime;
+            var osc = audioCtx.createOscillator();
+            var env = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.exponentialRampToValueAtTime(50, now + 0.5);
+            env.gain.setValueAtTime(0.18, now);
+            env.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+            osc.connect(env);
+            env.connect(sfxGain);
+            osc.start(now);
+            osc.stop(now + 0.6);
+            // Noise burst
+            var bufSize = audioCtx.sampleRate * 0.15;
+            var nBuf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+            var nData = nBuf.getChannelData(0);
+            for (var i = 0; i < bufSize; i++) nData[i] = Math.random() * 2 - 1;
+            var ns = audioCtx.createBufferSource();
+            ns.buffer = nBuf;
+            var ne = audioCtx.createGain();
+            ne.gain.setValueAtTime(0.1, now);
+            ne.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+            ns.connect(ne);
+            ne.connect(sfxGain);
+            ns.start(now);
+            ns.stop(now + 0.25);
+        }
+
+        document.getElementById('musicToggle').addEventListener('click', toggleMusic);
 
         // ---- GAME STATE ----
         let W, H;
@@ -903,6 +1198,8 @@
         let decorations = [];
         let levelWidth = 0;
         let flagX = 0;
+        let bgSymbols = [];
+        let floatingTexts = [];
 
         // ---- PARALLAX ----
         let clouds = [];
@@ -1053,6 +1350,23 @@
                     type: Math.random() > 0.5 ? 'tree' : 'bush'
                 });
             }
+
+            // Initialize background math symbols
+            bgSymbols = [];
+            var mathSyms = ['+', '-', '\u00D7', '\u00F7', '=', '?', '\u03C0'];
+            for (let i = 0; i < 10; i++) {
+                bgSymbols.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    sym: mathSyms[Math.floor(Math.random() * mathSyms.length)],
+                    speed: 0.2 + Math.random() * 0.4,
+                    size: 10 + Math.random() * 14,
+                    alpha: 0.06 + Math.random() * 0.08
+                });
+            }
+
+            // Initialize floating texts
+            floatingTexts = [];
         }
 
         // ============================================
@@ -2009,6 +2323,7 @@
                     player.onGround = false;
                     player.airJumps = 0;
                     spawnParticles(player.x + player.w / 2, player.y + player.h, '#FFFFFF', 6, 12, 18);
+                    playSfxJump();
                 } else if ((player.airJumps || 0) < maxAirJumps) {
                     player.vy = heroJump * 0.85;
                     player.airJumps = (player.airJumps || 0) + 1;
@@ -2016,6 +2331,7 @@
                     const colors = ['#88EEFF', '#FFD700', '#FF88FF'];
                     spawnParticles(player.x + player.w / 2, player.y + player.h, colors[player.airJumps - 1] || '#88EEFF', 10, 16, 22);
                     spawnParticles(player.x + player.w / 2, player.y + player.h, '#FFD700', 4, 10, 16);
+                    playSfxJump();
                 }
             }
 
@@ -2095,8 +2411,10 @@
                     player.x + player.w > c.x && player.x < c.x + 16 &&
                     player.y + player.h > c.y && player.y < c.y + 16) {
                     c.collected = true;
-                    addCoins(50);
+                    var coinVal = addCoins(50);
                     spawnParticles(c.x + 8, c.y + 8, '#FFD700', 8, 10, 20);
+                    playSfxCoin();
+                    floatingTexts.push({ x: c.x, y: c.y - 10, text: '+' + coinVal, life: 40, maxLife: 40, color: '#FFD700' });
                 }
             }
 
@@ -2160,6 +2478,7 @@
             lives--;
             spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#FF4444', 20, 20, 30);
             cameraShake = 12;
+            playSfxDeath();
 
             if (lives <= 0) {
                 gameState = 'gameOver';
@@ -2224,6 +2543,7 @@
                 questionsCorrect++;
                 addCoins(200);
                 currentGate.open = true;
+                playSfxCorrect();
                 // Update respawn checkpoint
                 player.respawnX = currentGate.x - 40;
                 player.respawnY = currentGate.y;
@@ -2239,6 +2559,7 @@
                 btn.classList.add('wrong');
                 questionsWrong++;
                 cameraShake = 8;
+                playSfxWrong();
 
                 // Highlight correct answer
                 const allBtns = container.querySelectorAll('.math-answer-btn');
@@ -2299,6 +2620,7 @@
             timerStart = Date.now();
             gameState = 'playing';
             updateHUD();
+            if (musicEnabled) startMusic(lvl);
         }
 
         function completeLevel() {
@@ -2318,6 +2640,7 @@
 
             if (currentLevel >= LEVEL_CONFIG.length - 1) {
                 // Won the whole game!
+                stopMusic();
                 document.getElementById('levelTitle').textContent = 'YOU WIN!';
                 document.getElementById('levelMsg').textContent = 'CONGRATULATIONS! YOU BEAT ALL 5 LEVELS!';
                 document.getElementById('nextLevelBtn').textContent = 'PLAY AGAIN';
@@ -2350,6 +2673,7 @@
         }
 
         function showGameOver() {
+            stopMusic();
             timerElapsed = Math.floor((Date.now() - timerStart) / 1000);
             const title = document.getElementById('gameOverTitle');
             title.textContent = 'GAME OVER';
@@ -2391,6 +2715,111 @@
         }
 
         // ============================================
+        //  VISUAL EFFECTS
+        // ============================================
+        function updateBgSymbols() {
+            var mathSyms = ['+', '-', '\u00D7', '\u00F7', '=', '?', '\u03C0'];
+            for (var i = 0; i < bgSymbols.length; i++) {
+                var s = bgSymbols[i];
+                s.y -= s.speed;
+                if (s.y < -20) {
+                    s.y = H + 20;
+                    s.x = Math.random() * W;
+                    s.sym = mathSyms[Math.floor(Math.random() * mathSyms.length)];
+                }
+            }
+        }
+
+        function drawBgSymbols() {
+            var gateColors = ['#22CC44','#DD8800','#CC2244','#6644CC','#FF4400'];
+            var col = gateColors[currentLevel] || '#FFFFFF';
+            ctx.font = '14px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            for (var i = 0; i < bgSymbols.length; i++) {
+                var s = bgSymbols[i];
+                ctx.globalAlpha = s.alpha;
+                ctx.fillStyle = col;
+                ctx.font = Math.round(s.size) + 'px "Press Start 2P"';
+                ctx.fillText(s.sym, Math.round(s.x), Math.round(s.y));
+            }
+            ctx.globalAlpha = 1;
+            ctx.textBaseline = 'alphabetic';
+        }
+
+        function drawLightRays() {
+            var gateColors = ['#22CC44','#DD8800','#CC2244','#6644CC','#FF4400'];
+            var col = gateColors[currentLevel] || '#FFFFFF';
+            var t = Date.now() * 0.0003;
+            ctx.save();
+            for (var i = 0; i < 4; i++) {
+                var angle = t + i * 1.2;
+                var x = W * 0.2 + Math.sin(angle) * W * 0.4;
+                ctx.globalAlpha = 0.035;
+                ctx.fillStyle = col;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x + 60, 0);
+                ctx.lineTo(x + 180 + Math.sin(angle * 0.7) * 40, H);
+                ctx.lineTo(x - 40 + Math.sin(angle * 0.5) * 30, H);
+                ctx.closePath();
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+
+        function drawGroundFog() {
+            var baseY = H - TILE;
+            var t = Date.now() * 0.001;
+            ctx.save();
+            for (var i = 0; i < 6; i++) {
+                var offset = Math.sin(t + i * 1.5) * 30;
+                var fogY = baseY - 8 + i * 3;
+                var alpha = 0.04 - i * 0.005;
+                if (alpha <= 0) continue;
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = '#AABBCC';
+                ctx.fillRect(offset - 20, Math.round(fogY), W + 40, 6);
+            }
+            ctx.restore();
+        }
+
+        function updateFloatingTexts() {
+            for (var i = floatingTexts.length - 1; i >= 0; i--) {
+                var ft = floatingTexts[i];
+                ft.y -= 1.2;
+                ft.life--;
+                if (ft.life <= 0) floatingTexts.splice(i, 1);
+            }
+        }
+
+        function drawFloatingTexts() {
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            for (var i = 0; i < floatingTexts.length; i++) {
+                var ft = floatingTexts[i];
+                var alpha = ft.life / ft.maxLife;
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = ft.color;
+                ctx.font = '10px "Press Start 2P"';
+                ctx.fillText(ft.text, Math.round(ft.x - cameraX), Math.round(ft.y));
+            }
+            ctx.globalAlpha = 1;
+            ctx.textBaseline = 'alphabetic';
+        }
+
+        function drawVignette() {
+            var cx = W / 2;
+            var cy = H / 2;
+            var r = Math.max(W, H) * 0.7;
+            var grad = ctx.createRadialGradient(cx, cy, r * 0.4, cx, cy, r);
+            grad.addColorStop(0, 'rgba(0,0,0,0)');
+            grad.addColorStop(1, 'rgba(0,0,0,0.45)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, H);
+        }
+
+        // ============================================
         //  MAIN LOOP
         // ============================================
         function resize() {
@@ -2422,6 +2851,8 @@
             }
 
             updateParticles();
+            updateBgSymbols();
+            updateFloatingTexts();
 
             // Draw
             ctx.clearRect(0, 0, W, H);
@@ -2444,10 +2875,17 @@
             drawFlag();
             drawPlayer();
             drawParticles();
+            drawFloatingTexts();
+            drawBgSymbols();
+            drawLightRays();
+            drawGroundFog();
 
             if (cameraShake > 0) {
                 ctx.restore();
             }
+
+            // Vignette (outside camera shake)
+            drawVignette();
 
             // Death pit — lava/void effect
             if (currentLevel >= 3) {
