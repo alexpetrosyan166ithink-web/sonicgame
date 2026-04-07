@@ -1,0 +1,2242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/png" href="../../assets/images/favicon.png">
+    <title>Math Obby - Platform Math Adventure | Alex Games</title>
+    <meta name="description" content="Jump, run, and solve math problems in this retro platformer obstacle course! Practice arithmetic while having fun at Alex Games.">
+    <link rel="stylesheet" href="../../assets/styles/portal.css">
+    <style>
+        /* ============================================
+           MATH OBBY - GAME STYLES
+           ============================================ */
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+            font-family: 'Press Start 2P', monospace;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        /* Navigation bar */
+        .game-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.85);
+            border-bottom: 3px solid #FFD700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .game-nav .back-link {
+            color: #FFD700;
+            text-decoration: none;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            text-shadow: 2px 2px 0px #000;
+            transition: color 0.2s;
+        }
+
+        .game-nav .back-link:hover {
+            color: #00FFFF;
+        }
+
+        .game-nav .game-title {
+            font-size: 10px;
+            color: #00FFFF;
+            text-shadow: 2px 2px 0px #000;
+            letter-spacing: 1px;
+        }
+
+        /* Canvas container */
+        #gameContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        /* HUD overlay */
+        .hud {
+            position: fixed;
+            top: 40px;
+            left: 0;
+            right: 0;
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .hud-item {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(7px, 1.5vw, 11px);
+            text-shadow: 2px 2px 0px #000;
+            letter-spacing: 1px;
+        }
+
+        .hud-lives { color: #FF4444; }
+        .hud-score { color: #FFD700; }
+        .hud-level { color: #00FFFF; }
+        .hud-timer { color: #FFFFFF; }
+        .hud-djump { color: #88EEFF; font-size: clamp(6px, 1.2vw, 9px); }
+        .hud-djump.used { color: #555; }
+
+        .heart { display: inline; }
+
+        /* Math Gate Modal */
+        .math-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 20, 0.88);
+            animation: modalIn 0.25s ease-out;
+        }
+
+        .math-modal.active {
+            display: flex;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.85); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .math-box {
+            background: linear-gradient(180deg, #001155 0%, #002288 100%);
+            border: 4px solid #FFD700;
+            border-radius: 8px;
+            padding: 28px 32px;
+            text-align: center;
+            box-shadow: 6px 6px 0px #000, 0 0 60px rgba(0, 136, 238, 0.3);
+            max-width: 420px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .math-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #FFD700, #00FFFF, #FFD700);
+            animation: shimmer 2s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200px; }
+            100% { background-position: 200px; }
+        }
+
+        .math-box h2 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(10px, 2.5vw, 14px);
+            color: #FFD700;
+            text-shadow: 2px 2px 0px #000;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        .math-box .gate-label {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(7px, 1.5vw, 9px);
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .math-question {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(12px, 3.5vw, 24px);
+            color: #FFFFFF;
+            text-shadow: 3px 3px 0px #000;
+            margin: 20px 0;
+            letter-spacing: 2px;
+            word-break: break-word;
+            line-height: 1.6;
+        }
+
+        .math-answers {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .math-answer-btn {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(10px, 2vw, 14px);
+            padding: 14px 8px;
+            background: rgba(0, 68, 170, 0.8);
+            color: #FFF;
+            border: 3px solid #0088EE;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 3px 3px 0px #000;
+            text-shadow: 1px 1px 0px #000;
+        }
+
+        .math-answer-btn:hover {
+            background: rgba(0, 100, 200, 0.9);
+            border-color: #FFD700;
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0px #000;
+        }
+
+        .math-answer-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px #000;
+        }
+
+        .math-answer-btn.correct {
+            background: #00AA44;
+            border-color: #00FF66;
+            animation: correctPulse 0.4s ease;
+        }
+
+        .math-answer-btn.wrong {
+            background: #AA0000;
+            border-color: #FF3333;
+            animation: wrongShake 0.4s ease;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
+        }
+
+        /* Touch Controls */
+        .touch-controls {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 80;
+            padding: 10px 12px 16px;
+            pointer-events: none;
+        }
+
+        .touch-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .touch-btn {
+            pointer-events: auto;
+            width: clamp(62px, 16vw, 80px);
+            height: clamp(62px, 16vw, 80px);
+            background: rgba(0, 68, 170, 0.6);
+            border: 3px solid rgba(255, 215, 0, 0.6);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(22px, 6vw, 32px);
+            color: rgba(255, 255, 255, 0.85);
+            text-shadow: 2px 2px 0px #000;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            gap: 2px;
+        }
+
+        .touch-btn:active, .touch-btn.pressed {
+            background: rgba(0, 120, 255, 0.8);
+            border-color: #FFD700;
+            transform: scale(0.95);
+        }
+
+        .touch-btn-label {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 6px;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 1px;
+        }
+
+        .touch-dpad {
+            display: flex;
+            gap: 10px;
+        }
+
+        .touch-jump {
+            width: clamp(90px, 24vw, 120px);
+            height: clamp(72px, 18vw, 90px);
+            background: rgba(0, 100, 50, 0.6);
+            border-color: rgba(0, 255, 100, 0.5);
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(10px, 2.5vw, 14px);
+        }
+
+        .touch-jump:active, .touch-jump.pressed {
+            background: rgba(0, 160, 80, 0.8);
+            border-color: #00FF66;
+        }
+
+        .touch-jump-hint {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 6px;
+            color: rgba(0,255,100,0.5);
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        /* Screens */
+        .screen-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 300;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 20, 0.92);
+        }
+
+        .screen-overlay.active {
+            display: flex;
+        }
+
+        .screen-box {
+            text-align: center;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .screen-box h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(20px, 5vw, 36px);
+            color: #FFD700;
+            text-shadow: 3px 3px 0px #AA6600, 4px 4px 0px #000;
+            margin-bottom: 16px;
+            letter-spacing: 3px;
+            line-height: 1.4;
+        }
+
+        .screen-box .subtitle {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(8px, 1.8vw, 12px);
+            color: #00FFFF;
+            text-shadow: 2px 2px 0px #000;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        .screen-box .info {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(7px, 1.3vw, 9px);
+            color: #888;
+            text-shadow: 1px 1px 0px #000;
+            margin-bottom: 24px;
+            line-height: 2;
+        }
+
+        .screen-box .stats {
+            margin: 20px 0;
+        }
+
+        .screen-box .stat-line {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(8px, 1.5vw, 11px);
+            color: #FFF;
+            text-shadow: 1px 1px 0px #000;
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .screen-box .stat-line span {
+            color: #FFD700;
+        }
+
+        .play-btn {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(11px, 2.5vw, 16px);
+            padding: 16px 32px;
+            background: linear-gradient(180deg, #DD0000 0%, #AA0000 100%);
+            color: #FFF;
+            border: 4px solid #FFD700;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px #000;
+            text-shadow: 2px 2px 0px #000;
+            letter-spacing: 2px;
+            transition: all 0.15s ease;
+            margin-top: 10px;
+        }
+
+        .play-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #000;
+            background: linear-gradient(180deg, #FF2222 0%, #CC0000 100%);
+        }
+
+        .play-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000;
+        }
+
+        .level-complete-msg {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(8px, 1.5vw, 11px);
+            color: #00FF66;
+            text-shadow: 2px 2px 0px #000;
+            margin: 16px 0;
+            line-height: 1.8;
+        }
+
+        /* Footer */
+        .game-footer {
+            position: fixed;
+            bottom: 4px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 7px;
+            color: rgba(255,255,255,0.25);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Mobile detection — show touch controls on any touch device */
+        @media (pointer: coarse) {
+            .touch-controls { display: block !important; }
+            .game-footer { display: none; }
+            .hud { top: 36px; padding: 6px 10px; }
+            .hud-item { font-size: clamp(6px, 1.3vw, 9px); }
+            .game-nav { padding: 6px 10px; }
+            .game-nav .back-link { font-size: 8px; }
+            .game-nav .game-title { font-size: 8px; }
+        }
+
+        @media (max-width: 768px) {
+            .touch-controls { display: block !important; }
+            .game-footer { display: none; }
+        }
+
+        @media (hover: hover) and (pointer: fine) and (min-width: 769px) {
+            .touch-controls { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="game-nav">
+        <a href="../" class="back-link">&#8592; BACK TO EDUCATIONAL</a>
+        <span class="game-title">MATH OBBY</span>
+    </nav>
+
+    <!-- HUD -->
+    <div class="hud">
+        <div class="hud-item hud-lives" id="hudLives"></div>
+        <div class="hud-item hud-level" id="hudLevel">LEVEL 1</div>
+        <div class="hud-item hud-score" id="hudScore">SCORE: 0</div>
+        <div class="hud-item hud-timer" id="hudTimer">0:00</div>
+    </div>
+
+    <!-- Game Canvas -->
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <!-- Math Gate Modal -->
+    <div class="math-modal" id="mathModal">
+        <div class="math-box">
+            <h2>MATH GATE</h2>
+            <div class="gate-label" id="gateLabel">SOLVE TO PASS</div>
+            <div class="math-question" id="mathQuestion">12 + 7 = ?</div>
+            <div class="math-answers" id="mathAnswers"></div>
+        </div>
+    </div>
+
+    <!-- Start Screen -->
+    <div class="screen-overlay active" id="startScreen">
+        <div class="screen-box">
+            <h1>MATH OBBY</h1>
+            <div class="subtitle">JUMP, RUN & SOLVE!</div>
+            <div class="info">
+                ARROW KEYS / WASD TO MOVE<br>
+                SPACE TO JUMP (TAP TWICE TO DOUBLE JUMP!)<br><br>
+                SOLVE MATH GATES TO PROGRESS<br>
+                LV1: SUBTRACTION | LV2: TIMES & DIVIDE<br>
+                LV3: MEGA MULTIPLY | LV4: BRUTAL DIVISION<br>
+                LV5: COMPLEX EXPRESSIONS!
+            </div>
+            <button class="play-btn" id="startBtn">START GAME</button>
+        </div>
+    </div>
+
+    <!-- Level Complete Screen -->
+    <div class="screen-overlay" id="levelScreen">
+        <div class="screen-box">
+            <h1 id="levelTitle">LEVEL COMPLETE!</h1>
+            <div class="level-complete-msg" id="levelMsg"></div>
+            <div class="stats" id="levelStats"></div>
+            <button class="play-btn" id="nextLevelBtn">NEXT LEVEL</button>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div class="screen-overlay" id="gameOverScreen">
+        <div class="screen-box">
+            <h1 id="gameOverTitle">GAME OVER</h1>
+            <div class="stats" id="gameOverStats"></div>
+            <button class="play-btn" id="restartBtn">TRY AGAIN</button>
+        </div>
+    </div>
+
+    <!-- Touch Controls -->
+    <div class="touch-controls" id="touchControls">
+        <div class="touch-row">
+            <div class="touch-dpad">
+                <div class="touch-btn" id="touchLeft">&#9664;<span class="touch-btn-label">LEFT</span></div>
+                <div class="touch-btn" id="touchRight">&#9654;<span class="touch-btn-label">RIGHT</span></div>
+            </div>
+            <div class="touch-btn touch-jump" id="touchJump">JUMP<span class="touch-jump-hint">TAP 2x</span></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="game-footer">&copy; 2026 Alex Games. All Rights Reserved.</div>
+
+    <script>
+    // ============================================
+    //  MATH OBBY - GAME ENGINE
+    // ============================================
+    (function() {
+        'use strict';
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // ---- CONSTANTS ----
+        const TILE = 32;
+        const GRAVITY = 0.55;
+        const JUMP_FORCE = -11.5;
+        const MOVE_SPEED = 3.8;
+        const FRICTION = 0.82;
+        const MAX_FALL = 12;
+
+        // ---- GAME STATE ----
+        let W, H;
+        let gameState = 'start'; // start, playing, math, levelComplete, gameOver, win
+        let score = 0;
+        let lives = 3;
+        let currentLevel = 0;
+        let timerStart = 0;
+        let timerElapsed = 0;
+        let cameraX = 0;
+        let cameraShake = 0;
+        let questionsCorrect = 0;
+        let questionsWrong = 0;
+        let levelStartScore = 0;
+
+        // ---- PLAYER ----
+        const player = {
+            x: 80, y: 0, vx: 0, vy: 0,
+            w: 22, h: 28,
+            onGround: false,
+            facing: 1,
+            frame: 0,
+            frameTimer: 0,
+            dead: false,
+            respawnX: 80,
+            respawnY: 0,
+            invincible: 0,
+            hasDoubleJumped: false,
+            jumpPressed: false
+        };
+
+        // ---- INPUT ----
+        const keys = {};
+        let prevKeys = {};
+        let touchState = { left: false, right: false, jump: false };
+
+        // ---- PARTICLES ----
+        let particles = [];
+
+        // ---- LEVEL DATA ----
+        let platforms = [];
+        let spikes = [];
+        let gates = [];
+        let coins = [];
+        let movingPlatforms = [];
+        let decorations = [];
+        let levelWidth = 0;
+        let flagX = 0;
+
+        // ---- PARALLAX ----
+        let clouds = [];
+        let mountains = [];
+
+        // ============================================
+        //  LEVEL GENERATOR
+        // ============================================
+        const LEVEL_CONFIG = [
+            { name: 'SUBTRACTION SPRINT', type: 'subtract', gates: 3, color: '#22AA44',
+              sky: ['#001833','#002244','#003366','#004488'] },
+            { name: 'TIMES & DIVIDE', type: 'timesdivide', gates: 3, color: '#DD8800',
+              sky: ['#0A0020','#1A0040','#2A1060','#3A2080'] },
+            { name: 'MEGA MULTIPLY', type: 'hardmultiply', gates: 4, color: '#CC2244',
+              sky: ['#100005','#200010','#330015','#550022'] },
+            { name: 'BRUTAL DIVISION', type: 'harddivide', gates: 4, color: '#6644CC',
+              sky: ['#000810','#001020','#002040','#003060'] },
+            { name: 'MATH MASTER', type: 'complex', gates: 4, color: '#FF4400',
+              sky: ['#0C0000','#1A0000','#2A0505','#3A0A0A'] }
+        ];
+
+        function generateLevel(lvlIndex) {
+            const cfg = LEVEL_CONFIG[lvlIndex];
+            platforms = [];
+            spikes = [];
+            gates = [];
+            coins = [];
+            movingPlatforms = [];
+            decorations = [];
+
+            const sections = cfg.gates + 2; // intro + gate sections + ending
+            const sectionWidth = 800;
+            levelWidth = sections * sectionWidth;
+            flagX = levelWidth - 120;
+
+            // Ground & Starting platform
+            platforms.push({ x: 0, y: H - TILE, w: 260, h: TILE, type: 'ground' });
+
+            let px = 260;
+            let baseY = H - TILE;
+            let gateIndex = 0;
+
+            for (let s = 0; s < sections; s++) {
+                const sectionStart = px;
+                const sectionEnd = sectionStart + sectionWidth;
+                const isGateSection = s > 0 && s <= cfg.gates;
+
+                // Generate platforms in this section
+                let cx = sectionStart + 60;
+                while (cx < sectionEnd - 160) {
+                    const pWidth = 80 + Math.random() * 120;
+                    const variation = Math.random();
+
+                    if (variation < 0.2 && cx > sectionStart + 200) {
+                        // Gap with no platform - just coins to lure
+                        const coinY = baseY - 60 - Math.random() * 40;
+                        coins.push({ x: cx + 20, y: coinY, collected: false });
+                        cx += 80;
+                        continue;
+                    }
+
+                    let py;
+                    if (variation < 0.4) {
+                        py = baseY - 40 - Math.random() * 60;
+                    } else if (variation < 0.6) {
+                        py = baseY;
+                    } else if (variation < 0.8) {
+                        py = baseY - 80 - Math.random() * 50;
+                    } else {
+                        // Moving platform
+                        py = baseY - 50 - Math.random() * 80;
+                        movingPlatforms.push({
+                            x: cx, y: py, w: 80, h: 12,
+                            startX: cx, endX: cx + 60 + Math.random() * 80,
+                            speed: 0.8 + Math.random() * 0.7,
+                            dir: 1, vertical: Math.random() > 0.5,
+                            startY: py, endY: py - 40 - Math.random() * 40
+                        });
+                        cx += 140;
+                        continue;
+                    }
+
+                    platforms.push({ x: cx, y: py, w: pWidth, h: TILE * 0.5, type: 'normal' });
+
+                    // Add coins above some platforms
+                    if (Math.random() > 0.5) {
+                        coins.push({ x: cx + pWidth / 2 - 8, y: py - 30, collected: false });
+                    }
+
+                    // Occasionally add spikes
+                    if (Math.random() > 0.7 && pWidth > 100) {
+                        spikes.push({ x: cx + 30 + Math.random() * (pWidth - 60), y: py - 16, w: 16, h: 16 });
+                    }
+
+                    cx += pWidth + 40 + Math.random() * 60;
+                }
+
+                // Place gate
+                if (isGateSection) {
+                    const gateX = sectionEnd - 120;
+                    const gatePlatY = baseY - 10;
+                    platforms.push({ x: gateX - 40, y: gatePlatY, w: 160, h: TILE * 0.5, type: 'gate' });
+                    gates.push({
+                        x: gateX, y: gatePlatY - 64, w: 64, h: 64,
+                        open: false, index: gateIndex,
+                        question: null, triggerX: gateX - 20
+                    });
+                    gateIndex++;
+
+                    // Checkpoint - wider landing before gate
+                    platforms.push({ x: gateX - 140, y: gatePlatY, w: 120, h: TILE * 0.5, type: 'normal' });
+                }
+
+                // Add safe landing after each section
+                platforms.push({ x: sectionEnd - 40, y: baseY, w: 100, h: TILE, type: 'ground' });
+
+                px = sectionEnd;
+            }
+
+            // End platform with flag area
+            platforms.push({ x: flagX - 100, y: baseY, w: 300, h: TILE, type: 'finish' });
+
+            // Generate background
+            clouds = [];
+            for (let i = 0; i < 20; i++) {
+                clouds.push({
+                    x: Math.random() * levelWidth,
+                    y: 40 + Math.random() * (H * 0.35),
+                    w: 40 + Math.random() * 80,
+                    speed: 0.1 + Math.random() * 0.3
+                });
+            }
+
+            mountains = [];
+            for (let i = 0; i < 15; i++) {
+                mountains.push({
+                    x: i * (levelWidth / 15) + Math.random() * 100,
+                    h: 60 + Math.random() * 100,
+                    w: 80 + Math.random() * 120,
+                    shade: Math.random() * 0.3
+                });
+            }
+
+            // Add decorations (small pixel trees/bushes)
+            for (let i = 0; i < 30; i++) {
+                decorations.push({
+                    x: Math.random() * levelWidth,
+                    type: Math.random() > 0.5 ? 'tree' : 'bush'
+                });
+            }
+        }
+
+        // ============================================
+        //  MATH QUESTION GENERATOR
+        // ============================================
+        function randInt(min, max) {
+            return min + Math.floor(Math.random() * (max - min + 1));
+        }
+
+        function generateQuestion(lvlIndex) {
+            const cfg = LEVEL_CONFIG[lvlIndex];
+            let answer, questionText;
+
+            switch(cfg.type) {
+                case 'subtract': {
+                    // Level 1: Simple subtraction (numbers up to 50)
+                    const a = randInt(10, 50);
+                    const b = randInt(1, a - 1);
+                    answer = a - b;
+                    questionText = `${a} - ${b} = ?`;
+                    break;
+                }
+                case 'timesdivide': {
+                    // Level 2: Multiplication or division (small-medium)
+                    if (Math.random() > 0.5) {
+                        const a = randInt(3, 12);
+                        const b = randInt(3, 12);
+                        answer = a * b;
+                        questionText = `${a} × ${b} = ?`;
+                    } else {
+                        const b = randInt(2, 10);
+                        const result = randInt(2, 12);
+                        const a = b * result;
+                        answer = result;
+                        questionText = `${a} ÷ ${b} = ?`;
+                    }
+                    break;
+                }
+                case 'hardmultiply': {
+                    // Level 3: Harder multiplication (bigger numbers)
+                    const variant = Math.random();
+                    if (variant < 0.33) {
+                        const a = randInt(12, 25);
+                        const b = randInt(6, 15);
+                        answer = a * b;
+                        questionText = `${a} × ${b} = ?`;
+                    } else if (variant < 0.66) {
+                        const a = randInt(20, 50);
+                        const b = randInt(3, 9);
+                        answer = a * b;
+                        questionText = `${a} × ${b} = ?`;
+                    } else {
+                        // Two-step: a × b + c
+                        const a = randInt(5, 15);
+                        const b = randInt(5, 12);
+                        const c = randInt(10, 50);
+                        answer = a * b + c;
+                        questionText = `${a} × ${b} + ${c} = ?`;
+                    }
+                    break;
+                }
+                case 'harddivide': {
+                    // Level 4: Harder division with bigger numbers
+                    const variant = Math.random();
+                    if (variant < 0.4) {
+                        const b = randInt(6, 15);
+                        const result = randInt(8, 25);
+                        const a = b * result;
+                        answer = result;
+                        questionText = `${a} ÷ ${b} = ?`;
+                    } else if (variant < 0.7) {
+                        // a × b ÷ c (whole number result)
+                        const c = randInt(3, 8);
+                        const result = randInt(5, 20);
+                        const product = c * result;
+                        const a = randInt(2, 6);
+                        const bVal = product / a;
+                        if (Number.isInteger(bVal) && bVal > 1) {
+                            answer = result;
+                            questionText = `${a} × ${Math.round(bVal)} ÷ ${c} = ?`;
+                        } else {
+                            const b2 = randInt(8, 20);
+                            const r2 = randInt(5, 15);
+                            answer = r2;
+                            questionText = `${b2 * r2} ÷ ${b2} = ?`;
+                        }
+                    } else {
+                        // a ÷ b + c
+                        const b = randInt(4, 12);
+                        const div_result = randInt(5, 15);
+                        const a = b * div_result;
+                        const c = randInt(10, 40);
+                        answer = div_result + c;
+                        questionText = `${a} ÷ ${b} + ${c} = ?`;
+                    }
+                    break;
+                }
+                case 'complex': {
+                    // Level 5: Complex multi-operation expressions
+                    const variant = Math.random();
+                    if (variant < 0.25) {
+                        // (a × b + c) ÷ d
+                        const d = randInt(3, 8);
+                        const result = randInt(10, 50);
+                        const total = d * result;
+                        const a = randInt(5, 15);
+                        const bTimes = randInt(2, 8);
+                        const c = total - (a * bTimes);
+                        if (c > 0 && c < 500) {
+                            answer = result;
+                            questionText = `(${a} × ${bTimes} + ${c}) ÷ ${d} = ?`;
+                        } else {
+                            const x = randInt(100, 500);
+                            const y = randInt(3, 8);
+                            const z = randInt(10, 50);
+                            const div = y;
+                            answer = Math.floor(x / div) + z;
+                            const xAdj = Math.floor(x / div) * div;
+                            questionText = `${xAdj} ÷ ${div} + ${z} = ?`;
+                        }
+                    } else if (variant < 0.5) {
+                        // a + (b × c) ÷ d
+                        const b = randInt(10, 50);
+                        const c = randInt(2, 8);
+                        const d = randInt(2, 5);
+                        const inner = b * c;
+                        const divResult = Math.floor(inner / d);
+                        const innerAdj = divResult * d;
+                        const bAdj = innerAdj / c;
+                        if (Number.isInteger(bAdj) && bAdj > 0) {
+                            const a = randInt(100, 999);
+                            answer = a + divResult;
+                            questionText = `${a} + (${Math.round(bAdj)} × ${c}) ÷ ${d} = ?`;
+                        } else {
+                            const a2 = randInt(200, 800);
+                            const m = randInt(5, 12);
+                            const n = randInt(3, 7);
+                            answer = a2 + m * n;
+                            questionText = `${a2} + ${m} × ${n} = ?`;
+                        }
+                    } else if (variant < 0.75) {
+                        // (a + b) × c - d
+                        const a = randInt(20, 80);
+                        const b = randInt(10, 40);
+                        const c = randInt(2, 5);
+                        const d = randInt(10, 60);
+                        answer = (a + b) * c - d;
+                        questionText = `(${a} + ${b}) × ${c} - ${d} = ?`;
+                    } else {
+                        // a × b + c × d
+                        const a = randInt(10, 50);
+                        const b = randInt(3, 9);
+                        const c = randInt(10, 40);
+                        const d = randInt(2, 7);
+                        answer = a * b + c * d;
+                        questionText = `${a} × ${b} + ${c} × ${d} = ?`;
+                    }
+                    break;
+                }
+            }
+
+            // Generate wrong answers - scale spread to answer size
+            const spread = Math.max(3, Math.floor(Math.abs(answer) * 0.15) + 1);
+            const wrongs = new Set();
+            let attempts = 0;
+            while (wrongs.size < 3 && attempts < 50) {
+                attempts++;
+                let wrong;
+                const offset = randInt(1, spread);
+                if (Math.random() > 0.5) wrong = answer + offset;
+                else wrong = answer - offset;
+                if (wrong < 0) wrong = answer + randInt(1, spread);
+                if (wrong !== answer && wrong >= 0) wrongs.add(wrong);
+            }
+            // Fallback if not enough wrongs
+            while (wrongs.size < 3) {
+                wrongs.add(answer + wrongs.size + 1);
+            }
+
+            const choices = [answer, ...wrongs];
+            for (let i = choices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [choices[i], choices[j]] = [choices[j], choices[i]];
+            }
+
+            return { text: questionText, answer, choices };
+        }
+
+        // ============================================
+        //  PARTICLE SYSTEM
+        // ============================================
+        function spawnParticles(x, y, color, count, spread, life) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x + (Math.random() - 0.5) * spread,
+                    y: y + (Math.random() - 0.5) * spread,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: -Math.random() * 4 - 1,
+                    life: life || 30 + Math.random() * 20,
+                    maxLife: life || 30 + Math.random() * 20,
+                    color: color,
+                    size: 2 + Math.random() * 3
+                });
+            }
+        }
+
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.08;
+                p.life--;
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+        }
+
+        function drawParticles() {
+            for (const p of particles) {
+                const alpha = p.life / p.maxLife;
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(
+                    Math.round(p.x - cameraX),
+                    Math.round(p.y),
+                    Math.round(p.size),
+                    Math.round(p.size)
+                );
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        // ============================================
+        //  RENDERING
+        // ============================================
+        function drawBackground() {
+            const cfg = LEVEL_CONFIG[currentLevel];
+            const sky = cfg.sky;
+
+            // Sky gradient — unique per level
+            const grad = ctx.createLinearGradient(0, 0, 0, H);
+            grad.addColorStop(0, sky[0]);
+            grad.addColorStop(0.35, sky[1]);
+            grad.addColorStop(0.65, sky[2]);
+            grad.addColorStop(1, sky[3]);
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, H);
+
+            // Stars (more on darker levels)
+            const starCount = 60 + currentLevel * 20;
+            ctx.fillStyle = '#FFFFFF';
+            for (let i = 0; i < starCount; i++) {
+                const sx = ((i * 137.5) % W + (cameraX * 0.02) % W + W) % W;
+                const sy = (i * 97.3) % (H * 0.55);
+                const ss = (i % 5 === 0) ? 3 : (i % 3 === 0) ? 2 : 1;
+                const twinkle = Math.sin(Date.now() * 0.003 + i * 1.7);
+                ctx.globalAlpha = 0.2 + twinkle * 0.4;
+                ctx.fillRect(Math.round(sx), Math.round(sy), ss, ss);
+                // Cross-shaped bright stars
+                if (ss === 3) {
+                    ctx.globalAlpha = 0.15 + twinkle * 0.2;
+                    ctx.fillRect(Math.round(sx - 1), Math.round(sy), 5, 1);
+                    ctx.fillRect(Math.round(sx + 1), Math.round(sy - 1), 1, 3);
+                }
+            }
+            ctx.globalAlpha = 1;
+
+            // Nebula glow (later levels get colored nebulae)
+            if (currentLevel >= 2) {
+                const nebColors = [null, null, 'rgba(180,30,60,0.06)', 'rgba(60,30,180,0.06)', 'rgba(200,60,0,0.07)'];
+                const nc = nebColors[currentLevel];
+                if (nc) {
+                    for (let i = 0; i < 4; i++) {
+                        const nx = ((i * 350 + 100) - cameraX * 0.05 + W * 2) % (W * 2);
+                        const ny = 60 + i * 70;
+                        ctx.fillStyle = nc;
+                        ctx.beginPath();
+                        ctx.arc(nx, ny, 120 + i * 30, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            // Mountains — colored per level
+            const mtColors = ['rgba(0,40,80,0.6)', 'rgba(40,10,60,0.6)', 'rgba(60,10,20,0.6)', 'rgba(10,30,60,0.6)', 'rgba(50,15,5,0.6)'];
+            const mtSnow = currentLevel < 3;
+            for (const m of mountains) {
+                const mx = m.x - cameraX * 0.2;
+                if (mx < -m.w - 100 || mx > W + 100) continue;
+                ctx.fillStyle = mtColors[currentLevel];
+                ctx.beginPath();
+                ctx.moveTo(mx - m.w / 2, H - TILE + 10);
+                ctx.lineTo(mx, H - TILE - m.h);
+                ctx.lineTo(mx + m.w / 2, H - TILE + 10);
+                ctx.closePath();
+                ctx.fill();
+
+                // Snow cap (only on earlier levels)
+                if (mtSnow) {
+                    ctx.fillStyle = 'rgba(200, 220, 255, 0.25)';
+                    ctx.beginPath();
+                    ctx.moveTo(mx - m.w * 0.12, H - TILE - m.h + m.h * 0.25);
+                    ctx.lineTo(mx, H - TILE - m.h);
+                    ctx.lineTo(mx + m.w * 0.12, H - TILE - m.h + m.h * 0.25);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                // Lava glow on mountain base for level 5
+                if (currentLevel === 4) {
+                    ctx.fillStyle = 'rgba(255,60,0,0.12)';
+                    ctx.fillRect(Math.round(mx - m.w / 2), Math.round(H - TILE), Math.round(m.w), 10);
+                }
+            }
+
+            // Clouds
+            for (const c of clouds) {
+                const cx2 = ((c.x - cameraX * 0.15) % (levelWidth + 200) + levelWidth + 200) % (levelWidth + 200) - 100;
+                if (cx2 < -c.w - 20 || cx2 > W + 20) continue;
+                const cloudAlpha = currentLevel >= 3 ? 0.08 : 0.18;
+                ctx.fillStyle = `rgba(100, 150, 220, ${cloudAlpha})`;
+                drawPixelCloud(cx2, c.y, c.w);
+            }
+        }
+
+        function drawPixelCloud(x, y, w) {
+            const h = w * 0.35;
+            const s = 6;
+            // Main body
+            for (let px = 0; px < w; px += s) {
+                const cy = y + Math.sin(px / w * Math.PI) * h * 0.3;
+                ctx.fillRect(Math.round(x + px), Math.round(cy), s, Math.round(h * 0.5));
+            }
+            // Top bumps
+            ctx.fillRect(Math.round(x + w * 0.2), Math.round(y - h * 0.2), Math.round(w * 0.3), Math.round(h * 0.3));
+            ctx.fillRect(Math.round(x + w * 0.5), Math.round(y - h * 0.15), Math.round(w * 0.25), Math.round(h * 0.25));
+        }
+
+        // Level-themed platform colors
+        const PLAT_THEMES = [
+            { ground: '#2A5A1A', grass: '#44AA22', dirt: '#1E4012', float: '#3A5A2A', floatTop: '#55882A', edge: '#1A3A0A' },
+            { ground: '#3A2A4A', grass: '#6644AA', dirt: '#2A1A3A', float: '#4A3A5A', floatTop: '#7755BB', edge: '#2A1A3A' },
+            { ground: '#4A1A1A', grass: '#882222', dirt: '#3A0A0A', float: '#5A2A2A', floatTop: '#AA4444', edge: '#3A1010' },
+            { ground: '#1A2A4A', grass: '#2255AA', dirt: '#0A1A3A', float: '#2A3A5A', floatTop: '#4466CC', edge: '#0A1A3A' },
+            { ground: '#3A2A1A', grass: '#AA6622', dirt: '#2A1A0A', float: '#4A3020', floatTop: '#CC7733', edge: '#2A1A0A' }
+        ];
+
+        function drawPlatforms() {
+            const theme = PLAT_THEMES[currentLevel];
+
+            for (const p of platforms) {
+                const px = p.x - cameraX;
+                if (px > W + 20 || px + p.w < -20) continue;
+                const rpx = Math.round(px);
+                const rpy = Math.round(p.y);
+                const rpw = Math.round(p.w);
+                const rph = Math.round(p.h);
+
+                if (p.type === 'ground' || p.type === 'finish') {
+                    // Solid ground with brick pattern
+                    ctx.fillStyle = theme.ground;
+                    ctx.fillRect(rpx, rpy, rpw, rph);
+                    // Grass top with pixel detail
+                    ctx.fillStyle = theme.grass;
+                    ctx.fillRect(rpx, rpy, rpw, 6);
+                    // Grass blades
+                    for (let dx = 0; dx < p.w; dx += 8) {
+                        const bladeH = 3 + Math.sin(dx * 0.5) * 2;
+                        ctx.fillRect(Math.round(px + dx), Math.round(p.y - bladeH), 2, Math.round(bladeH));
+                    }
+                    // Brick/dirt pattern
+                    ctx.fillStyle = theme.dirt;
+                    for (let dy = 10; dy < p.h; dy += 8) {
+                        const offset = (Math.floor(dy / 8) % 2) * 6;
+                        for (let dx = offset; dx < p.w; dx += 14) {
+                            ctx.fillRect(Math.round(px + dx), Math.round(p.y + dy), 10, 5);
+                        }
+                    }
+                    // Bottom edge shadow
+                    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                    ctx.fillRect(rpx, rpy + rph - 2, rpw, 2);
+
+                    // Finish platform special glow
+                    if (p.type === 'finish') {
+                        ctx.fillStyle = 'rgba(255,215,0,0.08)';
+                        ctx.fillRect(rpx, rpy - 30, rpw, 30);
+                    }
+                } else if (p.type === 'gate') {
+                    // Gate platform - animated golden shimmer
+                    ctx.fillStyle = '#554400';
+                    ctx.fillRect(rpx, rpy, rpw, rph);
+                    ctx.fillStyle = '#AA8800';
+                    ctx.fillRect(rpx, rpy, rpw, 4);
+                    // Animated sparkle strip
+                    const t = Date.now() * 0.003;
+                    for (let dx = 0; dx < p.w; dx += 8) {
+                        const bright = Math.sin(t + dx * 0.3) * 0.5 + 0.5;
+                        ctx.globalAlpha = bright;
+                        ctx.fillStyle = '#FFD700';
+                        ctx.fillRect(Math.round(px + dx), rpy + 1, 6, 2);
+                    }
+                    ctx.globalAlpha = 1;
+                    // Side pillars
+                    ctx.fillStyle = '#886600';
+                    ctx.fillRect(rpx, rpy - 8, 6, 8);
+                    ctx.fillRect(rpx + rpw - 6, rpy - 8, 6, 8);
+                    ctx.fillStyle = '#FFD700';
+                    ctx.fillRect(rpx + 1, rpy - 6, 4, 2);
+                    ctx.fillRect(rpx + rpw - 5, rpy - 6, 4, 2);
+                } else {
+                    // Floating platform with better texture
+                    ctx.fillStyle = theme.float;
+                    ctx.fillRect(rpx, rpy, rpw, rph);
+                    // Top highlight
+                    ctx.fillStyle = theme.floatTop;
+                    ctx.fillRect(rpx, rpy, rpw, 4);
+                    // Pixel rivets/bolts
+                    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+                    ctx.fillRect(rpx + 4, rpy + 2, 2, 2);
+                    ctx.fillRect(rpx + rpw - 6, rpy + 2, 2, 2);
+                    // Bottom edge shadow
+                    ctx.fillStyle = theme.edge;
+                    ctx.fillRect(rpx, rpy + rph - 3, rpw, 3);
+                    // Underside shadow
+                    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+                    ctx.fillRect(rpx + 2, rpy + rph, rpw - 4, 3);
+                }
+            }
+
+            // Moving platforms - glowing rails
+            for (const mp of movingPlatforms) {
+                const mpx = mp.x - cameraX;
+                if (mpx > W + 20 || mpx + mp.w < -20) continue;
+                const rmpx = Math.round(mpx);
+                const rmpy = Math.round(mp.y);
+
+                // Glow underneath
+                ctx.fillStyle = 'rgba(100,150,255,0.12)';
+                ctx.fillRect(rmpx - 2, rmpy + Math.round(mp.h), Math.round(mp.w) + 4, 6);
+
+                // Platform body
+                ctx.fillStyle = '#4466AA';
+                ctx.fillRect(rmpx, rmpy, Math.round(mp.w), Math.round(mp.h));
+                // Top shine
+                ctx.fillStyle = '#6688CC';
+                ctx.fillRect(rmpx, rmpy, Math.round(mp.w), 3);
+                // Animated energy line
+                const energyX = ((Date.now() * 0.05) % mp.w);
+                ctx.fillStyle = '#88EEFF';
+                ctx.fillRect(Math.round(mpx + energyX), rmpy + 1, 8, 1);
+                // Side brackets
+                ctx.fillStyle = '#5577BB';
+                ctx.fillRect(rmpx, rmpy, 3, Math.round(mp.h));
+                ctx.fillRect(rmpx + Math.round(mp.w) - 3, rmpy, 3, Math.round(mp.h));
+            }
+        }
+
+        function drawSpikes() {
+            for (const s of spikes) {
+                const sx = s.x - cameraX;
+                if (sx > W + 20 || sx + s.w < -20) continue;
+                const rsx = Math.round(sx);
+                const rsy = Math.round(s.y);
+                const rsw = Math.round(s.w);
+                const rsh = Math.round(s.h);
+
+                // Danger glow underneath
+                ctx.fillStyle = 'rgba(255,0,0,0.15)';
+                ctx.fillRect(rsx - 2, rsy + rsh - 2, rsw + 4, 4);
+
+                // Main spike body
+                ctx.fillStyle = '#CC0000';
+                ctx.beginPath();
+                ctx.moveTo(rsx, rsy + rsh);
+                ctx.lineTo(rsx + rsw / 2, rsy);
+                ctx.lineTo(rsx + rsw, rsy + rsh);
+                ctx.closePath();
+                ctx.fill();
+
+                // Metallic highlight
+                ctx.fillStyle = '#FF6644';
+                ctx.beginPath();
+                ctx.moveTo(rsx + 2, rsy + rsh);
+                ctx.lineTo(rsx + rsw / 2, rsy + 2);
+                ctx.lineTo(rsx + rsw / 2, rsy + rsh);
+                ctx.closePath();
+                ctx.fill();
+
+                // Sharp tip shine
+                ctx.fillStyle = '#FFAA88';
+                ctx.fillRect(rsx + rsw / 2 - 1, rsy, 2, 3);
+
+                // Animated danger pulse
+                const pulse = Math.sin(Date.now() * 0.006 + s.x) * 0.2 + 0.2;
+                ctx.globalAlpha = pulse;
+                ctx.fillStyle = '#FF0000';
+                ctx.beginPath();
+                ctx.moveTo(rsx - 1, rsy + rsh + 1);
+                ctx.lineTo(rsx + rsw / 2, rsy - 2);
+                ctx.lineTo(rsx + rsw + 1, rsy + rsh + 1);
+                ctx.closePath();
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        function drawGates() {
+            const gateColors = ['#22CC44','#DD8800','#CC2244','#6644CC','#FF4400'];
+            const gateColor = gateColors[currentLevel];
+
+            for (const g of gates) {
+                const gx = g.x - cameraX;
+                if (gx > W + 50 || gx + g.w < -50) continue;
+                const rgx = Math.round(gx);
+                const rgy = Math.round(g.y);
+
+                if (g.open) {
+                    // Open gate - green glow
+                    ctx.fillStyle = 'rgba(0,255,100,0.08)';
+                    ctx.fillRect(rgx - 10, rgy - 10, g.w + 20, g.h + 20);
+                    ctx.strokeStyle = '#00FF66';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(rgx, rgy, g.w, g.h);
+                    // Animated checkmark
+                    ctx.fillStyle = '#00FF66';
+                    ctx.font = '22px "Press Start 2P"';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('✓', rgx + g.w / 2, rgy + g.h / 2 + 7);
+                    // Open sparkles
+                    if (Math.random() > 0.9) {
+                        spawnParticles(g.x + g.w / 2, g.y + g.h / 2, '#00FF66', 1, 20, 15);
+                    }
+                } else {
+                    // Closed gate - colored energy barrier
+                    const glow = 0.5 + Math.sin(Date.now() * 0.004) * 0.3;
+
+                    // Outer glow
+                    ctx.fillStyle = gateColor + '15';
+                    ctx.fillRect(rgx - 8, rgy - 8, g.w + 16, g.h + 16);
+
+                    // Gate fill
+                    ctx.globalAlpha = glow;
+                    ctx.fillStyle = gateColor;
+                    ctx.fillRect(rgx, rgy, g.w, g.h);
+                    ctx.globalAlpha = 1;
+
+                    // Border with double line
+                    ctx.strokeStyle = gateColor;
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(rgx, rgy, g.w, g.h);
+                    ctx.strokeStyle = '#FFD700';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(rgx + 3, rgy + 3, g.w - 6, g.h - 6);
+
+                    // Corner decorations
+                    ctx.fillStyle = '#FFD700';
+                    const cs = 5;
+                    ctx.fillRect(rgx, rgy, cs, cs);
+                    ctx.fillRect(rgx + g.w - cs, rgy, cs, cs);
+                    ctx.fillRect(rgx, rgy + g.h - cs, cs, cs);
+                    ctx.fillRect(rgx + g.w - cs, rgy + g.h - cs, cs, cs);
+
+                    // Question mark with shadow
+                    ctx.fillStyle = '#000';
+                    ctx.font = '24px "Press Start 2P"';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('?', rgx + g.w / 2 + 2, rgy + g.h / 2 + 2);
+                    ctx.fillStyle = '#FFF';
+                    ctx.fillText('?', rgx + g.w / 2, rgy + g.h / 2);
+
+                    // Energy beam upward
+                    for (let ly = g.y; ly > g.y - 250; ly -= 10) {
+                        const la = 1 - (g.y - ly) / 250;
+                        ctx.globalAlpha = la * 0.25;
+                        ctx.fillStyle = gateColor;
+                        const beamW = 4 + (g.y - ly) * 0.02;
+                        ctx.fillRect(Math.round(gx + g.w / 2 - beamW / 2), Math.round(ly), Math.round(beamW), 6);
+                    }
+                    ctx.globalAlpha = 1;
+
+                    // Floating particles around gate
+                    if (Math.random() > 0.92) {
+                        spawnParticles(g.x + g.w / 2, g.y + Math.random() * g.h, gateColor, 1, 30, 25);
+                    }
+                }
+            }
+            ctx.textBaseline = 'alphabetic';
+        }
+
+        function drawCoins() {
+            for (const c of coins) {
+                if (c.collected) continue;
+                const cx = c.x - cameraX;
+                if (cx > W + 20 || cx < -20) continue;
+                const bounce = Math.sin(Date.now() * 0.005 + c.x) * 3;
+                const by = c.y + bounce;
+                const rcx = Math.round(cx);
+                const rcy = Math.round(by);
+
+                // Coin glow
+                ctx.fillStyle = 'rgba(255,215,0,0.15)';
+                ctx.fillRect(rcx - 2, rcy - 2, 20, 20);
+
+                // Coin body (spinning effect via width)
+                const spin = Math.abs(Math.sin(Date.now() * 0.004 + c.x * 0.1));
+                const coinW = Math.max(4, Math.round(14 * spin));
+                const coinX = rcx + 2 + Math.round((14 - coinW) / 2);
+
+                ctx.fillStyle = '#FFD700';
+                ctx.fillRect(coinX, rcy + 2, coinW, 12);
+                // Inner shine
+                if (coinW > 6) {
+                    ctx.fillStyle = '#FFEE66';
+                    ctx.fillRect(coinX + 2, rcy + 3, Math.max(1, coinW - 4), 10);
+                    // Dollar/star symbol
+                    if (coinW > 10) {
+                        ctx.fillStyle = '#CC9900';
+                        ctx.fillRect(coinX + Math.floor(coinW / 2) - 1, rcy + 5, 2, 6);
+                        ctx.fillRect(coinX + Math.floor(coinW / 2) - 2, rcy + 6, 4, 1);
+                        ctx.fillRect(coinX + Math.floor(coinW / 2) - 2, rcy + 9, 4, 1);
+                    }
+                }
+
+                // Sparkle
+                if (Math.random() > 0.96) {
+                    spawnParticles(c.x + 8, c.y + 8, '#FFEE66', 1, 8, 12);
+                }
+            }
+        }
+
+        function drawFlag() {
+            const fx = flagX - cameraX;
+            if (fx > W + 60 || fx < -60) return;
+            const baseY = H - TILE;
+
+            // Glow circle around flag
+            const glowPulse = 0.3 + Math.sin(Date.now() * 0.003) * 0.15;
+            ctx.fillStyle = `rgba(255,215,0,${glowPulse})`;
+            ctx.beginPath();
+            ctx.arc(Math.round(fx + 14), Math.round(baseY - 40), 35, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Pole with metallic effect
+            ctx.fillStyle = '#999';
+            ctx.fillRect(Math.round(fx + 6), Math.round(baseY - 90), 5, 90);
+            ctx.fillStyle = '#BBB';
+            ctx.fillRect(Math.round(fx + 7), Math.round(baseY - 90), 2, 90);
+            // Pole top ball
+            ctx.fillStyle = '#FFD700';
+            ctx.fillRect(Math.round(fx + 5), Math.round(baseY - 94), 7, 6);
+            ctx.fillStyle = '#FFEE66';
+            ctx.fillRect(Math.round(fx + 6), Math.round(baseY - 93), 3, 3);
+
+            // Flag with wave animation
+            const wave = Math.sin(Date.now() * 0.004) * 4;
+            const wave2 = Math.sin(Date.now() * 0.006 + 1) * 2;
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.moveTo(Math.round(fx + 11), Math.round(baseY - 88));
+            ctx.lineTo(Math.round(fx + 45 + wave), Math.round(baseY - 75 + wave2));
+            ctx.lineTo(Math.round(fx + 42 + wave * 0.7), Math.round(baseY - 62 + wave2 * 0.5));
+            ctx.lineTo(Math.round(fx + 11), Math.round(baseY - 56));
+            ctx.closePath();
+            ctx.fill();
+            // Flag stripe
+            ctx.fillStyle = '#FFAA00';
+            ctx.beginPath();
+            ctx.moveTo(Math.round(fx + 11), Math.round(baseY - 76));
+            ctx.lineTo(Math.round(fx + 40 + wave * 0.8), Math.round(baseY - 72 + wave2 * 0.7));
+            ctx.lineTo(Math.round(fx + 38 + wave * 0.6), Math.round(baseY - 66 + wave2 * 0.4));
+            ctx.lineTo(Math.round(fx + 11), Math.round(baseY - 66));
+            ctx.closePath();
+            ctx.fill();
+            // Star on flag
+            ctx.fillStyle = '#FFF';
+            ctx.font = '9px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText('★', Math.round(fx + 26 + wave * 0.5), Math.round(baseY - 69 + wave2 * 0.5));
+
+            // Sparkle particles around flag
+            if (Math.random() > 0.85) {
+                spawnParticles(flagX + 20, baseY - 70, '#FFD700', 1, 30, 25);
+            }
+        }
+
+        function drawPlayer() {
+            if (player.dead) return;
+
+            const px = player.x - cameraX;
+            const py = player.y;
+
+            // Invincibility flash
+            if (player.invincible > 0 && Math.floor(player.invincible / 4) % 2 === 0) return;
+
+            ctx.save();
+            ctx.translate(Math.round(px + player.w / 2), Math.round(py + player.h / 2));
+            if (player.facing < 0) ctx.scale(-1, 1);
+            ctx.translate(-player.w / 2, -player.h / 2);
+
+            // Cape (flutters!)
+            const capeWave = Math.sin(Date.now() * 0.008 + player.frame * 0.2) * 3;
+            ctx.fillStyle = '#DD2200';
+            ctx.beginPath();
+            ctx.moveTo(2, 10);
+            ctx.lineTo(-4 + capeWave, 22);
+            ctx.lineTo(6, 20);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#BB1800';
+            ctx.beginPath();
+            ctx.moveTo(2, 12);
+            ctx.lineTo(-2 + capeWave, 20);
+            ctx.lineTo(5, 19);
+            ctx.closePath();
+            ctx.fill();
+
+            // Body (shirt)
+            ctx.fillStyle = '#3388FF';
+            ctx.fillRect(2, 8, 18, 14);
+            // Shirt detail (collar)
+            ctx.fillStyle = '#55AAFF';
+            ctx.fillRect(6, 8, 10, 3);
+            // Belt
+            ctx.fillStyle = '#AA7700';
+            ctx.fillRect(3, 19, 16, 3);
+            ctx.fillStyle = '#FFD700';
+            ctx.fillRect(9, 19, 4, 3); // buckle
+
+            // Head
+            ctx.fillStyle = '#FFCC88';
+            ctx.fillRect(4, 0, 14, 12);
+            // Cheek blush
+            ctx.fillStyle = 'rgba(255,100,100,0.3)';
+            ctx.fillRect(13, 7, 3, 2);
+
+            // Eyes
+            ctx.fillStyle = '#000';
+            const blink = Math.sin(Date.now() * 0.003) > 0.95;
+            if (!blink) {
+                ctx.fillRect(12, 3, 3, 4);
+                // Eye white
+                ctx.fillStyle = '#FFF';
+                ctx.fillRect(12, 3, 2, 2);
+                // Pupil
+                ctx.fillStyle = '#2244AA';
+                ctx.fillRect(12, 4, 2, 2);
+            } else {
+                ctx.fillRect(12, 5, 3, 1);
+            }
+
+            // Hair
+            ctx.fillStyle = '#553311';
+            ctx.fillRect(4, -1, 14, 4);
+            ctx.fillRect(2, -1, 4, 6);
+            ctx.fillRect(16, 0, 3, 3);
+            // Hair highlight
+            ctx.fillStyle = '#774422';
+            ctx.fillRect(6, -1, 4, 2);
+
+            // Backpack (small)
+            ctx.fillStyle = '#226622';
+            ctx.fillRect(-1, 10, 5, 8);
+            ctx.fillStyle = '#338833';
+            ctx.fillRect(-1, 10, 5, 3);
+
+            // Arms
+            ctx.fillStyle = '#FFCC88';
+            if (Math.abs(player.vx) > 0.3) {
+                const armFrame = Math.floor(player.frame / 6) % 2;
+                ctx.fillRect(18, 10 + armFrame * 2, 4, 6);
+            } else {
+                ctx.fillRect(18, 12, 4, 6);
+            }
+
+            // Legs (animated)
+            ctx.fillStyle = '#2255AA';
+            if (!player.onGround) {
+                ctx.fillRect(3, 22, 6, 5);
+                ctx.fillRect(13, 22, 6, 5);
+            } else if (Math.abs(player.vx) > 0.3) {
+                const legFrame = Math.floor(player.frame / 5) % 4;
+                const legOffsets = [[0,2],[1,0],[2,1],[0,2]];
+                ctx.fillRect(3, 22 + legOffsets[legFrame][0], 6, 5);
+                ctx.fillRect(13, 22 + legOffsets[legFrame][1], 6, 5);
+            } else {
+                ctx.fillRect(4, 22, 6, 5);
+                ctx.fillRect(12, 22, 6, 5);
+            }
+
+            // Shoes
+            ctx.fillStyle = '#DD0000';
+            if (!player.onGround) {
+                ctx.fillRect(2, 26, 8, 3);
+                ctx.fillRect(12, 26, 8, 3);
+            } else {
+                ctx.fillRect(3, 26, 8, 3);
+                ctx.fillRect(11, 26, 8, 3);
+            }
+            // Shoe sole
+            ctx.fillStyle = '#880000';
+            ctx.fillRect(3, 28, 8, 1);
+            ctx.fillRect(11, 28, 8, 1);
+
+            ctx.restore();
+
+            // Double jump ring effect
+            if (!player.onGround && player.hasDoubleJumped) {
+                const ringAlpha = Math.max(0, 0.4 - player.vy * 0.03);
+                if (ringAlpha > 0) {
+                    ctx.save();
+                    ctx.globalAlpha = ringAlpha;
+                    ctx.strokeStyle = '#88EEFF';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.ellipse(
+                        Math.round(player.x - cameraX + player.w / 2),
+                        Math.round(player.y + player.h),
+                        12, 5, 0, 0, Math.PI * 2
+                    );
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+
+            // Jump trail particles
+            if (!player.onGround && player.vy < -2) {
+                if (Math.random() > 0.4) {
+                    const trailColor = player.hasDoubleJumped
+                        ? ['#88EEFF', '#FFD700', '#AAEEFF'][Math.floor(Math.random() * 3)]
+                        : ['#88BBFF', '#AADDFF', '#55AAFF'][Math.floor(Math.random() * 3)];
+                    spawnParticles(player.x + player.w / 2, player.y + player.h, trailColor, 1, 10, 18);
+                }
+            }
+            // Run dust
+            if (player.onGround && Math.abs(player.vx) > 2) {
+                if (Math.random() > 0.5) {
+                    spawnParticles(player.x + (player.facing < 0 ? player.w : 0), player.y + player.h, '#AA9977', 2, 6, 14);
+                }
+            }
+            // Landing impact
+            if (player.onGround && player.vy === 0 && player._wasAirborne) {
+                spawnParticles(player.x + player.w / 2, player.y + player.h, '#CCBB99', 5, 16, 12);
+            }
+            player._wasAirborne = !player.onGround;
+        }
+
+        function drawDecorations() {
+            const treeColors = [
+                ['#1A3A0A','#226622','#338833'], // green
+                ['#2A1A3A','#443388','#5544AA'], // purple
+                ['#3A1010','#662222','#883333'], // red/dead
+                ['#0A1A3A','#224488','#3366AA'], // blue crystal
+                ['#2A1A0A','#553311','#774422']  // brown/burnt
+            ];
+            const tc = treeColors[currentLevel];
+
+            for (const d of decorations) {
+                const dx = d.x - cameraX * 0.9;
+                if (dx > W + 30 || dx < -30) continue;
+                const gy = H - TILE;
+                const rdx = Math.round(dx);
+
+                if (d.type === 'tree') {
+                    // Trunk
+                    ctx.fillStyle = tc[0];
+                    ctx.fillRect(rdx + 6, Math.round(gy - 28), 6, 28);
+                    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+                    ctx.fillRect(rdx + 7, Math.round(gy - 28), 2, 28);
+                    // Canopy layers
+                    ctx.fillStyle = tc[1];
+                    ctx.fillRect(rdx - 2, Math.round(gy - 42), 22, 18);
+                    ctx.fillStyle = tc[2];
+                    ctx.fillRect(rdx + 1, Math.round(gy - 54), 16, 16);
+                    ctx.fillRect(rdx + 4, Math.round(gy - 60), 10, 10);
+                    // Highlight dots
+                    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+                    ctx.fillRect(rdx + 3, Math.round(gy - 50), 2, 2);
+                    ctx.fillRect(rdx + 10, Math.round(gy - 44), 2, 2);
+
+                    // Level 5: fire/embers on trees
+                    if (currentLevel === 4 && Math.random() > 0.97) {
+                        spawnParticles(dx + 9, gy - 50, '#FF6600', 1, 8, 20);
+                    }
+                } else {
+                    // Bush
+                    ctx.fillStyle = tc[1];
+                    ctx.fillRect(rdx, Math.round(gy - 10), 18, 10);
+                    ctx.fillStyle = tc[2];
+                    ctx.fillRect(rdx + 2, Math.round(gy - 16), 14, 10);
+                    ctx.fillRect(rdx + 5, Math.round(gy - 20), 8, 6);
+                    // Berry/detail
+                    if (currentLevel < 3) {
+                        ctx.fillStyle = '#CC3333';
+                        ctx.fillRect(rdx + 6, Math.round(gy - 14), 3, 3);
+                        ctx.fillRect(rdx + 11, Math.round(gy - 12), 3, 3);
+                    }
+                }
+            }
+
+            // Level 5: floating embers
+            if (currentLevel === 4) {
+                ctx.fillStyle = 'rgba(255,100,0,0.4)';
+                for (let i = 0; i < 12; i++) {
+                    const ex = ((i * 251 + Date.now() * 0.015) % W);
+                    const ey = H - 60 - Math.sin(Date.now() * 0.002 + i * 3) * 50;
+                    ctx.fillRect(Math.round(ex), Math.round(ey), 2, 2);
+                }
+            }
+        }
+
+        // ============================================
+        //  GAME LOGIC
+        // ============================================
+        function updatePlayer() {
+            if (player.dead) return;
+
+            // Input
+            const left = keys['ArrowLeft'] || keys['KeyA'] || touchState.left;
+            const right = keys['ArrowRight'] || keys['KeyD'] || touchState.right;
+            const jump = keys['Space'] || keys['ArrowUp'] || keys['KeyW'] || touchState.jump;
+
+            if (left) {
+                player.vx -= MOVE_SPEED * 0.3;
+                player.facing = -1;
+            }
+            if (right) {
+                player.vx += MOVE_SPEED * 0.3;
+                player.facing = 1;
+            }
+
+            player.vx *= FRICTION;
+            if (Math.abs(player.vx) > MOVE_SPEED) player.vx = MOVE_SPEED * Math.sign(player.vx);
+            if (Math.abs(player.vx) < 0.1) player.vx = 0;
+
+            // Jump (edge-triggered for double jump support)
+            const jumpWasPressed = player.jumpPressed;
+            player.jumpPressed = jump;
+            const jumpJustPressed = jump && !jumpWasPressed;
+
+            if (jumpJustPressed) {
+                if (player.onGround) {
+                    // First jump from ground
+                    player.vy = JUMP_FORCE;
+                    player.onGround = false;
+                    player.hasDoubleJumped = false;
+                    spawnParticles(player.x + player.w / 2, player.y + player.h, '#FFFFFF', 6, 12, 18);
+                } else if (!player.hasDoubleJumped) {
+                    // Double jump in air
+                    player.vy = JUMP_FORCE * 0.85;
+                    player.hasDoubleJumped = true;
+                    spawnParticles(player.x + player.w / 2, player.y + player.h, '#88EEFF', 10, 16, 22);
+                    spawnParticles(player.x + player.w / 2, player.y + player.h, '#FFD700', 4, 10, 16);
+                }
+            }
+
+            // Gravity
+            player.vy += GRAVITY;
+            if (player.vy > MAX_FALL) player.vy = MAX_FALL;
+
+            // Move X
+            player.x += player.vx;
+
+            // Collision X
+            for (const p of getAllPlatforms()) {
+                if (rectCollide(player, p)) {
+                    if (player.vx > 0) {
+                        player.x = p.x - player.w;
+                    } else if (player.vx < 0) {
+                        player.x = p.x + p.w;
+                    }
+                    player.vx = 0;
+                }
+            }
+
+            // Move Y
+            player.y += player.vy;
+            player.onGround = false;
+
+            // Collision Y
+            for (const p of getAllPlatforms()) {
+                if (rectCollide(player, p)) {
+                    if (player.vy > 0) {
+                        player.y = p.y - player.h;
+                        player.vy = 0;
+                        player.onGround = true;
+                        player.hasDoubleJumped = false;
+                    } else if (player.vy < 0) {
+                        player.y = p.y + p.h;
+                        player.vy = 0;
+                    }
+                }
+            }
+
+            // Moving platform logic
+            for (const mp of movingPlatforms) {
+                if (player.vy >= 0 &&
+                    player.x + player.w > mp.x && player.x < mp.x + mp.w &&
+                    player.y + player.h >= mp.y && player.y + player.h <= mp.y + mp.h + 6) {
+                    player.y = mp.y - player.h;
+                    player.vy = 0;
+                    player.onGround = true;
+                    player.hasDoubleJumped = false;
+                    // Move with platform
+                    if (!mp.vertical) player.x += mp.speed * mp.dir;
+                }
+            }
+
+            // Fall death
+            if (player.y > H + 50) {
+                playerDie();
+                return;
+            }
+
+            // Spike collision
+            if (player.invincible <= 0) {
+                for (const s of spikes) {
+                    if (player.x + player.w > s.x + 3 && player.x < s.x + s.w - 3 &&
+                        player.y + player.h > s.y + 4 && player.y < s.y + s.h) {
+                        playerDie();
+                        return;
+                    }
+                }
+            }
+
+            // Coin collection
+            for (const c of coins) {
+                if (!c.collected &&
+                    player.x + player.w > c.x && player.x < c.x + 16 &&
+                    player.y + player.h > c.y && player.y < c.y + 16) {
+                    c.collected = true;
+                    score += 50;
+                    spawnParticles(c.x + 8, c.y + 8, '#FFD700', 8, 10, 20);
+                }
+            }
+
+            // Gate collision
+            for (const g of gates) {
+                if (!g.open &&
+                    player.x + player.w > g.triggerX && player.x < g.triggerX + g.w + 40 &&
+                    player.y + player.h > g.y && player.y < g.y + g.h + 20) {
+                    openMathGate(g);
+                    return;
+                }
+            }
+
+            // Level end
+            if (player.x + player.w > flagX && player.x < flagX + 30) {
+                completeLevel();
+            }
+
+            // Clamp left boundary
+            if (player.x < 0) { player.x = 0; player.vx = 0; }
+
+            // Animation
+            player.frame++;
+            if (player.invincible > 0) player.invincible--;
+        }
+
+        function getAllPlatforms() {
+            return [...platforms, ...gates.filter(g => !g.open)];
+        }
+
+        function rectCollide(a, b) {
+            return a.x + a.w > b.x && a.x < b.x + b.w &&
+                   a.y + a.h > b.y && a.y < b.y + (b.h || TILE);
+        }
+
+        function updateMovingPlatforms() {
+            for (const mp of movingPlatforms) {
+                if (mp.vertical) {
+                    mp.y += mp.speed * mp.dir;
+                    if (mp.y <= mp.endY || mp.y >= mp.startY) mp.dir *= -1;
+                } else {
+                    mp.x += mp.speed * mp.dir;
+                    if (mp.x >= mp.endX || mp.x <= mp.startX) mp.dir *= -1;
+                }
+            }
+        }
+
+        function updateCamera() {
+            const targetX = player.x - W * 0.35;
+            cameraX += (targetX - cameraX) * 0.08;
+            if (cameraX < 0) cameraX = 0;
+            if (cameraX > levelWidth - W) cameraX = Math.max(0, levelWidth - W);
+
+            if (cameraShake > 0) {
+                cameraShake--;
+            }
+        }
+
+        function playerDie() {
+            if (player.invincible > 0) return;
+            lives--;
+            spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#FF4444', 20, 20, 30);
+            cameraShake = 12;
+
+            if (lives <= 0) {
+                gameState = 'gameOver';
+                showGameOver();
+                return;
+            }
+
+            // Respawn at last checkpoint
+            player.x = player.respawnX;
+            player.y = player.respawnY - player.h - 10;
+            player.vx = 0;
+            player.vy = 0;
+            player.invincible = 90;
+            player.dead = false;
+        }
+
+        // ============================================
+        //  MATH GATE LOGIC
+        // ============================================
+        let currentGate = null;
+        let mathAnswered = false;
+
+        function openMathGate(gate) {
+            if (gate.open || gameState === 'math') return;
+            gameState = 'math';
+            currentGate = gate;
+            mathAnswered = false;
+
+            const q = generateQuestion(currentLevel);
+            gate.question = q;
+
+            const cfg = LEVEL_CONFIG[currentLevel];
+            document.getElementById('gateLabel').textContent = `${cfg.name} - GATE ${gate.index + 1}`;
+            document.getElementById('mathQuestion').textContent = q.text;
+
+            const answersDiv = document.getElementById('mathAnswers');
+            answersDiv.innerHTML = '';
+
+            q.choices.forEach((choice, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'math-answer-btn';
+                btn.textContent = choice;
+                btn.addEventListener('click', () => handleAnswer(choice, btn, answersDiv));
+                answersDiv.appendChild(btn);
+            });
+
+            document.getElementById('mathModal').classList.add('active');
+
+            // Stop player
+            player.vx = 0;
+            player.vy = 0;
+        }
+
+        function handleAnswer(choice, btn, container) {
+            if (mathAnswered) return;
+            mathAnswered = true;
+
+            const correct = choice === currentGate.question.answer;
+
+            if (correct) {
+                btn.classList.add('correct');
+                questionsCorrect++;
+                score += 200;
+                currentGate.open = true;
+                // Update respawn checkpoint
+                player.respawnX = currentGate.x - 40;
+                player.respawnY = currentGate.y;
+
+                spawnParticles(player.x + player.w / 2, player.y, '#00FF66', 25, 30, 35);
+
+                setTimeout(() => {
+                    document.getElementById('mathModal').classList.remove('active');
+                    gameState = 'playing';
+                    currentGate = null;
+                }, 600);
+            } else {
+                btn.classList.add('wrong');
+                questionsWrong++;
+                cameraShake = 8;
+
+                // Highlight correct answer
+                const allBtns = container.querySelectorAll('.math-answer-btn');
+                allBtns.forEach(b => {
+                    if (Number(b.textContent) === currentGate.question.answer) {
+                        setTimeout(() => b.classList.add('correct'), 300);
+                    }
+                });
+
+                spawnParticles(player.x + player.w / 2, player.y, '#FF4444', 15, 20, 25);
+
+                setTimeout(() => {
+                    document.getElementById('mathModal').classList.remove('active');
+                    gameState = 'playing';
+                    currentGate = null;
+                    // Push player back
+                    player.x -= 80;
+                    player.vx = -3;
+                    lives--;
+                    if (lives <= 0) {
+                        gameState = 'gameOver';
+                        showGameOver();
+                    }
+                }, 1000);
+            }
+
+            updateHUD();
+        }
+
+        // ============================================
+        //  LEVEL FLOW
+        // ============================================
+        function startGame() {
+            currentLevel = 0;
+            score = 0;
+            lives = 3;
+            questionsCorrect = 0;
+            questionsWrong = 0;
+            loadLevel(0);
+        }
+
+        function loadLevel(lvl) {
+            currentLevel = lvl;
+            generateLevel(lvl);
+            player.x = 80;
+            player.y = H - TILE - player.h - 10;
+            player.vx = 0;
+            player.vy = 0;
+            player.onGround = false;
+            player.dead = false;
+            player.invincible = 0;
+            player.respawnX = 80;
+            player.respawnY = H - TILE;
+            cameraX = 0;
+            particles = [];
+            levelStartScore = score;
+            timerStart = Date.now();
+            gameState = 'playing';
+            updateHUD();
+        }
+
+        function completeLevel() {
+            gameState = 'levelComplete';
+            timerElapsed = Math.floor((Date.now() - timerStart) / 1000);
+            const levelScore = score - levelStartScore;
+
+            // Celebration particles
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    spawnParticles(player.x + player.w / 2, player.y - 20,
+                        ['#FFD700', '#00FFFF', '#FF4444', '#00FF66', '#FF88FF'][i], 20, 50, 40);
+                }, i * 200);
+            }
+
+            const cfg = LEVEL_CONFIG[currentLevel];
+
+            if (currentLevel >= LEVEL_CONFIG.length - 1) {
+                // Won the whole game!
+                document.getElementById('levelTitle').textContent = 'YOU WIN!';
+                document.getElementById('levelMsg').textContent = 'CONGRATULATIONS! YOU BEAT ALL 5 LEVELS!';
+                document.getElementById('nextLevelBtn').textContent = 'PLAY AGAIN';
+                document.getElementById('nextLevelBtn').onclick = () => {
+                    document.getElementById('levelScreen').classList.remove('active');
+                    startGame();
+                };
+            } else {
+                document.getElementById('levelTitle').textContent = 'LEVEL COMPLETE!';
+                document.getElementById('levelMsg').textContent = `${cfg.name} CLEARED!`;
+                document.getElementById('nextLevelBtn').textContent = 'NEXT LEVEL';
+                document.getElementById('nextLevelBtn').onclick = () => {
+                    document.getElementById('levelScreen').classList.remove('active');
+                    loadLevel(currentLevel + 1);
+                };
+            }
+
+            document.getElementById('levelStats').innerHTML =
+                `<div class="stat-line">SCORE: <span>${score}</span></div>` +
+                `<div class="stat-line">LEVEL SCORE: <span>+${levelScore}</span></div>` +
+                `<div class="stat-line">TIME: <span>${formatTime(timerElapsed)}</span></div>` +
+                `<div class="stat-line">LIVES: <span>${'❤️'.repeat(lives)}</span></div>`;
+
+            setTimeout(() => {
+                document.getElementById('levelScreen').classList.add('active');
+            }, 1200);
+        }
+
+        function showGameOver() {
+            timerElapsed = Math.floor((Date.now() - timerStart) / 1000);
+            const title = document.getElementById('gameOverTitle');
+            title.textContent = 'GAME OVER';
+
+            document.getElementById('gameOverStats').innerHTML =
+                `<div class="stat-line">FINAL SCORE: <span>${score}</span></div>` +
+                `<div class="stat-line">LEVEL REACHED: <span>${currentLevel + 1}</span></div>` +
+                `<div class="stat-line">CORRECT: <span>${questionsCorrect}</span> | WRONG: <span style="color:#FF4444">${questionsWrong}</span></div>` +
+                `<div class="stat-line">TIME: <span>${formatTime(timerElapsed)}</span></div>`;
+
+            setTimeout(() => {
+                document.getElementById('gameOverScreen').classList.add('active');
+            }, 500);
+        }
+
+        // ============================================
+        //  HUD
+        // ============================================
+        function updateHUD() {
+            const hearts = '❤️'.repeat(Math.max(0, lives)) + '🖤'.repeat(Math.max(0, 3 - lives));
+            document.getElementById('hudLives').textContent = hearts;
+            document.getElementById('hudScore').textContent = `SCORE: ${score}`;
+            document.getElementById('hudLevel').textContent = `LV${currentLevel + 1}: ${LEVEL_CONFIG[currentLevel].name}`;
+        }
+
+        function updateTimer() {
+            if (gameState !== 'playing') return;
+            const elapsed = Math.floor((Date.now() - timerStart) / 1000);
+            document.getElementById('hudTimer').textContent = formatTime(elapsed);
+        }
+
+        function formatTime(s) {
+            const m = Math.floor(s / 60);
+            const sec = s % 60;
+            return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        // ============================================
+        //  MAIN LOOP
+        // ============================================
+        function resize() {
+            W = window.innerWidth;
+            H = window.innerHeight;
+            canvas.width = W;
+            canvas.height = H;
+        }
+
+        function gameLoop() {
+            if (gameState === 'playing') {
+                updatePlayer();
+                updateMovingPlatforms();
+                updateCamera();
+                updateTimer();
+            }
+
+            updateParticles();
+
+            // Draw
+            ctx.clearRect(0, 0, W, H);
+
+            // Camera shake offset
+            if (cameraShake > 0) {
+                ctx.save();
+                ctx.translate(
+                    (Math.random() - 0.5) * cameraShake * 1.5,
+                    (Math.random() - 0.5) * cameraShake * 1.5
+                );
+            }
+
+            drawBackground();
+            drawDecorations();
+            drawPlatforms();
+            drawSpikes();
+            drawGates();
+            drawCoins();
+            drawFlag();
+            drawPlayer();
+            drawParticles();
+
+            if (cameraShake > 0) {
+                ctx.restore();
+            }
+
+            // Death pit — lava/void effect
+            if (currentLevel >= 3) {
+                // Lava glow for hard levels
+                const lavaGrad = ctx.createLinearGradient(0, H - 30, 0, H);
+                lavaGrad.addColorStop(0, 'rgba(255,60,0,0)');
+                lavaGrad.addColorStop(0.5, 'rgba(255,80,0,0.15)');
+                lavaGrad.addColorStop(1, 'rgba(255,40,0,0.5)');
+                ctx.fillStyle = lavaGrad;
+                ctx.fillRect(0, H - 30, W, 30);
+                // Lava bubbles
+                for (let i = 0; i < 8; i++) {
+                    const bx = ((i * 173 + Date.now() * 0.02) % W);
+                    const by = H - 6 + Math.sin(Date.now() * 0.004 + i * 2) * 4;
+                    ctx.fillStyle = `rgba(255,${100 + Math.sin(i) * 50},0,0.6)`;
+                    ctx.fillRect(Math.round(bx), Math.round(by), 4, 4);
+                }
+            } else {
+                // Simple danger strip
+                const dangerGrad = ctx.createLinearGradient(0, H - 15, 0, H);
+                dangerGrad.addColorStop(0, 'rgba(255,0,0,0)');
+                dangerGrad.addColorStop(1, 'rgba(255,0,0,0.25)');
+                ctx.fillStyle = dangerGrad;
+                ctx.fillRect(0, H - 15, W, 15);
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ============================================
+        //  INPUT HANDLERS
+        // ============================================
+        window.addEventListener('keydown', e => {
+            keys[e.code] = true;
+            if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+                e.preventDefault();
+            }
+        });
+
+        window.addEventListener('keyup', e => {
+            keys[e.code] = false;
+        });
+
+        // Touch controls — direction buttons are hold, jump is tap-based (edge-triggered)
+        function setupTouchHold(id, stateKey) {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            const activate = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                touchState[stateKey] = true;
+                el.classList.add('pressed');
+            };
+            const deactivate = (e) => {
+                e.preventDefault();
+                touchState[stateKey] = false;
+                el.classList.remove('pressed');
+            };
+
+            el.addEventListener('touchstart', activate, { passive: false });
+            el.addEventListener('touchend', deactivate, { passive: false });
+            el.addEventListener('touchcancel', deactivate, { passive: false });
+            el.addEventListener('mousedown', activate);
+            el.addEventListener('mouseup', deactivate);
+            el.addEventListener('mouseleave', deactivate);
+        }
+
+        function setupTouchJump(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            // Each tap sets jump true for one frame then auto-clears
+            // This makes double jump work: tap once = jump, tap again = double jump
+            const onTap = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                touchState.jump = true;
+                el.classList.add('pressed');
+                // Auto-release after 1 frame so next tap is a new press
+                setTimeout(() => {
+                    touchState.jump = false;
+                    el.classList.remove('pressed');
+                }, 80);
+            };
+
+            el.addEventListener('touchstart', onTap, { passive: false });
+            el.addEventListener('mousedown', onTap);
+        }
+
+        setupTouchHold('touchLeft', 'left');
+        setupTouchHold('touchRight', 'right');
+        setupTouchJump('touchJump');
+
+        // ============================================
+        //  SCREEN BUTTONS
+        // ============================================
+        document.getElementById('startBtn').addEventListener('click', () => {
+            document.getElementById('startScreen').classList.remove('active');
+            startGame();
+        });
+
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            document.getElementById('gameOverScreen').classList.remove('active');
+            startGame();
+        });
+
+        // ============================================
+        //  INIT
+        // ============================================
+        window.addEventListener('resize', resize);
+        resize();
+        gameLoop();
+
+        // Prevent default touch behaviors on canvas
+        canvas.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+        canvas.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+
+    })();
+    </script>
+</body>
+</html>
