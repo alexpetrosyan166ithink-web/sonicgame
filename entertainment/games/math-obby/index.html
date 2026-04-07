@@ -501,6 +501,161 @@
         @media (hover: hover) and (pointer: fine) and (min-width: 769px) {
             .touch-controls { display: none !important; }
         }
+
+        /* ============================================
+           SHOP STYLES
+           ============================================ */
+        .shop-btn {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(9px, 2vw, 12px);
+            padding: 12px 24px;
+            background: linear-gradient(180deg, #AA6600 0%, #885500 100%);
+            color: #FFF;
+            border: 3px solid #FFD700;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px #000;
+            text-shadow: 2px 2px 0px #000;
+            letter-spacing: 1px;
+            transition: all 0.15s ease;
+            margin-top: 12px;
+        }
+
+        .shop-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #000;
+            background: linear-gradient(180deg, #CC7700 0%, #AA6600 100%);
+        }
+
+        .shop-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000;
+        }
+
+        .shop-wallet {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(10px, 2vw, 14px);
+            color: #FFD700;
+            text-shadow: 2px 2px 0px #000;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            max-height: 55vh;
+            overflow-y: auto;
+            padding: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: #FFD700 #001155;
+        }
+
+        .shop-grid::-webkit-scrollbar { width: 6px; }
+        .shop-grid::-webkit-scrollbar-track { background: #001155; }
+        .shop-grid::-webkit-scrollbar-thumb { background: #FFD700; border-radius: 3px; }
+
+        .hero-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            background: rgba(0, 34, 100, 0.8);
+            border: 2px solid #0066CC;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: left;
+        }
+
+        .hero-card:hover {
+            border-color: #FFD700;
+            background: rgba(0, 50, 130, 0.9);
+        }
+
+        .hero-card.selected {
+            border-color: #00FF66;
+            background: rgba(0, 60, 30, 0.6);
+            box-shadow: 0 0 12px rgba(0,255,100,0.2);
+        }
+
+        .hero-card.locked {
+            opacity: 0.6;
+        }
+
+        .hero-card.locked:hover {
+            border-color: #FF4444;
+        }
+
+        .hero-preview {
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-preview canvas {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        .hero-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .hero-name {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(7px, 1.5vw, 10px);
+            color: #FFF;
+            text-shadow: 1px 1px 0px #000;
+            margin-bottom: 4px;
+        }
+
+        .hero-perk {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(5px, 1vw, 7px);
+            color: #00FFFF;
+            text-shadow: 1px 1px 0px #000;
+            line-height: 1.6;
+        }
+
+        .hero-price {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(7px, 1.3vw, 9px);
+            color: #FFD700;
+            text-shadow: 1px 1px 0px #000;
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .hero-price.owned {
+            color: #00FF66;
+        }
+
+        .shop-back-btn {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(8px, 1.5vw, 10px);
+            padding: 10px 20px;
+            background: rgba(0,50,100,0.8);
+            color: #FFF;
+            border: 2px solid #0088EE;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 14px;
+            transition: all 0.15s;
+            box-shadow: 3px 3px 0px #000;
+            text-shadow: 1px 1px 0px #000;
+        }
+
+        .shop-back-btn:hover {
+            border-color: #FFD700;
+            transform: translate(-1px,-1px);
+            box-shadow: 4px 4px 0px #000;
+        }
     </style>
 </head>
 <body>
@@ -546,7 +701,20 @@
                 LV3: MEGA MULTIPLY | LV4: BRUTAL DIVISION<br>
                 LV5: COMPLEX EXPRESSIONS!
             </div>
+            <div class="shop-wallet" id="startWallet"></div>
             <button class="play-btn" id="startBtn">START GAME</button>
+            <br>
+            <button class="shop-btn" id="shopBtn">HERO SHOP</button>
+        </div>
+    </div>
+
+    <!-- Shop Screen -->
+    <div class="screen-overlay" id="shopScreen">
+        <div class="screen-box" style="max-width:440px;">
+            <h1 style="font-size:clamp(16px,4vw,24px);">HERO SHOP</h1>
+            <div class="shop-wallet" id="shopWallet"></div>
+            <div class="shop-grid" id="shopGrid"></div>
+            <button class="shop-back-btn" id="shopBackBtn">BACK</button>
         </div>
     </div>
 
@@ -643,6 +811,85 @@
         const keys = {};
         let prevKeys = {};
         let touchState = { left: false, right: false, jump: false };
+
+        // ============================================
+        //  HERO SHOP SYSTEM
+        // ============================================
+        const HEROES = [
+            {
+                id: 'runner', name: 'RUNNER', price: 0,
+                perk: 'DEFAULT HERO',
+                color: '#3388FF', hairColor: '#553311', shoeColor: '#DD0000',
+                capeColor: '#DD2200', speedMult: 1, jumpMult: 1, lives: 3,
+                coinMult: 1, tripleJump: false, stackCount: 1
+            },
+            {
+                id: 'speedy', name: 'SPEED BOY', price: 500,
+                perk: '+25% SPEED',
+                color: '#22DD44', hairColor: '#114411', shoeColor: '#00AA00',
+                capeColor: '#00CC33', speedMult: 1.25, jumpMult: 1, lives: 3,
+                coinMult: 1, tripleJump: false, stackCount: 1
+            },
+            {
+                id: 'jumper', name: 'JUMP GIRL', price: 2000,
+                perk: '+20% JUMP HEIGHT',
+                color: '#DD44AA', hairColor: '#660044', shoeColor: '#AA0066',
+                capeColor: '#FF44CC', speedMult: 1, jumpMult: 1.2, lives: 3,
+                coinMult: 1, tripleJump: false, stackCount: 1
+            },
+            {
+                id: 'shield', name: 'SHIELD KNIGHT', price: 8000,
+                perk: '5 LIVES INSTEAD OF 3',
+                color: '#8888CC', hairColor: '#333355', shoeColor: '#444488',
+                capeColor: '#6666BB', speedMult: 1, jumpMult: 1, lives: 5,
+                coinMult: 1, tripleJump: false, stackCount: 1
+            },
+            {
+                id: 'rocket', name: 'ROCKET KID', price: 25000,
+                perk: 'TRIPLE JUMP!',
+                color: '#FF6622', hairColor: '#442200', shoeColor: '#CC4400',
+                capeColor: '#FF8844', speedMult: 1.1, jumpMult: 1.1, lives: 3,
+                coinMult: 1, tripleJump: true, stackCount: 1
+            },
+            {
+                id: 'goldking', name: 'GOLD KING', price: 80000,
+                perk: '2X COIN VALUE + 4 LIVES',
+                color: '#DDAA00', hairColor: '#664400', shoeColor: '#AA7700',
+                capeColor: '#FFCC00', speedMult: 1.1, jumpMult: 1.1, lives: 4,
+                coinMult: 2, tripleJump: false, stackCount: 1
+            },
+            {
+                id: 'megastack', name: 'MEGA STACK', price: 500000,
+                perk: '4 MEN STACKED! ALL BONUSES!',
+                color: '#FF2288', hairColor: '#440022', shoeColor: '#CC0044',
+                capeColor: '#FF44AA', speedMult: 1.25, jumpMult: 1.2, lives: 5,
+                coinMult: 2, tripleJump: true, stackCount: 4
+            }
+        ];
+
+        // Persistent data
+        let totalCoins = parseInt(localStorage.getItem('mathObbyCoins') || '0');
+        let ownedHeroes = JSON.parse(localStorage.getItem('mathObbyOwned') || '["runner"]');
+        let selectedHero = localStorage.getItem('mathObbyHero') || 'runner';
+
+        function saveShopData() {
+            localStorage.setItem('mathObbyCoins', totalCoins.toString());
+            localStorage.setItem('mathObbyOwned', JSON.stringify(ownedHeroes));
+            localStorage.setItem('mathObbyHero', selectedHero);
+        }
+
+        function getHero() {
+            return HEROES.find(h => h.id === selectedHero) || HEROES[0];
+        }
+
+        function addCoins(amount) {
+            const hero = getHero();
+            const earned = amount * hero.coinMult;
+            totalCoins += earned;
+            score += earned;
+            saveShopData();
+            return earned;
+        }
 
         // ---- PARTICLES ----
         let particles = [];
@@ -1491,9 +1738,90 @@
             }
         }
 
+        // Draw a single character with given colors at offset
+        function drawOneChar(offy, bodyColor, hairColor, shoeColor, capeColor) {
+            const capeWave = Math.sin(Date.now() * 0.008 + player.frame * 0.2 + offy * 0.5) * 3;
+            // Cape
+            ctx.fillStyle = capeColor;
+            ctx.beginPath();
+            ctx.moveTo(2, offy + 10);
+            ctx.lineTo(-4 + capeWave, offy + 22);
+            ctx.lineTo(6, offy + 20);
+            ctx.closePath();
+            ctx.fill();
+
+            // Body
+            ctx.fillStyle = bodyColor;
+            ctx.fillRect(2, offy + 8, 18, 14);
+            // Collar
+            const r = parseInt(bodyColor.slice(1,3),16), g = parseInt(bodyColor.slice(3,5),16), b = parseInt(bodyColor.slice(5,7),16);
+            ctx.fillStyle = `rgb(${Math.min(255,r+40)},${Math.min(255,g+40)},${Math.min(255,b+40)})`;
+            ctx.fillRect(6, offy + 8, 10, 3);
+            // Belt
+            ctx.fillStyle = '#AA7700';
+            ctx.fillRect(3, offy + 19, 16, 3);
+            ctx.fillStyle = '#FFD700';
+            ctx.fillRect(9, offy + 19, 4, 3);
+
+            // Head
+            ctx.fillStyle = '#FFCC88';
+            ctx.fillRect(4, offy, 14, 12);
+            ctx.fillStyle = 'rgba(255,100,100,0.3)';
+            ctx.fillRect(13, offy + 7, 3, 2);
+
+            // Eyes
+            ctx.fillStyle = '#000';
+            const blink = Math.sin(Date.now() * 0.003 + offy) > 0.95;
+            if (!blink) {
+                ctx.fillRect(12, offy + 3, 3, 4);
+                ctx.fillStyle = '#FFF';
+                ctx.fillRect(12, offy + 3, 2, 2);
+                ctx.fillStyle = '#2244AA';
+                ctx.fillRect(12, offy + 4, 2, 2);
+            } else {
+                ctx.fillRect(12, offy + 5, 3, 1);
+            }
+
+            // Hair
+            ctx.fillStyle = hairColor;
+            ctx.fillRect(4, offy - 1, 14, 4);
+            ctx.fillRect(2, offy - 1, 4, 6);
+
+            // Arms
+            ctx.fillStyle = '#FFCC88';
+            const armOff = Math.abs(player.vx) > 0.3 ? (Math.floor(player.frame / 6) % 2) * 2 : 2;
+            ctx.fillRect(18, offy + 10 + armOff, 4, 6);
+
+            // Legs
+            ctx.fillStyle = bodyColor;
+            if (!player.onGround) {
+                ctx.fillRect(3, offy + 22, 6, 5);
+                ctx.fillRect(13, offy + 22, 6, 5);
+            } else if (Math.abs(player.vx) > 0.3) {
+                const lf = Math.floor(player.frame / 5) % 4;
+                const lo = [[0,2],[1,0],[2,1],[0,2]];
+                ctx.fillRect(3, offy + 22 + lo[lf][0], 6, 5);
+                ctx.fillRect(13, offy + 22 + lo[lf][1], 6, 5);
+            } else {
+                ctx.fillRect(4, offy + 22, 6, 5);
+                ctx.fillRect(12, offy + 22, 6, 5);
+            }
+
+            // Shoes
+            ctx.fillStyle = shoeColor;
+            if (!player.onGround) {
+                ctx.fillRect(2, offy + 26, 8, 3);
+                ctx.fillRect(12, offy + 26, 8, 3);
+            } else {
+                ctx.fillRect(3, offy + 26, 8, 3);
+                ctx.fillRect(11, offy + 26, 8, 3);
+            }
+        }
+
         function drawPlayer() {
             if (player.dead) return;
 
+            const hero = getHero();
             const px = player.x - cameraX;
             const py = player.y;
 
@@ -1505,109 +1833,34 @@
             if (player.facing < 0) ctx.scale(-1, 1);
             ctx.translate(-player.w / 2, -player.h / 2);
 
-            // Cape (flutters!)
-            const capeWave = Math.sin(Date.now() * 0.008 + player.frame * 0.2) * 3;
-            ctx.fillStyle = '#DD2200';
-            ctx.beginPath();
-            ctx.moveTo(2, 10);
-            ctx.lineTo(-4 + capeWave, 22);
-            ctx.lineTo(6, 20);
-            ctx.closePath();
-            ctx.fill();
-            ctx.fillStyle = '#BB1800';
-            ctx.beginPath();
-            ctx.moveTo(2, 12);
-            ctx.lineTo(-2 + capeWave, 20);
-            ctx.lineTo(5, 19);
-            ctx.closePath();
-            ctx.fill();
-
-            // Body (shirt)
-            ctx.fillStyle = '#3388FF';
-            ctx.fillRect(2, 8, 18, 14);
-            // Shirt detail (collar)
-            ctx.fillStyle = '#55AAFF';
-            ctx.fillRect(6, 8, 10, 3);
-            // Belt
-            ctx.fillStyle = '#AA7700';
-            ctx.fillRect(3, 19, 16, 3);
-            ctx.fillStyle = '#FFD700';
-            ctx.fillRect(9, 19, 4, 3); // buckle
-
-            // Head
-            ctx.fillStyle = '#FFCC88';
-            ctx.fillRect(4, 0, 14, 12);
-            // Cheek blush
-            ctx.fillStyle = 'rgba(255,100,100,0.3)';
-            ctx.fillRect(13, 7, 3, 2);
-
-            // Eyes
-            ctx.fillStyle = '#000';
-            const blink = Math.sin(Date.now() * 0.003) > 0.95;
-            if (!blink) {
-                ctx.fillRect(12, 3, 3, 4);
-                // Eye white
-                ctx.fillStyle = '#FFF';
-                ctx.fillRect(12, 3, 2, 2);
-                // Pupil
-                ctx.fillStyle = '#2244AA';
-                ctx.fillRect(12, 4, 2, 2);
+            if (hero.stackCount > 1) {
+                // MEGA STACK: draw multiple characters stacked
+                const stackColors = [
+                    ['#3388FF','#553311','#DD0000','#DD2200'],
+                    ['#22DD44','#114411','#00AA00','#00CC33'],
+                    ['#DD44AA','#660044','#AA0066','#FF44CC'],
+                    [hero.color, hero.hairColor, hero.shoeColor, hero.capeColor]
+                ];
+                const wobble = Math.sin(Date.now() * 0.006) * 1.5;
+                for (let i = 0; i < hero.stackCount; i++) {
+                    const offy = -(i * 24) + (i > 0 ? Math.sin(Date.now() * 0.005 + i * 1.5) * 1.5 : 0);
+                    const sc = stackColors[i % stackColors.length];
+                    drawOneChar(offy, sc[0], sc[1], sc[2], sc[3]);
+                }
+                // Wobble lines between stacked chars
+                ctx.fillStyle = 'rgba(255,255,255,0.15)';
+                for (let i = 1; i < hero.stackCount; i++) {
+                    ctx.fillRect(4, -(i * 24) + 28, 14, 1);
+                }
             } else {
-                ctx.fillRect(12, 5, 3, 1);
+                // Single character
+                drawOneChar(0, hero.color, hero.hairColor, hero.shoeColor, hero.capeColor);
+                // Backpack
+                ctx.fillStyle = '#226622';
+                ctx.fillRect(-1, 10, 5, 8);
+                ctx.fillStyle = '#338833';
+                ctx.fillRect(-1, 10, 5, 3);
             }
-
-            // Hair
-            ctx.fillStyle = '#553311';
-            ctx.fillRect(4, -1, 14, 4);
-            ctx.fillRect(2, -1, 4, 6);
-            ctx.fillRect(16, 0, 3, 3);
-            // Hair highlight
-            ctx.fillStyle = '#774422';
-            ctx.fillRect(6, -1, 4, 2);
-
-            // Backpack (small)
-            ctx.fillStyle = '#226622';
-            ctx.fillRect(-1, 10, 5, 8);
-            ctx.fillStyle = '#338833';
-            ctx.fillRect(-1, 10, 5, 3);
-
-            // Arms
-            ctx.fillStyle = '#FFCC88';
-            if (Math.abs(player.vx) > 0.3) {
-                const armFrame = Math.floor(player.frame / 6) % 2;
-                ctx.fillRect(18, 10 + armFrame * 2, 4, 6);
-            } else {
-                ctx.fillRect(18, 12, 4, 6);
-            }
-
-            // Legs (animated)
-            ctx.fillStyle = '#2255AA';
-            if (!player.onGround) {
-                ctx.fillRect(3, 22, 6, 5);
-                ctx.fillRect(13, 22, 6, 5);
-            } else if (Math.abs(player.vx) > 0.3) {
-                const legFrame = Math.floor(player.frame / 5) % 4;
-                const legOffsets = [[0,2],[1,0],[2,1],[0,2]];
-                ctx.fillRect(3, 22 + legOffsets[legFrame][0], 6, 5);
-                ctx.fillRect(13, 22 + legOffsets[legFrame][1], 6, 5);
-            } else {
-                ctx.fillRect(4, 22, 6, 5);
-                ctx.fillRect(12, 22, 6, 5);
-            }
-
-            // Shoes
-            ctx.fillStyle = '#DD0000';
-            if (!player.onGround) {
-                ctx.fillRect(2, 26, 8, 3);
-                ctx.fillRect(12, 26, 8, 3);
-            } else {
-                ctx.fillRect(3, 26, 8, 3);
-                ctx.fillRect(11, 26, 8, 3);
-            }
-            // Shoe sole
-            ctx.fillStyle = '#880000';
-            ctx.fillRect(3, 28, 8, 1);
-            ctx.fillRect(11, 28, 8, 1);
 
             ctx.restore();
 
@@ -1727,36 +1980,41 @@
             const right = keys['ArrowRight'] || keys['KeyD'] || touchState.right;
             const jump = keys['Space'] || keys['ArrowUp'] || keys['KeyW'] || touchState.jump;
 
+            const hero = getHero();
+            const heroSpeed = MOVE_SPEED * hero.speedMult;
+            const heroJump = JUMP_FORCE * hero.jumpMult;
+
             if (left) {
-                player.vx -= MOVE_SPEED * 0.3;
+                player.vx -= heroSpeed * 0.3;
                 player.facing = -1;
             }
             if (right) {
-                player.vx += MOVE_SPEED * 0.3;
+                player.vx += heroSpeed * 0.3;
                 player.facing = 1;
             }
 
             player.vx *= FRICTION;
-            if (Math.abs(player.vx) > MOVE_SPEED) player.vx = MOVE_SPEED * Math.sign(player.vx);
+            if (Math.abs(player.vx) > heroSpeed) player.vx = heroSpeed * Math.sign(player.vx);
             if (Math.abs(player.vx) < 0.1) player.vx = 0;
 
-            // Jump (edge-triggered for double jump support)
+            // Jump (edge-triggered for double/triple jump support)
             const jumpWasPressed = player.jumpPressed;
             player.jumpPressed = jump;
             const jumpJustPressed = jump && !jumpWasPressed;
+            const maxAirJumps = hero.tripleJump ? 2 : 1;
 
             if (jumpJustPressed) {
                 if (player.onGround) {
-                    // First jump from ground
-                    player.vy = JUMP_FORCE;
+                    player.vy = heroJump;
                     player.onGround = false;
-                    player.hasDoubleJumped = false;
+                    player.airJumps = 0;
                     spawnParticles(player.x + player.w / 2, player.y + player.h, '#FFFFFF', 6, 12, 18);
-                } else if (!player.hasDoubleJumped) {
-                    // Double jump in air
-                    player.vy = JUMP_FORCE * 0.85;
+                } else if ((player.airJumps || 0) < maxAirJumps) {
+                    player.vy = heroJump * 0.85;
+                    player.airJumps = (player.airJumps || 0) + 1;
                     player.hasDoubleJumped = true;
-                    spawnParticles(player.x + player.w / 2, player.y + player.h, '#88EEFF', 10, 16, 22);
+                    const colors = ['#88EEFF', '#FFD700', '#FF88FF'];
+                    spawnParticles(player.x + player.w / 2, player.y + player.h, colors[player.airJumps - 1] || '#88EEFF', 10, 16, 22);
                     spawnParticles(player.x + player.w / 2, player.y + player.h, '#FFD700', 4, 10, 16);
                 }
             }
@@ -1792,6 +2050,7 @@
                         player.vy = 0;
                         player.onGround = true;
                         player.hasDoubleJumped = false;
+                        player.airJumps = 0;
                     } else if (player.vy < 0) {
                         player.y = p.y + p.h;
                         player.vy = 0;
@@ -1836,7 +2095,7 @@
                     player.x + player.w > c.x && player.x < c.x + 16 &&
                     player.y + player.h > c.y && player.y < c.y + 16) {
                     c.collected = true;
-                    score += 50;
+                    addCoins(50);
                     spawnParticles(c.x + 8, c.y + 8, '#FFD700', 8, 10, 20);
                 }
             }
@@ -1963,7 +2222,7 @@
             if (correct) {
                 btn.classList.add('correct');
                 questionsCorrect++;
-                score += 200;
+                addCoins(200);
                 currentGate.open = true;
                 // Update respawn checkpoint
                 player.respawnX = currentGate.x - 40;
@@ -2013,9 +2272,10 @@
         //  LEVEL FLOW
         // ============================================
         function startGame() {
+            const hero = getHero();
             currentLevel = 0;
             score = 0;
-            lives = 3;
+            lives = hero.lives;
             questionsCorrect = 0;
             questionsWrong = 0;
             loadLevel(0);
@@ -2075,11 +2335,14 @@
                 };
             }
 
+            saveShopData();
+
             document.getElementById('levelStats').innerHTML =
                 `<div class="stat-line">SCORE: <span>${score}</span></div>` +
                 `<div class="stat-line">LEVEL SCORE: <span>+${levelScore}</span></div>` +
                 `<div class="stat-line">TIME: <span>${formatTime(timerElapsed)}</span></div>` +
-                `<div class="stat-line">LIVES: <span>${'❤️'.repeat(lives)}</span></div>`;
+                `<div class="stat-line">LIVES: <span>${'❤️'.repeat(lives)}</span></div>` +
+                `<div class="stat-line">TOTAL COINS: <span>${totalCoins.toLocaleString()}</span></div>`;
 
             setTimeout(() => {
                 document.getElementById('levelScreen').classList.add('active');
@@ -2091,11 +2354,14 @@
             const title = document.getElementById('gameOverTitle');
             title.textContent = 'GAME OVER';
 
+            saveShopData();
+
             document.getElementById('gameOverStats').innerHTML =
                 `<div class="stat-line">FINAL SCORE: <span>${score}</span></div>` +
                 `<div class="stat-line">LEVEL REACHED: <span>${currentLevel + 1}</span></div>` +
                 `<div class="stat-line">CORRECT: <span>${questionsCorrect}</span> | WRONG: <span style="color:#FF4444">${questionsWrong}</span></div>` +
-                `<div class="stat-line">TIME: <span>${formatTime(timerElapsed)}</span></div>`;
+                `<div class="stat-line">TIME: <span>${formatTime(timerElapsed)}</span></div>` +
+                `<div class="stat-line">TOTAL COINS: <span>${totalCoins.toLocaleString()}</span></div>`;
 
             setTimeout(() => {
                 document.getElementById('gameOverScreen').classList.add('active');
@@ -2108,7 +2374,7 @@
         function updateHUD() {
             const hearts = '❤️'.repeat(Math.max(0, lives)) + '🖤'.repeat(Math.max(0, 3 - lives));
             document.getElementById('hudLives').textContent = hearts;
-            document.getElementById('hudScore').textContent = `SCORE: ${score}`;
+            document.getElementById('hudScore').textContent = `COINS: ${totalCoins.toLocaleString()}`;
             document.getElementById('hudLevel').textContent = `LV${currentLevel + 1}: ${LEVEL_CONFIG[currentLevel].name}`;
         }
 
@@ -2277,6 +2543,127 @@
         setupTouchJump('touchJump');
 
         // ============================================
+        //  SHOP UI
+        // ============================================
+        function updateWalletDisplay() {
+            const fmt = totalCoins.toLocaleString();
+            document.getElementById('startWallet').textContent = `COINS: ${fmt}`;
+            const sw = document.getElementById('shopWallet');
+            if (sw) sw.textContent = `YOUR COINS: ${fmt}`;
+        }
+
+        function renderShop() {
+            const grid = document.getElementById('shopGrid');
+            grid.innerHTML = '';
+
+            HEROES.forEach(h => {
+                const owned = ownedHeroes.includes(h.id);
+                const selected = selectedHero === h.id;
+                const canAfford = totalCoins >= h.price;
+
+                const card = document.createElement('div');
+                card.className = 'hero-card' + (selected ? ' selected' : '') + (!owned ? ' locked' : '');
+
+                // Preview canvas
+                const prev = document.createElement('div');
+                prev.className = 'hero-preview';
+                const pc = document.createElement('canvas');
+                pc.width = 24; pc.height = h.stackCount > 1 ? 24 + (h.stackCount - 1) * 20 : 30;
+                pc.style.width = '48px';
+                pc.style.height = (h.stackCount > 1 ? 48 + (h.stackCount - 1) * 16 : 48) + 'px';
+                const pctx = pc.getContext('2d');
+                drawHeroPreview(pctx, h);
+                prev.appendChild(pc);
+
+                const info = document.createElement('div');
+                info.className = 'hero-info';
+                info.innerHTML = `<div class="hero-name">${h.name}</div><div class="hero-perk">${h.perk}</div>`;
+
+                const price = document.createElement('div');
+                price.className = 'hero-price' + (owned ? ' owned' : '');
+                if (owned && selected) {
+                    price.textContent = 'EQUIPPED';
+                    price.style.color = '#00FF66';
+                } else if (owned) {
+                    price.textContent = 'SELECT';
+                    price.style.color = '#00CCFF';
+                } else {
+                    price.textContent = h.price.toLocaleString();
+                    if (!canAfford) price.style.color = '#FF4444';
+                }
+
+                card.appendChild(prev);
+                card.appendChild(info);
+                card.appendChild(price);
+
+                card.addEventListener('click', () => {
+                    if (owned) {
+                        selectedHero = h.id;
+                        saveShopData();
+                        renderShop();
+                    } else if (canAfford) {
+                        totalCoins -= h.price;
+                        ownedHeroes.push(h.id);
+                        selectedHero = h.id;
+                        saveShopData();
+                        updateWalletDisplay();
+                        renderShop();
+                    }
+                });
+
+                grid.appendChild(card);
+            });
+
+            updateWalletDisplay();
+        }
+
+        function drawHeroPreview(c, h) {
+            const stacks = h.stackCount;
+            const colors = [
+                [h.color, h.hairColor, h.shoeColor],
+                ['#3388FF','#553311','#DD0000'],
+                ['#22DD44','#114411','#00AA00'],
+                ['#DD44AA','#660044','#AA0066']
+            ];
+            for (let i = 0; i < stacks; i++) {
+                const sc = i === stacks - 1 ? colors[0] : colors[(i + 1) % colors.length];
+                const oy = c.canvas.height - 28 - i * 20;
+                // Body
+                c.fillStyle = sc[0];
+                c.fillRect(3, oy + 8, 16, 12);
+                // Head
+                c.fillStyle = '#FFCC88';
+                c.fillRect(5, oy, 12, 10);
+                // Hair
+                c.fillStyle = sc[1];
+                c.fillRect(5, oy, 12, 3);
+                // Eyes
+                c.fillStyle = '#000';
+                c.fillRect(12, oy + 4, 2, 2);
+                // Legs
+                c.fillStyle = sc[0];
+                c.fillRect(4, oy + 20, 5, 4);
+                c.fillRect(13, oy + 20, 5, 4);
+                // Shoes
+                c.fillStyle = sc[2];
+                c.fillRect(3, oy + 24, 6, 2);
+                c.fillRect(12, oy + 24, 6, 2);
+            }
+        }
+
+        function openShop() {
+            renderShop();
+            document.getElementById('startScreen').classList.remove('active');
+            document.getElementById('shopScreen').classList.add('active');
+        }
+
+        function closeShop() {
+            document.getElementById('shopScreen').classList.remove('active');
+            document.getElementById('startScreen').classList.add('active');
+            updateWalletDisplay();
+        }
+
+        // ============================================
         //  SCREEN BUTTONS
         // ============================================
         document.getElementById('startBtn').addEventListener('click', () => {
@@ -2289,11 +2676,15 @@
             startGame();
         });
 
+        document.getElementById('shopBtn').addEventListener('click', openShop);
+        document.getElementById('shopBackBtn').addEventListener('click', closeShop);
+
         // ============================================
         //  INIT
         // ============================================
         window.addEventListener('resize', resize);
         resize();
+        updateWalletDisplay();
         gameLoop();
 
         // Prevent default touch behaviors on canvas
