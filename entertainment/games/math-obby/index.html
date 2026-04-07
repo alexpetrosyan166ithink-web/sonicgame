@@ -1343,12 +1343,17 @@
                 });
             }
 
-            // Add decorations (small pixel trees/bushes)
-            for (let i = 0; i < 30; i++) {
-                decorations.push({
-                    x: Math.random() * levelWidth,
-                    type: Math.random() > 0.5 ? 'tree' : 'bush'
-                });
+            // Add decorations only on ground/finish platforms
+            const groundPlats = platforms.filter(p => p.type === 'ground' || p.type === 'finish');
+            for (const gp of groundPlats) {
+                const count = Math.floor(gp.w / 60);
+                for (let i = 0; i < count; i++) {
+                    decorations.push({
+                        x: gp.x + 10 + Math.random() * (gp.w - 20),
+                        y: gp.y,
+                        type: Math.random() > 0.5 ? 'tree' : 'bush'
+                    });
+                }
             }
 
             // Initialize background math symbols
@@ -2230,9 +2235,9 @@
             const tc = treeColors[currentLevel];
 
             for (const d of decorations) {
-                const dx = d.x - cameraX * 0.9;
+                const dx = d.x - cameraX;
                 if (dx > W + 30 || dx < -30) continue;
-                const gy = H - TILE;
+                const gy = d.y;
                 const rdx = Math.round(dx);
 
                 if (d.type === 'tree') {
@@ -2254,7 +2259,7 @@
 
                     // Level 5: fire/embers on trees
                     if (currentLevel === 4 && Math.random() > 0.97) {
-                        spawnParticles(dx + 9, gy - 50, '#FF6600', 1, 8, 20);
+                        spawnParticles(d.x + 9, gy - 50, '#FF6600', 1, 8, 20);
                     }
                 } else {
                     // Bush
