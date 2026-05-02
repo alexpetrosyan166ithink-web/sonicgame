@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-labelledby="title desc">
+  <title id="title">City Soothing 3D thumbnail</title>
+  <desc id="desc">A glowing night city skyline with neon buildings, a river, and a calm boulevard.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0b1630"/>
+      <stop offset="55%" stop-color="#163660"/>
+      <stop offset="100%" stop-color="#244e7e"/>
+    </linearGradient>
+    <linearGradient id="road" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#2d3f5f"/>
+      <stop offset="100%" stop-color="#0f1624"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#2d89c6"/>
+      <stop offset="100%" stop-color="#0d325e"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#sky)"/>
+  <circle cx="310" cy="62" r="28" fill="#ffd48f" opacity="0.85"/>
+  <rect x="0" y="220" width="400" height="80" fill="#0f1827"/>
+  <polygon points="150,300 250,300 220,168 180,168" fill="url(#road)"/>
+  <rect x="0" y="174" width="400" height="28" fill="url(#water)" opacity="0.9"/>
+  <rect x="34" y="110" width="38" height="110" fill="#20395e"/>
+  <rect x="78" y="84" width="34" height="136" fill="#2b4f79"/>
+  <rect x="118" y="132" width="26" height="88" fill="#19314b"/>
+  <rect x="262" y="118" width="34" height="102" fill="#24476e"/>
+  <rect x="302" y="78" width="42" height="142" fill="#2f5f8f"/>
+  <rect x="350" y="128" width="24" height="92" fill="#18314d"/>
+  <g fill="#ffd780">
+    <rect x="42" y="126" width="6" height="8"/>
+    <rect x="54" y="126" width="6" height="8"/>
+    <rect x="42" y="144" width="6" height="8"/>
+    <rect x="54" y="144" width="6" height="8"/>
+    <rect x="86" y="98" width="6" height="8"/>
+    <rect x="98" y="98" width="6" height="8"/>
+    <rect x="86" y="118" width="6" height="8"/>
+    <rect x="98" y="118" width="6" height="8"/>
+    <rect x="270" y="132" width="6" height="8"/>
+    <rect x="282" y="132" width="6" height="8"/>
+    <rect x="310" y="96" width="6" height="8"/>
+    <rect x="322" y="96" width="6" height="8"/>
+    <rect x="310" y="116" width="6" height="8"/>
+    <rect x="322" y="116" width="6" height="8"/>
+  </g>
+  <rect x="174" y="166" width="4" height="54" fill="#ffe4a8"/>
+  <rect x="222" y="166" width="4" height="54" fill="#ffe4a8"/>
+  <text x="28" y="42" fill="#f3f8ff" font-family="Verdana, sans-serif" font-size="23" font-weight="700">CITY SOOTHING</text>
+  <text x="28" y="65" fill="#86dcff" font-family="Verdana, sans-serif" font-size="12" letter-spacing="2">3D WEBGPU CRUISE</text>
+</svg>

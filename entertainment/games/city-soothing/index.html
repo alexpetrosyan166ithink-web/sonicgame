@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="../../../assets/images/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City Survival 3D - Zombie Shooter Obby | Alex Games</title>
+    <meta name="description" content="Run through a blocky city, shoot zombies, jump obstacles, and survive a Roblox-style mobile-friendly 3D action game in the browser.">
+    <meta name="keywords" content="zombie shooter game, roblox style game, city survival game, 3D obstacle game, mobile friendly browser game, WebGPU game, Alex Games">
+    <meta name="author" content="Alex Games">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://alexgames.am/entertainment/games/city-soothing/">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://alexgames.am/entertainment/games/city-soothing/">
+    <meta property="og:title" content="City Survival 3D - Zombie Shooter Obby">
+    <meta property="og:description" content="Blocky city survival with zombies, obstacles, jumping, and touch-friendly browser controls.">
+    <meta property="og:image" content="https://alexgames.am/assets/images/game-thumbnails/city-soothing-thumb.svg">
+    <meta property="og:site_name" content="Alex Games">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="City Survival 3D - Zombie Shooter Obby">
+    <meta name="twitter:description" content="Shoot zombies, dodge blockers, and clear a Roblox-style city run on desktop or mobile.">
+    <meta name="twitter:image" content="https://alexgames.am/assets/images/game-thumbnails/city-soothing-thumb.svg">
+    <link rel="stylesheet" href="style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "City Survival 3D",
+        "description": "A blocky city zombie shooter obstacle run rendered in the browser for desktop and mobile devices.",
+        "url": "https://alexgames.am/entertainment/games/city-soothing/",
+        "genre": "Shooter",
+        "gamePlatform": "Web Browser",
+        "applicationCategory": "Game",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        }
+    }
+    </script>
+</head>
+<body>
+    <a class="back-link" href="../../">Back To Entertainment</a>
+
+    <main class="shell">
+        <section class="intro-panel">
+            <p class="eyebrow">Alex Games City Survival</p>
+            <h1>City Survival 3D</h1>
+            <p class="summary">Run a blocky city lane, blast zombies before they close in, and jump barriers and gaps to keep your score climbing.</p>
+
+            <div class="control-list">
+                <div><span>A/D Or Arrows</span> Change lane</div>
+                <div><span>W Or Up</span> Push forward</div>
+                <div><span>Space</span> Jump obstacle</div>
+                <div><span>Click / Tap</span> Shoot zombies</div>
+            </div>
+
+            <div class="status-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Wave</span>
+                    <strong id="modeLabel">1</strong>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">HP</span>
+                    <strong id="speedLabel">100</strong>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Score</span>
+                    <strong id="heightLabel">0</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="stage-shell" aria-label="City Survival 3D game area">
+            <div class="stage-topbar">
+                <div class="pill">Zombie shooter obby</div>
+                <div class="pill" id="fpsLabel">Preparing</div>
+            </div>
+
+            <canvas id="scene" aria-label="3D city zombie shooter obstacle game"></canvas>
+
+            <div id="unsupported" class="unsupported hidden" role="alert">
+                <h2>WebGPU is not available.</h2>
+                <p>This experience needs a browser with WebGPU enabled. Try a current version of Chrome, Edge, or another WebGPU-capable browser.</p>
+            </div>
+
+            <div class="touch-dock" aria-label="Mobile controls">
+                <button id="slowerBtn" type="button">Left</button>
+                <button id="fasterBtn" type="button">Right</button>
+                <button id="lowerBtn" type="button">Jump</button>
+                <button id="higherBtn" type="button">Shoot</button>
+                <button id="pauseBtn" type="button">Pause</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="game.js"></script>
+</body>
+</html>

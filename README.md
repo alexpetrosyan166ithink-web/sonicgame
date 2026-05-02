@@ -18,6 +18,8 @@ Home (alexgames.am)
 │   ├── Turbo Racing       (/entertainment/games/racing/)
 │   ├── Battle Tanks       (/entertainment/games/tanks/)
 │   ├── Dead Ruins         (/entertainment/games/3d-exploration/)
+│   ├── City Survival 3D   (/entertainment/games/city-soothing/)
+│   ├── 3D Royal Chess     (/entertainment/games/3d-chess/)
 │   └── Math Obby          (/entertainment/games/math-obby/)
 └── Educational (/educational/)
     ├── Grammar Quizzes    (/educational/grammar-quizzes/)
@@ -72,6 +74,11 @@ Battle City-style strategic tank warfare with destructible terrain, upgrades, an
 PS1-style 3D zombie survival shooter with wave-based combat, 4 weapons (pistol, shotgun, sniper, RPG), medkits, and escalating hordes.
 
 **Controls:** WASD=Move, Mouse=Aim, Click=Shoot, 1-4=Weapons, R=Reload
+
+### 3D Royal Chess
+WebGPU-powered 3D chess with a cinematic board, procedural character pieces, full legal move enforcement, captures, check/checkmate, stalemate, castling, en passant, promotion, undo, reset, and an optional casual AI opponent.
+
+**Controls:** Click/Tap=Select and move, Drag=Orbit camera, Wheel/Pinch=Zoom
 
 ### Math Obby
 2D side-scrolling platformer obstacle course with math gates. Players run, jump, and solve math questions to progress through 5 levels of increasing difficulty. Features a hero shop, procedural chiptune music, and persistent coin economy.
@@ -179,6 +186,7 @@ All 5 games support mobile devices with virtual on-screen controls:
 | Racing | 4-direction | Nitro |
 | Tanks | 4-direction | Fire |
 | Dead Ruins | WASD (on-screen) | Shoot, Weapons |
+| 3D Royal Chess | Tap board | Drag orbit, pinch zoom |
 | Math Obby | Left/Right | Jump (tap 2x for double jump) |
 
 - Controls auto-detected via `@media (pointer: coarse)` — only shown on touch devices
@@ -204,7 +212,7 @@ Every page includes:
 | Page | Schemas |
 |------|---------|
 | Home | WebSite, Organization, BreadcrumbList, ItemList |
-| Entertainment | BreadcrumbList, CollectionPage, ItemList with 7x VideoGame |
+| Entertainment | BreadcrumbList, CollectionPage, ItemList with 9x VideoGame |
 | Educational | BreadcrumbList, CollectionPage, ItemList with Quiz |
 | Grammar Quizzes Hub | BreadcrumbList, ItemList with 5x Quiz |
 | Each Quiz | BreadcrumbList, Quiz |
@@ -239,6 +247,7 @@ alexgames.am/
 │       │   ├── racing-thumb.svg
 │       │   ├── tanks-thumb.svg
 │       │   ├── dead-ruins-thumb.svg
+│       │   ├── 3d-chess-thumb.svg
 │       │   ├── math-obby-thumb.svg
 │       │   ├── math-thumb.svg
 │       │   ├── grammar-thumb.svg
@@ -248,7 +257,7 @@ alexgames.am/
 │           ├── play-icon.svg
 │           └── lock-icon.svg
 ├── entertainment/
-│   ├── index.html                          # Entertainment landing - 5 game cards
+│   ├── index.html                          # Entertainment landing - 9 game cards
 │   └── games/
 │       ├── sonic/
 │       │   ├── index.html
@@ -273,6 +282,10 @@ alexgames.am/
 │       │   └── style.css
 │       ├── 3d-exploration/
 │       │   └── index.html                  # Dead Ruins - 3D zombie shooter
+│       ├── 3d-chess/
+│       │   ├── index.html
+│       │   ├── game.js                     # WebGPU 3D chess
+│       │   └── style.css
 │       └── math-obby/
 │           └── index.html                  # Math Obby - single-file platformer
 └── educational/
@@ -307,7 +320,8 @@ alexgames.am/
 - **HTML5** — semantic markup
 - **CSS3** — Grid, Flexbox, Custom Properties, media queries, animations
 - **JavaScript ES6+** — no frameworks
-- **Three.js** — 3D rendering (Sonic game only)
+- **Three.js** — 3D rendering (Sonic game)
+- **WebGPU** — hardware-accelerated 3D rendering for City Survival 3D and 3D Royal Chess
 - **Web Audio API** — retro sound effects (games + quizzes)
 - **Google Fonts** — Press Start 2P (retro pixel font)
 - **GitHub Pages** — static hosting

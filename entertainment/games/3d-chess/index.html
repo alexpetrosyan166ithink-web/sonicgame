@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="../../../assets/images/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Royal Chess - WebGPU Chess Game | Alex Games</title>
+    <meta name="description" content="Play a full WebGPU 3D chess game with character pieces, legal moves, captures, checkmate, undo, reset, and a casual AI opponent.">
+    <meta name="keywords" content="3D chess game, WebGPU chess, browser chess, chess AI, free online chess, Alex Games">
+    <meta name="author" content="Alex Games">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://alexgames.am/entertainment/games/3d-chess/">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://alexgames.am/entertainment/games/3d-chess/">
+    <meta property="og:title" content="3D Royal Chess - WebGPU Chess Game">
+    <meta property="og:description" content="A cinematic 3D chess board with character pieces, full legal chess rules, local two-player mode, and AI.">
+    <meta property="og:image" content="https://alexgames.am/assets/images/game-thumbnails/3d-chess-thumb.svg">
+    <meta property="og:site_name" content="Alex Games">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="3D Royal Chess - WebGPU Chess Game">
+    <meta name="twitter:description" content="Play full 3D WebGPU chess with legal moves, checkmate, undo, reset, and AI.">
+    <meta name="twitter:image" content="https://alexgames.am/assets/images/game-thumbnails/3d-chess-thumb.svg">
+    <link rel="stylesheet" href="style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "3D Royal Chess",
+        "description": "A full browser chess game rendered with WebGPU, featuring 3D character pieces, legal move enforcement, local two-player play, and a casual AI opponent.",
+        "url": "https://alexgames.am/entertainment/games/3d-chess/",
+        "genre": "Board Game",
+        "gamePlatform": "Web Browser",
+        "applicationCategory": "Game",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        }
+    }
+    </script>
+</head>
+<body>
+    <a class="back-link" href="../../">Back To Entertainment</a>
+
+    <main class="game-shell">
+        <section class="board-panel" aria-label="3D Royal Chess game board">
+            <canvas id="scene" aria-label="Interactive 3D chess board"></canvas>
+
+            <div id="unsupported" class="overlay-card hidden" role="alert">
+                <h2>WebGPU is not available.</h2>
+                <p>This chess board needs a WebGPU-capable browser. Try a current version of Chrome or Edge.</p>
+            </div>
+
+            <div id="promotion" class="overlay-card hidden" role="dialog" aria-label="Choose promotion piece">
+                <h2>Promote Pawn</h2>
+                <div class="promotion-grid">
+                    <button type="button" data-promote="q">Queen</button>
+                    <button type="button" data-promote="r">Rook</button>
+                    <button type="button" data-promote="b">Bishop</button>
+                    <button type="button" data-promote="n">Knight</button>
+                </div>
+            </div>
+        </section>
+
+        <aside class="hud-panel">
+            <div>
+                <p class="eyebrow">Alex Games</p>
+                <h1>3D Royal Chess</h1>
+            </div>
+
+            <div class="status-stack">
+                <div class="status-card">
+                    <span>Turn</span>
+                    <strong id="turnLabel">White</strong>
+                </div>
+                <div class="status-card">
+                    <span>Status</span>
+                    <strong id="statusLabel">Select a piece</strong>
+                </div>
+                <div class="status-card">
+                    <span>Mode</span>
+                    <strong id="modeLabel">Two Player</strong>
+                </div>
+            </div>
+
+            <div class="controls-grid">
+                <button id="modeBtn" type="button">Play Vs AI</button>
+                <button id="undoBtn" type="button">Undo</button>
+                <button id="resetBtn" type="button">Reset</button>
+                <button id="cameraBtn" type="button">Camera</button>
+            </div>
+
+            <section class="captures">
+                <h2>Captured</h2>
+                <div class="capture-row"><span>White</span><p id="whiteCaptured"></p></div>
+                <div class="capture-row"><span>Black</span><p id="blackCaptured"></p></div>
+            </section>
+
+            <section class="moves">
+                <h2>Moves</h2>
+                <ol id="moveList"></ol>
+            </section>
+
+            <p class="hint">Click a piece, then a highlighted square. Drag the board to orbit and use the wheel or pinch to zoom.</p>
+        </aside>
+    </main>
+
+    <script src="game.js"></script>
+</body>
+</html>
