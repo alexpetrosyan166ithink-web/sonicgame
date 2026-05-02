@@ -646,6 +646,9 @@ function updateHud() {
     if (!player || !enemy) return;
     $('playerName').textContent = player.name;
     $('enemyName').textContent = enemy.name;
+    $('battleRound').textContent = TRAINERS[trainerIndex]?.name || 'Champion';
+    $('playerCp').textContent = `CP ${Math.round(player.maxHp * 18 + player.moves.length * 45)}`;
+    $('enemyCp').textContent = `CP ${Math.round(enemy.maxHp * 18 + enemy.moves.length * 45)}`;
     $('playerType').textContent = player.type.toUpperCase();
     $('enemyType').textContent = enemy.type.toUpperCase();
     $('playerType').style.background = TYPE_COLOR[player.type];
@@ -669,18 +672,21 @@ function showMoveBox() {
     player.moves.forEach((m, i) => {
         const btn = document.createElement('div');
         btn.className = 'move-btn';
+        btn.style.setProperty('--move-color', TYPE_COLOR[m.type]);
         btn.innerHTML = `
             <div class="move-key">${i + 1}</div>
+            <div class="move-orb">
+                <span class="move-pow">${m.heal ? `+${m.heal}` : m.power}</span>
+            </div>
             <div class="move-name">${m.name}</div>
-            <div class="move-type" style="background:${TYPE_COLOR[m.type]}">${m.type.toUpperCase()}</div>
-            <div class="move-pow">${m.heal ? `+${m.heal}` : `Pow ${m.power}`}</div>
+            <div class="move-type">${m.type.toUpperCase()}</div>
         `;
         btn.onclick = () => playerUseMove(i);
         c.appendChild(btn);
     });
     $('runHint').textContent = TRAINERS[trainerIndex].wild
-        ? 'Press R to run from this wild battle'
-        : 'Trainer battle - you cannot run';
+        ? 'RUN'
+        : 'TRAINER BATTLE';
 }
 
 function showMessageBox(text) {

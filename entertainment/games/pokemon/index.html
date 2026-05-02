@@ -19,28 +19,55 @@
         <div id="scene"></div>
 
         <div id="hud" class="hidden">
+            <div class="battle-status">
+                <span class="battle-chip">GO Battle</span>
+                <span id="battleRound">VS Trainer</span>
+            </div>
+            <div class="switch-tray" aria-hidden="true">
+                <div class="switch-slot active"></div>
+                <div class="switch-slot"></div>
+                <div class="switch-slot faint"></div>
+            </div>
             <div class="hp-card hp-enemy">
-                <div class="hp-row">
+                <div class="hp-top">
                     <span class="hp-name" id="enemyName">-</span>
-                    <span class="hp-type" id="enemyType">-</span>
+                    <span class="hp-lvl" id="enemyCp">CP 1500</span>
                 </div>
-                <div class="hp-bar"><div class="hp-fill" id="enemyHpFill"></div></div>
-                <div class="hp-num"><span id="enemyHpNum">0/0</span></div>
+                <div class="hp-mid">
+                    <span class="hp-label">HP</span>
+                    <div class="hp-bar"><div class="hp-fill" id="enemyHpFill"></div></div>
+                </div>
+                <div class="hp-type-row">
+                    <span class="hp-type" id="enemyType">-</span>
+                    <span class="shield-stack"><i></i><i></i></span>
+                    <span class="hp-num" id="enemyHpNum">0/0</span>
+                </div>
             </div>
             <div class="hp-card hp-player">
-                <div class="hp-row">
+                <div class="hp-top">
                     <span class="hp-name" id="playerName">-</span>
-                    <span class="hp-type" id="playerType">-</span>
+                    <span class="hp-lvl" id="playerCp">CP 1500</span>
                 </div>
-                <div class="hp-bar"><div class="hp-fill" id="playerHpFill"></div></div>
-                <div class="hp-num"><span id="playerHpNum">0/0</span></div>
+                <div class="hp-mid">
+                    <span class="hp-label">HP</span>
+                    <div class="hp-bar"><div class="hp-fill" id="playerHpFill"></div></div>
+                </div>
+                <div class="hp-num-row">
+                    <span class="hp-type" id="playerType">-</span>
+                    <span class="shield-stack"><i></i><i></i></span>
+                    <span class="hp-num" id="playerHpNum">0/0</span>
+                </div>
+                <div class="exp-row">
+                    <span class="exp-label">EXP</span>
+                    <div class="exp-bar"><div class="exp-fill"></div></div>
+                </div>
             </div>
         </div>
 
         <div id="bottomPanel" class="hidden">
             <div id="moveBox" class="hidden">
-                <div class="moves" id="moves"></div>
                 <p class="run-hint" id="runHint">Press R to run</p>
+                <div class="moves" id="moves"></div>
             </div>
             <div id="messageBox" class="hidden">
                 <p id="messageText"></p>
@@ -64,4 +91,3 @@
     <script src="game.js"></script>
 </body>
 </html>
-
