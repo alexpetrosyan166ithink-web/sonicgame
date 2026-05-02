@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Press Start 2P', 'Arial', sans-serif;
+    background: linear-gradient(180deg, #2a75bb 0%, #1a3a6e 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.breadcrumb {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 50;
+}
+.breadcrumb a {
+    color: #ffcb05;
+    text-decoration: none;
+    font-size: 11px;
+    background: rgba(0,0,0,0.6);
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 2px solid #ffcb05;
+}
+.breadcrumb a:hover { background: #ffcb05; color: #1a3a6e; }
+
+#game-container {
+    position: relative;
+    background: #000;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+    border: 4px solid #ffcb05;
+    margin-top: 50px;
+    max-width: 100vw;
+}
+
+#gameCanvas {
+    display: block;
+    background: #87ceeb;
+    image-rendering: pixelated;
+    max-width: 100%;
+    height: auto;
+}
+
+#screen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.88);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+#screen h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 28px;
+    margin-bottom: 18px;
+    color: #ffcb05;
+    text-shadow: 3px 3px 0 #2a75bb;
+    letter-spacing: 3px;
+}
+#screen p { font-size: 16px; margin: 8px 0; }
+.hidden { display: none !important; }
+
+.starters {
+    display: flex;
+    gap: 18px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.starter {
+    background: #222;
+    border: 3px solid #ffcb05;
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s;
+    width: 140px;
+}
+.starter:hover { transform: scale(1.08); background: #2a75bb; }
+.starter p { margin-top: 6px; font-weight: bold; font-family: Arial, sans-serif; }
+
+#controls {
+    color: #aaa;
+    font-size: 12px;
+    margin-top: 18px;
+    line-height: 1.7;
+}
