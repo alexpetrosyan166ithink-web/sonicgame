@@ -1,0 +1,64 @@
+{
+  "enabled": true,
+  "notes": "Remote free/Creative Commons GLB assets are attempted first. They are deliberately not only chess assets: the game customizes soldiers, horses, castles, books, and characters into chess roles with procedural crowns, shields, staffs, banners, glows, and team materials. If a browser cannot fetch them because of network or CORS restrictions, the game falls back to the built-in procedural WebGPU character pieces.",
+  "attribution": [
+    {
+      "title": "Filer free 3D chess GLB listings",
+      "url": "https://filer.dev/en/3d-model/chess-set.glb",
+      "license": "Creative Commons Attribution as listed by Filer"
+    },
+    {
+      "title": "Filer medieval soldier GLB",
+      "url": "https://www.filer.dev/en/3d-model/medieval-soldier.glb",
+      "license": "Creative Commons/free model as listed by Filer"
+    },
+    {
+      "title": "Filer fantasy tree house medieval castle GLB",
+      "url": "https://www.filer.dev/en/3d-model/fantasy-tree-house-medieval-castle.glb",
+      "license": "Creative Commons/free model as listed by Filer"
+    },
+    {
+      "title": "Filer book GLB",
+      "url": "https://filer.dev/en/3d-model/book.glb",
+      "license": "Creative Commons/free model as listed by Filer"
+    }
+  ],
+  "pieces": {
+    "p": {
+      "role": "soldier pawn",
+      "src": "https://crudblobs.blob.core.windows.net/models/medieval-soldier.glb",
+      "scale": 0.26,
+      "yOffset": 0.02
+    },
+    "r": {
+      "role": "castle rook",
+      "src": "https://crudblobs.blob.core.windows.net/models/fantasy-tree-house-medieval-castle.glb",
+      "scale": 0.18,
+      "yOffset": -0.04
+    },
+    "n": {
+      "role": "war horse knight",
+      "src": "https://crudblobs.blob.core.windows.net/models/chariot-horse.glb",
+      "scale": 0.28,
+      "yOffset": 0.02
+    },
+    "b": {
+      "role": "spell book bishop",
+      "src": "https://crudblobs.blob.core.windows.net/models/book.glb",
+      "scale": 0.54,
+      "yOffset": 0.08
+    },
+    "q": {
+      "role": "royal queen",
+      "src": "https://crudblobs.blob.core.windows.net/models/female-model.glb",
+      "scale": 0.24,
+      "yOffset": 0.02
+    },
+    "k": {
+      "role": "crowned king",
+      "src": "https://crudblobs.blob.core.windows.net/models/medieval-soldier.glb",
+      "scale": 0.3,
+      "yOffset": 0.02
+    }
+  }
+}

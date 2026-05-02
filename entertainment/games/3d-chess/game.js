@@ -27,12 +27,15 @@
     let context;
     let format;
     let pipeline;
+    let meshPipeline;
     let bindGroup;
+    let meshBindGroup;
     let vertexBuffer;
     let instanceBuffer;
     let uniformBuffer;
+    let meshUniformBuffer;
     let depthTexture;
-    let maxInstances = 2600;
+    let maxInstances = 5200;
 
     let board = createInitialBoard();
     let turn = WHITE;
@@ -46,6 +49,9 @@
     let vsAI = false;
     let aiThinking = false;
     let gameOver = false;
+    let fxEvents = [];
+    let modelAssets = null;
+    let modelStatus = 'procedural';
 
     const camera = {
         theta: Math.PI * 0.25,
@@ -100,6 +106,7 @@
         selected = null;
         legalMoves = [];
         gameOver = s.gameOver;
+        fxEvents = [];
         pendingPromotion = null;
         promotion.classList.add('hidden');
         updateHud();
@@ -287,6 +294,15 @@
         const capturedPiece = applyMoveToBoard(board, move, state, promotionType);
         enPassant = state.enPassant;
         if (capturedPiece) captured[mover.color].push(capturedPiece.type);
+        fxEvents.push({
+            from: { ...move.from },
+            to: { ...move.to },
+            capture: Boolean(capturedPiece),
+            castle: Boolean(move.isCastle),
+            promotion: mover.type === 'p' && (move.to.r === 0 || move.to.r === 7),
+            start: performance.now() / 1000
+        });
+        if (fxEvents.length > 12) fxEvents.shift();
         moveLog.push(formatMove(move, mover, beforeTarget, promotionType));
         turn = opposite(turn);
         selected = null;
@@ -378,6 +394,7 @@
         pendingPromotion = null;
         aiThinking = false;
         gameOver = false;
+        fxEvents = [];
         promotion.classList.add('hidden');
         updateHud();
     }
@@ -516,6 +533,7 @@
         device.queue.writeBuffer(vertexBuffer, 0, cubeVerts);
         instanceBuffer = device.createBuffer({ size: maxInstances * 48, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
         uniformBuffer = device.createBuffer({ size: 96, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+        meshUniformBuffer = device.createBuffer({ size: 160, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
 
         const shader = device.createShaderModule({ code: `
 struct U { vp: mat4x4<f32>, cam: vec4<f32>, light: vec4<f32> }
@@ -529,10 +547,15 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(127.1,311.7))) * 4
  let l = max(dot(normalize(i.n), normalize(-u.light.xyz)), 0.0);
  let v = normalize(u.cam.xyz - i.wp);
  let rim = pow(1.0 - max(dot(normalize(i.n), v), 0.0), 2.0);
- let shine = pow(max(dot(reflect(normalize(u.light.xyz), normalize(i.n)), v), 0.0), 22.0) * i.flags.y;
- let grain = h(floor(i.wp.xz * 8.0)) * 0.035;
+ let sparkle = h(floor(i.wp.xz * 11.0 + i.wp.yy * 3.0)) * 0.045;
+ let spec = pow(max(dot(reflect(normalize(u.light.xyz), normalize(i.n)), v), 0.0), mix(18.0, 88.0, clamp(i.flags.y, 0.0, 1.0))) * (0.12 + i.flags.y * 1.45);
+ let fresnel = rim * (0.08 + i.flags.y * 0.22);
+ let torch = vec3<f32>(1.0, 0.45, 0.12) * max(0.0, 1.0 - distance(i.wp.xz, vec2<f32>(-6.8, -6.8)) * 0.16) * 0.45;
  let glow = i.c * i.flags.z;
- return vec4<f32>(i.c * (0.32 + l * 0.9 + grain) + vec3<f32>(shine) + rim * 0.08 + glow, max(0.18, i.flags.x));
+ let fog = clamp((distance(u.cam.xyz, i.wp) - 11.0) / 28.0, 0.0, 1.0);
+ let lit = i.c * (0.28 + l * 0.98 + sparkle) + vec3<f32>(spec) + fresnel + glow + torch;
+ lit = mix(lit, vec3<f32>(0.045, 0.046, 0.058), fog * 0.34);
+ return vec4<f32>(lit, max(0.18, i.flags.x));
 }` });
 
         pipeline = device.createRenderPipeline({
@@ -553,11 +576,225 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(127.1,311.7))) * 4
             layout: pipeline.getBindGroupLayout(0),
             entries: [{ binding: 0, resource: { buffer: uniformBuffer } }]
         });
+        initMeshPipeline();
         return true;
+    }
+
+    function initMeshPipeline() {
+        const shader = device.createShaderModule({ code: `
+struct U {
+ vp: mat4x4<f32>,
+ cam: vec4<f32>,
+ light: vec4<f32>,
+ xform: vec4<f32>,
+ color: vec4<f32>,
+ flags: vec4<f32>
+}
+@group(0) @binding(0) var<uniform> u: U;
+struct O { @builtin(position) pos: vec4<f32>, @location(0) wp: vec3<f32>, @location(1) n: vec3<f32>, @location(2) c: vec4<f32>, @location(3) flags: vec4<f32> }
+@vertex fn vs(@location(0) p: vec3<f32>, @location(1) n: vec3<f32>) -> O {
+ var o: O;
+ let w = vec3<f32>(p.x * u.xform.w + u.xform.x, p.y * u.xform.w + u.xform.y, p.z * u.xform.w + u.xform.z);
+ o.pos = u.vp * vec4<f32>(w, 1.0);
+ o.wp = w;
+ o.n = normalize(n);
+ o.c = u.color;
+ o.flags = u.flags;
+ return o;
+}
+fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12758.5453); }
+@fragment fn fs(i: O) -> @location(0) vec4<f32> {
+ let l = max(dot(normalize(i.n), normalize(-u.light.xyz)), 0.0);
+ let v = normalize(u.cam.xyz - i.wp);
+ let rim = pow(1.0 - max(dot(normalize(i.n), v), 0.0), 2.0);
+ let spec = pow(max(dot(reflect(normalize(u.light.xyz), normalize(i.n)), v), 0.0), 72.0) * i.flags.y;
+ let micro = h(floor(i.wp.xz * 14.0)) * 0.035;
+ let fresnel = rim * (0.14 + i.flags.y * 0.22);
+ return vec4<f32>(i.c.rgb * (0.34 + l * 0.95 + micro) + vec3<f32>(spec) + fresnel + i.c.rgb * i.flags.z, i.c.a);
+}` });
+        meshPipeline = device.createRenderPipeline({
+            layout: 'auto',
+            vertex: {
+                module: shader,
+                entryPoint: 'vs',
+                buffers: [{ arrayStride: 24, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }, { shaderLocation: 1, offset: 12, format: 'float32x3' }] }]
+            },
+            fragment: { module: shader, entryPoint: 'fs', targets: [{ format }] },
+            primitive: { topology: 'triangle-list', cullMode: 'back' },
+            depthStencil: { depthWriteEnabled: true, depthCompare: 'less', format: 'depth24plus' }
+        });
+        meshBindGroup = device.createBindGroup({
+            layout: meshPipeline.getBindGroupLayout(0),
+            entries: [{ binding: 0, resource: { buffer: meshUniformBuffer } }]
+        });
+    }
+
+    async function loadPieceModels() {
+        modelStatus = 'loading';
+        try {
+            const manifestRes = await fetch('assets/models/manifest.json', { cache: 'no-store' });
+            if (!manifestRes.ok) throw new Error('No model manifest');
+            const manifest = await manifestRes.json();
+            if (manifest.enabled === false) throw new Error('Model manifest disabled');
+            const pieces = manifest.pieces || {};
+            const loaded = {};
+            for (const type of ['p', 'r', 'n', 'b', 'q', 'k']) {
+                const entry = pieces[type];
+                if (!entry || !entry.src) continue;
+                const src = new URL(entry.src, new URL('assets/models/manifest.json', location.href)).toString();
+                try {
+                    loaded[type] = await loadGlbMesh(src, entry);
+                } catch (assetErr) {
+                    console.info(`3D Royal Chess could not load ${type} model:`, assetErr.message);
+                }
+            }
+            if (Object.keys(loaded).length === 0) throw new Error('No usable GLB pieces');
+            modelAssets = loaded;
+            modelStatus = 'glb';
+        } catch (err) {
+            modelAssets = null;
+            modelStatus = 'procedural';
+            console.info('3D Royal Chess using procedural pieces:', err.message);
+        }
+    }
+
+    async function loadGlbMesh(src, config) {
+        const res = await fetch(src);
+        if (!res.ok) throw new Error(`Could not load ${src}`);
+        const buffer = await res.arrayBuffer();
+        const parsed = parseGlb(buffer);
+        const meshes = [];
+        for (const mesh of parsed.json.meshes || []) {
+            for (const primitive of mesh.primitives || []) {
+                const posAccessor = primitive.attributes && primitive.attributes.POSITION;
+                if (posAccessor === undefined) continue;
+                const positions = readAccessor(parsed, posAccessor);
+                const normals = primitive.attributes.NORMAL !== undefined
+                    ? readAccessor(parsed, primitive.attributes.NORMAL)
+                    : createFallbackNormals(positions.count);
+                const packed = new Float32Array(positions.count * 6);
+                for (let i = 0; i < positions.count; i++) {
+                    packed.set(positions.data.subarray(i * 3, i * 3 + 3), i * 6);
+                    packed.set(normals.data.subarray(i * 3, i * 3 + 3), i * 6 + 3);
+                }
+                const vertex = device.createBuffer({ size: packed.byteLength, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
+                device.queue.writeBuffer(vertex, 0, packed);
+                let index = null;
+                let indexCount = 0;
+                let indexFormat = 'uint16';
+                if (primitive.indices !== undefined) {
+                    const indices = readAccessor(parsed, primitive.indices);
+                    const indexArray = indices.componentType === 5125 ? new Uint32Array(indices.data) : new Uint16Array(indices.data);
+                    indexFormat = indices.componentType === 5125 ? 'uint32' : 'uint16';
+                    index = device.createBuffer({ size: indexArray.byteLength, usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST });
+                    device.queue.writeBuffer(index, 0, indexArray);
+                    indexCount = indexArray.length;
+                }
+                meshes.push({ vertex, index, indexCount, vertexCount: positions.count, indexFormat });
+            }
+        }
+        if (meshes.length === 0) throw new Error(`No mesh primitives in ${src}`);
+        return {
+            primitives: meshes,
+            scale: Number(config.scale || 1),
+            yOffset: Number(config.yOffset || 0),
+            colorBoost: Number(config.colorBoost || 1)
+        };
+    }
+
+    function parseGlb(arrayBuffer) {
+        const view = new DataView(arrayBuffer);
+        if (view.getUint32(0, true) !== 0x46546c67) throw new Error('Not a GLB file');
+        let offset = 12;
+        let json = null;
+        let bin = null;
+        while (offset < arrayBuffer.byteLength) {
+            const length = view.getUint32(offset, true);
+            const type = view.getUint32(offset + 4, true);
+            offset += 8;
+            const chunk = arrayBuffer.slice(offset, offset + length);
+            if (type === 0x4e4f534a) {
+                json = JSON.parse(new TextDecoder().decode(chunk));
+            } else if (type === 0x004e4942) {
+                bin = chunk;
+            }
+            offset += length;
+        }
+        if (!json || !bin) throw new Error('GLB missing JSON or BIN chunk');
+        return { json, bin };
+    }
+
+    function readAccessor(parsed, accessorIndex) {
+        const accessor = parsed.json.accessors[accessorIndex];
+        const view = parsed.json.bufferViews[accessor.bufferView];
+        const componentCount = accessor.type === 'VEC3' ? 3 : accessor.type === 'VEC2' ? 2 : 1;
+        const componentSize = accessor.componentType === 5126 || accessor.componentType === 5125 ? 4 : accessor.componentType === 5123 ? 2 : 1;
+        const stride = view.byteStride || componentCount * componentSize;
+        const byteOffset = (view.byteOffset || 0) + (accessor.byteOffset || 0);
+        const dataView = new DataView(parsed.bin, byteOffset, view.byteLength - (accessor.byteOffset || 0));
+        if (accessor.componentType === 5126) {
+            const out = new Float32Array(accessor.count * componentCount);
+            for (let i = 0; i < accessor.count; i++) {
+                for (let c = 0; c < componentCount; c++) out[i * componentCount + c] = dataView.getFloat32(i * stride + c * 4, true);
+            }
+            normalizeAccessor(out, componentCount);
+            return { data: out, count: accessor.count, componentType: accessor.componentType };
+        }
+        if (accessor.componentType === 5125) {
+            const out = new Uint32Array(accessor.count * componentCount);
+            for (let i = 0; i < accessor.count; i++) {
+                for (let c = 0; c < componentCount; c++) out[i * componentCount + c] = dataView.getUint32(i * stride + c * 4, true);
+            }
+            return { data: out, count: accessor.count, componentType: accessor.componentType };
+        }
+        if (accessor.componentType === 5123) {
+            const out = new Uint16Array(accessor.count * componentCount);
+            for (let i = 0; i < accessor.count; i++) {
+                for (let c = 0; c < componentCount; c++) out[i * componentCount + c] = dataView.getUint16(i * stride + c * 2, true);
+            }
+            return { data: out, count: accessor.count, componentType: accessor.componentType };
+        }
+        if (accessor.componentType === 5121) {
+            const out = new Uint16Array(accessor.count * componentCount);
+            for (let i = 0; i < accessor.count; i++) {
+                for (let c = 0; c < componentCount; c++) out[i * componentCount + c] = dataView.getUint8(i * stride + c);
+            }
+            return { data: out, count: accessor.count, componentType: accessor.componentType };
+        }
+        throw new Error(`Unsupported accessor component type ${accessor.componentType}`);
+    }
+
+    function normalizeAccessor(data, componentCount) {
+        if (componentCount !== 3) return;
+        for (let i = 0; i < data.length; i += 3) {
+            const len = Math.hypot(data[i], data[i + 1], data[i + 2]);
+            if (len > 2.5) return;
+        }
+    }
+
+    function createFallbackNormals(count) {
+        const data = new Float32Array(count * 3);
+        for (let i = 0; i < count; i++) data.set([0, 1, 0], i * 3);
+        return { data, count, componentType: 5126 };
     }
 
     function pushBox(out, x, y, z, sx, sy, sz, color, alpha = 1, shine = 0.15, glow = 0) {
         out.push(x, y, z, sx, sy, sz, color[0], color[1], color[2], alpha, shine, glow);
+    }
+
+    function pushColumn(out, x, y, z, radius, height, color, shine = 0.3, glow = 0) {
+        const steps = 8;
+        for (let i = 0; i < steps; i++) {
+            const a = (i / steps) * Math.PI * 2;
+            const sx = radius * (0.58 + Math.abs(Math.cos(a)) * 0.42);
+            const sz = radius * (0.58 + Math.abs(Math.sin(a)) * 0.42);
+            pushBox(out, x + Math.cos(a) * radius * 0.18, y, z + Math.sin(a) * radius * 0.18, sx, height, sz, color, 1, shine, glow);
+        }
+    }
+
+    function pushGem(out, x, y, z, size, color, glow = 0.25) {
+        pushBox(out, x, y, z, size, size, size, color, 1, 0.9, glow);
+        pushBox(out, x, y + size * 0.55, z, size * 0.66, size * 0.34, size * 0.66, color, 1, 1.0, glow);
     }
 
     function squareCenter(r, c) {
@@ -566,13 +803,24 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(127.1,311.7))) * 4
 
     function buildInstances(time) {
         const out = [];
-        pushBox(out, 0, -0.42, 0, BOARD + 1.6, 0.6, BOARD + 1.6, [0.24, 0.16, 0.08], 1, 0.35, 0);
-        pushBox(out, 0, -0.16, 0, BOARD + 0.42, 0.16, BOARD + 0.42, [0.84, 0.62, 0.28], 1, 0.75, 0.03);
+        pushBox(out, 0, -0.74, 0, BOARD + 8, 0.12, BOARD + 8, [0.035, 0.035, 0.045], 1, 0.18, 0);
+        pushBox(out, 0, -0.48, 0, BOARD + 2.6, 0.72, BOARD + 2.6, [0.09, 0.055, 0.032], 1, 0.45, 0);
+        pushBox(out, 0, -0.16, 0, BOARD + 0.42, 0.16, BOARD + 0.42, [0.9, 0.63, 0.25], 1, 0.95, 0.04);
+        for (const sx of [-1, 1]) {
+            for (const sz of [-1, 1]) {
+                const px = sx * (BOARD * 0.5 + 1.4);
+                const pz = sz * (BOARD * 0.5 + 1.4);
+                pushColumn(out, px, 0.18, pz, 0.28, 1.65, [0.22, 0.17, 0.13], 0.35, 0);
+                pushBox(out, px, 1.18, pz, 0.34, 0.24, 0.34, [0.95, 0.55, 0.12], 1, 0.7, 0.35 + Math.sin(time * 4 + px) * 0.08);
+                pushBox(out, px, 1.42 + Math.sin(time * 5 + pz) * 0.05, pz, 0.18, 0.5, 0.18, [1.0, 0.32, 0.08], 1, 0.35, 0.65);
+            }
+        }
         for (let r = 0; r < 8; r++) {
             for (let c = 0; c < 8; c++) {
                 const [x, z] = squareCenter(r, c);
                 const light = (r + c) % 2 === 0;
-                pushBox(out, x, -0.02, z, SQ * 0.96, 0.16, SQ * 0.96, light ? [0.82, 0.72, 0.55] : [0.22, 0.17, 0.13], 1, light ? 0.4 : 0.22, 0);
+                pushBox(out, x, -0.02, z, SQ * 0.96, 0.16, SQ * 0.96, light ? [0.86, 0.76, 0.58] : [0.18, 0.13, 0.095], 1, light ? 0.62 : 0.28, 0);
+                pushBox(out, x, 0.08, z, SQ * 0.88, 0.018, SQ * 0.88, light ? [1.0, 0.88, 0.66] : [0.28, 0.2, 0.14], 0.6, light ? 0.75 : 0.45, 0.015);
             }
         }
         for (const m of legalMoves) {
@@ -588,15 +836,84 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(127.1,311.7))) * 4
             const [x, z] = squareCenter(hoverSquare.r, hoverSquare.c);
             pushBox(out, x, 0.19, z, SQ * 0.92, 0.04, SQ * 0.92, [0.46, 0.75, 0.95], 0.55, 0.15, 0.14);
         }
+        addMoveEffects(out, time);
+        addImportedModelAdornments(out, time);
         for (let r = 0; r < 8; r++) {
             for (let c = 0; c < 8; c++) {
                 const p = board[r][c];
                 if (!p) continue;
+                if (modelAssets && modelAssets[p.type]) continue;
                 const [x, z] = squareCenter(r, c);
                 addPiece(out, p, x, z, time, selected && selected.r === r && selected.c === c);
             }
         }
         return new Float32Array(out.slice(0, maxInstances * 12));
+    }
+
+    function addImportedModelAdornments(out, time) {
+        if (!modelAssets) return;
+        for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+                const p = board[r][c];
+                if (!p || !modelAssets[p.type]) continue;
+                const [x, z] = squareCenter(r, c);
+                const white = p.color === WHITE;
+                const metal = white ? [1.0, 0.78, 0.22] : [0.55, 0.62, 0.75];
+                const team = white ? [0.25, 0.46, 0.95] : [0.62, 0.06, 0.08];
+                const glow = selected && selected.r === r && selected.c === c ? 0.18 : 0.03;
+                pushBox(out, x, 0.12, z, 0.92, 0.08, 0.92, metal, 1, 0.8, glow);
+                if (p.type === 'p') {
+                    pushBox(out, x - 0.34, 0.82, z - 0.2, 0.13, 0.42, 0.08, metal, 1, 0.6, 0.02);
+                    pushBox(out, x - 0.34, 1.08, z - 0.2, 0.38, 0.26, 0.07, team, 1, 0.45, 0.02);
+                } else if (p.type === 'r') {
+                    pushBox(out, x, 1.65, z, 0.92, 0.14, 0.92, metal, 1, 0.85, 0.05);
+                    for (const dx of [-0.34, 0, 0.34]) pushBox(out, x + dx, 1.9, z, 0.14, 0.38, 0.62, metal, 1, 0.75, 0.03);
+                    pushBox(out, x, 2.25, z, 0.12, 0.8, 0.12, metal, 1, 0.8, 0.04);
+                    pushBox(out, x + 0.32, 2.45, z, 0.56, 0.32, 0.06, team, 1, 0.45, 0.05);
+                } else if (p.type === 'n') {
+                    pushBox(out, x, 0.96, z, 0.82, 0.16, 0.54, team, 1, 0.5, 0.04);
+                    pushBox(out, x, 1.14, z - 0.18, 0.18, 0.44, 0.12, metal, 1, 0.8, 0.06);
+                    pushGem(out, x, 1.42, z - 0.18, 0.18, metal, 0.22);
+                } else if (p.type === 'b') {
+                    pushBox(out, x - 0.36, 0.95, z, 0.12, 1.12, 0.12, metal, 1, 0.75, 0.06);
+                    pushGem(out, x - 0.36, 1.62 + Math.sin(time * 3) * 0.05, z, 0.22, [0.45, 0.82, 1.0], 0.55);
+                    pushBox(out, x + 0.26, 0.75, z, 0.2, 0.6, 0.08, team, 1, 0.45, 0.05);
+                } else if (p.type === 'q') {
+                    pushBox(out, x, 1.58, z, 0.58, 0.13, 0.58, metal, 1, 0.9, 0.08);
+                    for (const dx of [-0.24, 0, 0.24]) pushGem(out, x + dx, 1.82 + Math.abs(dx) * 0.35, z, 0.15, metal, 0.28);
+                    pushBox(out, x, 0.86, z + 0.36, 0.72, 0.62, 0.08, team, 1, 0.35, 0.05);
+                } else if (p.type === 'k') {
+                    pushBox(out, x, 1.62, z, 0.62, 0.14, 0.62, metal, 1, 0.95, 0.1);
+                    pushBox(out, x, 1.9, z, 0.14, 0.5, 0.14, metal, 1, 0.95, 0.16);
+                    pushBox(out, x, 2.08, z, 0.44, 0.11, 0.11, metal, 1, 0.95, 0.14);
+                    pushBox(out, x, 0.9, z + 0.38, 0.74, 0.78, 0.09, team, 1, 0.35, 0.05);
+                }
+            }
+        }
+    }
+
+    function addMoveEffects(out, time) {
+        fxEvents = fxEvents.filter(fx => time - fx.start < 1.35);
+        for (const fx of fxEvents) {
+            const age = time - fx.start;
+            const t = Math.min(1, age / 0.7);
+            const [fx0, fz0] = squareCenter(fx.from.r, fx.from.c);
+            const [fx1, fz1] = squareCenter(fx.to.r, fx.to.c);
+            const mx = fx0 + (fx1 - fx0) * t;
+            const mz = fz0 + (fz1 - fz0) * t;
+            const pulse = Math.max(0, 1 - age / 1.35);
+            pushBox(out, mx, 1.85 + Math.sin(t * Math.PI) * 0.8, mz, 0.24 + t * 0.5, 0.24, 0.24 + t * 0.5, [0.82, 0.9, 1.0], 0.9, 0.8, 0.35 * pulse);
+            const ring = SQ * (0.5 + age * 1.1);
+            pushBox(out, fx1, 0.26, fz1, ring, 0.035, 0.08, fx.capture ? [1.0, 0.2, 0.08] : [0.35, 0.75, 1.0], 0.85, 0.5, 0.35 * pulse);
+            pushBox(out, fx1, 0.27, fz1, 0.08, 0.035, ring, fx.capture ? [1.0, 0.2, 0.08] : [0.35, 0.75, 1.0], 0.85, 0.5, 0.35 * pulse);
+            if (fx.capture || fx.promotion) {
+                for (let i = 0; i < 8; i++) {
+                    const a = i * Math.PI * 0.25 + age * 1.8;
+                    const d = 0.35 + age * 1.25;
+                    pushGem(out, fx1 + Math.cos(a) * d, 0.75 + pulse * 0.9, fz1 + Math.sin(a) * d, 0.12 * pulse + 0.04, fx.promotion ? [1.0, 0.82, 0.22] : [1.0, 0.16, 0.08], 0.6 * pulse);
+                }
+            }
+        }
     }
 
     function addPiece(out, p, x, z, time, isSelected) {
@@ -720,9 +1037,45 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(127.1,311.7))) * 4
         pass.setVertexBuffer(0, vertexBuffer);
         pass.setVertexBuffer(1, instanceBuffer);
         pass.draw(36, instances.length / 12);
+        drawModelPieces(pass, vp);
         pass.end();
         device.queue.submit([encoder.finish()]);
         requestAnimationFrame(render);
+    }
+
+    function drawModelPieces(pass, vp) {
+        if (!modelAssets) return;
+        pass.setPipeline(meshPipeline);
+        pass.setBindGroup(0, meshBindGroup);
+        const uniforms = new Float32Array(40);
+        uniforms.set(vp, 0);
+        uniforms.set([camera.eye[0], camera.eye[1], camera.eye[2], 1], 16);
+        uniforms.set([-0.45, -0.9, -0.22, 0], 20);
+        for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+                const p = board[r][c];
+                if (!p || !modelAssets[p.type]) continue;
+                const asset = modelAssets[p.type];
+                const [x, z] = squareCenter(r, c);
+                const y = 0.16 + asset.yOffset + (selected && selected.r === r && selected.c === c ? 0.11 : 0);
+                const white = p.color === WHITE;
+                const color = white ? [0.92, 0.82, 0.62, 1] : [0.08, 0.095, 0.12, 1];
+                const shine = white ? 0.66 : 0.92;
+                uniforms.set([x, y, z, asset.scale], 24);
+                uniforms.set(color, 28);
+                uniforms.set([1, shine, selected && selected.r === r && selected.c === c ? 0.12 : 0.02, 0], 32);
+                device.queue.writeBuffer(meshUniformBuffer, 0, uniforms);
+                for (const primitive of asset.primitives) {
+                    pass.setVertexBuffer(0, primitive.vertex);
+                    if (primitive.index) {
+                        pass.setIndexBuffer(primitive.index, primitive.indexFormat);
+                        pass.drawIndexed(primitive.indexCount);
+                    } else {
+                        pass.draw(primitive.vertexCount);
+                    }
+                }
+            }
+        }
     }
 
     function pickSquare(clientX, clientY) {
@@ -818,6 +1171,7 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(127.1,311.7))) * 4
         bindEvents();
         updateHud();
         if (await initGpu()) {
+            await loadPieceModels();
             resize();
             requestAnimationFrame(render);
         }
