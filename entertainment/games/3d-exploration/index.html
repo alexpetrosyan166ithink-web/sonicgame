@@ -63,6 +63,10 @@
             position: fixed; top: 52px; left: 50%; transform: translateX(-50%);
             color: #8a7e6a; font-size: 11px; letter-spacing: 3px; z-index: 20;
         }
+        #time-display {
+            position: fixed; top: 30px; right: 30px;
+            color: #8a7e6a; font-size: 11px; letter-spacing: 2px; z-index: 20;
+        }
 
         #wave-announce {
             position: fixed; top: 40%; left: 50%; transform: translate(-50%,-50%);
@@ -212,6 +216,7 @@
 <div id="gun-display">PISTOL</div>
 <div id="wave-display">WAVE 1</div>
 <div id="kill-count">KILLS: 0</div>
+<div id="time-display">MIDNIGHT</div>
 <div id="wave-announce"><span id="wave-announce-text"></span><span class="sub" id="wave-announce-sub"></span></div>
 <div id="prize-popup"><span id="prize-text"></span><span class="prize-desc" id="prize-desc"></span></div>
 <div id="damage-flash"></div>
@@ -266,6 +271,12 @@ const WEAPONS = {
 let unlockedWeapons = ['pistol', 'sniper'];
 let currentWeapon = 'pistol';
 let ammoInMag = {}, ammoReserve = {};
+
+// Day/night cycle
+const DAY_CYCLE_DURATION = 120; // Full cycle in seconds (2 minutes)
+let dayTime = 0.75; // Start at night (0=noon, 0.5=sunset, 0.75=midnight, 1=noon)
+let sunLight, ambientLight, hemiLight, fillLight, rimLight;
+let starsMesh, moonMesh, moonGlowMesh;
 
 const MEDKIT_HEAL = 40, MEDKIT_PICKUP_DIST = 2.0;
 const GRAVITY = -25, JUMP_FORCE = 10, MOVE_SPEED = 7, SPRINT_MULT = 1.6;
@@ -411,32 +422,29 @@ function init() {
 // ============================================================
 
 function setupLights() {
-    // Ambient - slightly warm
-    scene.add(new THREE.AmbientLight(0x6a5870, 0.5));
+    ambientLight = new THREE.AmbientLight(0x6a5870, 0.5);
+    scene.add(ambientLight);
 
-    // Main directional (moonlight feel)
-    const dirLight = new THREE.DirectionalLight(0xc0a080, 1.2);
-    dirLight.position.set(-30, 50, -20);
-    dirLight.castShadow = true;
-    dirLight.shadow.mapSize.set(2048, 2048);
-    dirLight.shadow.camera.near = 1;
-    dirLight.shadow.camera.far = 120;
-    dirLight.shadow.camera.left = dirLight.shadow.camera.bottom = -50;
-    dirLight.shadow.camera.right = dirLight.shadow.camera.top = 50;
-    dirLight.shadow.bias = -0.001;
-    dirLight.shadow.normalBias = 0.02;
-    scene.add(dirLight);
+    sunLight = new THREE.DirectionalLight(0xc0a080, 1.2);
+    sunLight.position.set(-30, 50, -20);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.set(2048, 2048);
+    sunLight.shadow.camera.near = 1;
+    sunLight.shadow.camera.far = 120;
+    sunLight.shadow.camera.left = sunLight.shadow.camera.bottom = -50;
+    sunLight.shadow.camera.right = sunLight.shadow.camera.top = 50;
+    sunLight.shadow.bias = -0.001;
+    sunLight.shadow.normalBias = 0.02;
+    scene.add(sunLight);
 
-    // Blue fill from opposite
-    const fill = new THREE.DirectionalLight(0x4060a0, 0.3);
-    fill.position.set(20, 15, 30);
-    scene.add(fill);
+    fillLight = new THREE.DirectionalLight(0x4060a0, 0.3);
+    fillLight.position.set(20, 15, 30);
+    scene.add(fillLight);
 
-    // Hemisphere
-    scene.add(new THREE.HemisphereLight(0x5a5080, 0x2a2010, 0.4));
+    hemiLight = new THREE.HemisphereLight(0x5a5080, 0x2a2010, 0.4);
+    scene.add(hemiLight);
 
-    // Subtle red rim light from below for horror atmosphere
-    const rimLight = new THREE.DirectionalLight(0x802020, 0.15);
+    rimLight = new THREE.DirectionalLight(0x802020, 0.15);
     rimLight.position.set(0, -5, 0);
     scene.add(rimLight);
 }
@@ -765,23 +773,24 @@ function buildWorld() {
         );
     }
     starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
-    const starMat = new THREE.PointsMaterial({ color: 0xccccdd, size: 0.3, sizeAttenuation: true });
-    scene.add(new THREE.Points(starGeo, starMat));
+    const starMat = new THREE.PointsMaterial({ color: 0xccccdd, size: 0.3, sizeAttenuation: true, transparent: true, opacity: 1.0 });
+    starsMesh = new THREE.Points(starGeo, starMat);
+    scene.add(starsMesh);
 
     // Moon
     const moonGeo = new THREE.SphereGeometry(4, 16, 16);
-    const moonMat = new THREE.MeshBasicMaterial({ color: 0xd4c8a8 });
-    const moon = new THREE.Mesh(moonGeo, moonMat);
-    moon.position.set(-40, 55, -50);
-    scene.add(moon);
+    const moonMat = new THREE.MeshBasicMaterial({ color: 0xd4c8a8, transparent: true, opacity: 1.0 });
+    moonMesh = new THREE.Mesh(moonGeo, moonMat);
+    moonMesh.position.set(-40, 55, -50);
+    scene.add(moonMesh);
 
     // Moon glow
-    const moonGlow = new THREE.Mesh(
+    moonGlowMesh = new THREE.Mesh(
         new THREE.SphereGeometry(6, 16, 16),
         new THREE.MeshBasicMaterial({ color: 0xd4c8a8, transparent: true, opacity: 0.08 })
     );
-    moonGlow.position.copy(moon.position);
-    scene.add(moonGlow);
+    moonGlowMesh.position.copy(moonMesh.position);
+    scene.add(moonGlowMesh);
 
     // === GROUND DETAILS ===
     // Grass tufts
@@ -1721,6 +1730,183 @@ function updateCamera() {
 // WORLD ANIMATION
 // ============================================================
 
+// ============================================================
+// DAY/NIGHT CYCLE
+// ============================================================
+
+function lerpColor(a, b, t) {
+    const c = new THREE.Color();
+    c.r = a.r + (b.r - a.r) * t;
+    c.g = a.g + (b.g - a.g) * t;
+    c.b = a.b + (b.b - a.b) * t;
+    return c;
+}
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+// Time phases: 0.0=noon, 0.25=sunset, 0.5=dusk, 0.75=midnight, 1.0=noon
+const SKY_COLORS = {
+    noon:     new THREE.Color(0x5a7aaa), // Blue sky
+    sunset:   new THREE.Color(0x8a4030), // Orange-red
+    dusk:     new THREE.Color(0x2a1828), // Deep purple
+    midnight: new THREE.Color(0x0a0812), // Near black
+    dawn:     new THREE.Color(0x6a4050), // Pink-purple
+    morning:  new THREE.Color(0x7a8aaa), // Light blue
+};
+
+const FOG_COLORS = {
+    noon:     new THREE.Color(0x5a7090),
+    sunset:   new THREE.Color(0x6a3525),
+    dusk:     new THREE.Color(0x1a1020),
+    midnight: new THREE.Color(0x08060f),
+    dawn:     new THREE.Color(0x4a2838),
+    morning:  new THREE.Color(0x607088),
+};
+
+function updateDayNightCycle(delta) {
+    dayTime = (dayTime + delta / DAY_CYCLE_DURATION) % 1.0;
+
+    // Convert dayTime (0-1) to a smooth cycle
+    // 0.0 = noon, 0.125 = afternoon, 0.25 = sunset, 0.375 = dusk,
+    // 0.5 = night, 0.75 = midnight, 0.875 = dawn, 1.0 = noon
+    const t = dayTime;
+
+    // Determine sky & fog color by interpolating between phases
+    let skyColor, fogColor, sunIntensity, ambientIntensity, hemiIntensity;
+    let sunColor, fillIntensity, starOpacity, moonOpacity;
+    let sunAngle; // Sun/moon position angle
+
+    if (t < 0.15) {
+        // Noon -> Afternoon
+        const p = t / 0.15;
+        skyColor = lerpColor(SKY_COLORS.noon, SKY_COLORS.noon, p);
+        fogColor = lerpColor(FOG_COLORS.noon, FOG_COLORS.noon, p);
+        sunIntensity = 1.4; ambientIntensity = 0.7; hemiIntensity = 0.6;
+        fillIntensity = 0.4; starOpacity = 0; moonOpacity = 0;
+        sunColor = new THREE.Color(0xffeedd);
+    } else if (t < 0.3) {
+        // Afternoon -> Sunset
+        const p = (t - 0.15) / 0.15;
+        skyColor = lerpColor(SKY_COLORS.noon, SKY_COLORS.sunset, p);
+        fogColor = lerpColor(FOG_COLORS.noon, FOG_COLORS.sunset, p);
+        sunIntensity = lerp(1.4, 0.9, p); ambientIntensity = lerp(0.7, 0.4, p);
+        hemiIntensity = lerp(0.6, 0.35, p); fillIntensity = lerp(0.4, 0.2, p);
+        starOpacity = lerp(0, 0.3, p); moonOpacity = lerp(0, 0.3, p);
+        sunColor = lerpColor(new THREE.Color(0xffeedd), new THREE.Color(0xff8844), p);
+    } else if (t < 0.4) {
+        // Sunset -> Dusk
+        const p = (t - 0.3) / 0.1;
+        skyColor = lerpColor(SKY_COLORS.sunset, SKY_COLORS.dusk, p);
+        fogColor = lerpColor(FOG_COLORS.sunset, FOG_COLORS.dusk, p);
+        sunIntensity = lerp(0.9, 0.3, p); ambientIntensity = lerp(0.4, 0.2, p);
+        hemiIntensity = lerp(0.35, 0.2, p); fillIntensity = lerp(0.2, 0.1, p);
+        starOpacity = lerp(0.3, 0.8, p); moonOpacity = lerp(0.3, 0.7, p);
+        sunColor = lerpColor(new THREE.Color(0xff8844), new THREE.Color(0x6a5a80), p);
+    } else if (t < 0.6) {
+        // Dusk -> Midnight (deep night)
+        const p = (t - 0.4) / 0.2;
+        skyColor = lerpColor(SKY_COLORS.dusk, SKY_COLORS.midnight, p);
+        fogColor = lerpColor(FOG_COLORS.dusk, FOG_COLORS.midnight, p);
+        sunIntensity = lerp(0.3, 0.15, p); ambientIntensity = lerp(0.2, 0.1, p);
+        hemiIntensity = lerp(0.2, 0.1, p); fillIntensity = lerp(0.1, 0.05, p);
+        starOpacity = lerp(0.8, 1.0, p); moonOpacity = lerp(0.7, 1.0, p);
+        sunColor = lerpColor(new THREE.Color(0x6a5a80), new THREE.Color(0x3040a0), p);
+    } else if (t < 0.75) {
+        // Midnight -> stays dark
+        const p = (t - 0.6) / 0.15;
+        skyColor = lerpColor(SKY_COLORS.midnight, SKY_COLORS.midnight, p);
+        fogColor = lerpColor(FOG_COLORS.midnight, FOG_COLORS.midnight, p);
+        sunIntensity = 0.15; ambientIntensity = 0.1; hemiIntensity = 0.1;
+        fillIntensity = 0.05; starOpacity = 1.0; moonOpacity = 1.0;
+        sunColor = new THREE.Color(0x3040a0);
+    } else if (t < 0.85) {
+        // Midnight -> Dawn
+        const p = (t - 0.75) / 0.1;
+        skyColor = lerpColor(SKY_COLORS.midnight, SKY_COLORS.dawn, p);
+        fogColor = lerpColor(FOG_COLORS.midnight, FOG_COLORS.dawn, p);
+        sunIntensity = lerp(0.15, 0.5, p); ambientIntensity = lerp(0.1, 0.3, p);
+        hemiIntensity = lerp(0.1, 0.3, p); fillIntensity = lerp(0.05, 0.15, p);
+        starOpacity = lerp(1.0, 0.3, p); moonOpacity = lerp(1.0, 0.4, p);
+        sunColor = lerpColor(new THREE.Color(0x3040a0), new THREE.Color(0xdd7755), p);
+    } else if (t < 0.95) {
+        // Dawn -> Morning
+        const p = (t - 0.85) / 0.1;
+        skyColor = lerpColor(SKY_COLORS.dawn, SKY_COLORS.morning, p);
+        fogColor = lerpColor(FOG_COLORS.dawn, FOG_COLORS.morning, p);
+        sunIntensity = lerp(0.5, 1.2, p); ambientIntensity = lerp(0.3, 0.6, p);
+        hemiIntensity = lerp(0.3, 0.55, p); fillIntensity = lerp(0.15, 0.35, p);
+        starOpacity = lerp(0.3, 0, p); moonOpacity = lerp(0.4, 0, p);
+        sunColor = lerpColor(new THREE.Color(0xdd7755), new THREE.Color(0xffeedd), p);
+    } else {
+        // Morning -> Noon
+        const p = (t - 0.95) / 0.05;
+        skyColor = lerpColor(SKY_COLORS.morning, SKY_COLORS.noon, p);
+        fogColor = lerpColor(FOG_COLORS.morning, FOG_COLORS.noon, p);
+        sunIntensity = lerp(1.2, 1.4, p); ambientIntensity = lerp(0.6, 0.7, p);
+        hemiIntensity = lerp(0.55, 0.6, p); fillIntensity = lerp(0.35, 0.4, p);
+        starOpacity = 0; moonOpacity = 0;
+        sunColor = new THREE.Color(0xffeedd);
+    }
+
+    // Apply sky & fog
+    scene.background.copy(skyColor);
+    scene.fog.color.copy(fogColor);
+
+    // Sun position rotates with time (high at noon, low at sunset/dawn, below at night)
+    sunAngle = t * Math.PI * 2;
+    sunLight.position.set(
+        Math.cos(sunAngle) * 50,
+        Math.sin(sunAngle) * 50 + 10,
+        -20
+    );
+    sunLight.color.copy(sunColor);
+    sunLight.intensity = sunIntensity;
+
+    // Other lights
+    ambientLight.intensity = ambientIntensity;
+    hemiLight.intensity = hemiIntensity;
+    fillLight.intensity = fillIntensity;
+
+    // Rim light stronger at night for horror feel
+    const nightAmount = Math.max(0, 1 - sunIntensity / 1.4);
+    rimLight.intensity = 0.05 + nightAmount * 0.2;
+
+    // Stars and moon fade
+    if (starsMesh) starsMesh.material.opacity = starOpacity;
+    if (moonMesh) moonMesh.material.opacity = moonOpacity;
+    if (moonGlowMesh) moonGlowMesh.material.opacity = moonOpacity * 0.08;
+
+    // Fog distance - closer at night, farther during day
+    scene.fog.near = lerp(25, 12, nightAmount);
+    scene.fog.far = lerp(90, 55, nightAmount);
+
+    // Tone mapping exposure
+    renderer.toneMappingExposure = lerp(1.3, 0.7, nightAmount);
+
+    // Update time display
+    updateTimeDisplay(t);
+}
+
+function updateTimeDisplay(t) {
+    let label;
+    if (t < 0.1) label = 'NOON';
+    else if (t < 0.2) label = 'AFTERNOON';
+    else if (t < 0.32) label = 'SUNSET';
+    else if (t < 0.42) label = 'DUSK';
+    else if (t < 0.6) label = 'NIGHT';
+    else if (t < 0.78) label = 'MIDNIGHT';
+    else if (t < 0.87) label = 'DAWN';
+    else if (t < 0.96) label = 'MORNING';
+    else label = 'NOON';
+
+    // Clock time (0=noon=12:00, 0.5=midnight=0:00)
+    const hours = Math.floor(((t * 24) + 12) % 24);
+    const mins = Math.floor((((t * 24) + 12) % 1) * 60);
+    const timeStr = String(hours).padStart(2,'0') + ':' + String(mins).padStart(2,'0');
+
+    document.getElementById('time-display').textContent = timeStr + ' ' + label;
+}
+
 function updateWorld(time) {
     scene.traverse(obj => {
         if (obj.userData && obj.userData.isFlame) {
@@ -1730,7 +1916,9 @@ function updateWorld(time) {
                 obj.scale.set(1+Math.sin(t*1.5)*0.3, 1.8+Math.sin(t*2.3)*0.4, 1+Math.cos(t*1.9)*0.3);
             } else {
                 obj.scale.set(1+Math.sin(t*1.3)*0.25, 2+Math.sin(t*2.1)*0.4, 1+Math.cos(t*1.7)*0.25);
-                if (obj.userData.light) obj.userData.light.intensity = 0.7 + Math.sin(t*3)*0.2;
+                // Torch lights brighter at night
+                const nightBoost = Math.max(0, 1 - sunLight.intensity / 1.4);
+                if (obj.userData.light) obj.userData.light.intensity = (0.4 + nightBoost * 0.8) + Math.sin(t*3)*0.2;
             }
         }
     });
@@ -1754,6 +1942,7 @@ function animate() {
     if (isReloading) { reloadTimer -= delta; if (reloadTimer <= 0) finishReload(); }
     if (mouseHeld && document.pointerLockElement) shoot();
 
+    updateDayNightCycle(delta);
     updatePlayer(delta);
     updateCamera();
     updateBullets(delta);

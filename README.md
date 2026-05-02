@@ -80,6 +80,11 @@ WebGPU-powered 3D chess with a cinematic board, procedural character pieces, ful
 
 **Controls:** Click/Tap=Select and move, Drag=Orbit camera, Wheel/Pinch=Zoom
 
+### Monster Catch 3D
+Original 3D creature-catching adventure with roaming exploration, capture capsules, a field lab refill loop, and a persistent local collection.
+
+**Controls:** WASD/Arrows=Move, Space/Click=Throw Capsule, E=Scan, P=Pause
+
 ### Math Obby
 2D side-scrolling platformer obstacle course with math gates. Players run, jump, and solve math questions to progress through 5 levels of increasing difficulty. Features a hero shop, procedural chiptune music, and persistent coin economy.
 
@@ -176,7 +181,7 @@ Each quiz topic has a unique icon/thumbnail.
 
 ## Mobile Touch Controls
 
-All 5 games support mobile devices with virtual on-screen controls:
+Several games support mobile devices with virtual on-screen controls:
 
 | Game | D-Pad | Action Buttons |
 |------|-------|---------------|
@@ -187,6 +192,7 @@ All 5 games support mobile devices with virtual on-screen controls:
 | Tanks | 4-direction | Fire |
 | Dead Ruins | WASD (on-screen) | Shoot, Weapons |
 | 3D Royal Chess | Tap board | Drag orbit, pinch zoom |
+| Monster Catch 3D | D-pad | Catch, Scan, Pause |
 | Math Obby | Left/Right | Jump (tap 2x for double jump) |
 
 - Controls auto-detected via `@media (pointer: coarse)` — only shown on touch devices
@@ -212,14 +218,14 @@ Every page includes:
 | Page | Schemas |
 |------|---------|
 | Home | WebSite, Organization, BreadcrumbList, ItemList |
-| Entertainment | BreadcrumbList, CollectionPage, ItemList with 9x VideoGame |
+| Entertainment | BreadcrumbList, CollectionPage, ItemList with 10x VideoGame |
 | Educational | BreadcrumbList, CollectionPage, ItemList with Quiz |
 | Grammar Quizzes Hub | BreadcrumbList, ItemList with 5x Quiz |
 | Each Quiz | BreadcrumbList, Quiz |
 
 ### Technical SEO Files
 - `robots.txt` — allows all crawlers, references sitemap
-- `sitemap.xml` — all 14 pages with priority hierarchy (1.0 home → 0.7 leaf pages)
+- `sitemap.xml` — all 15 pages with priority hierarchy (1.0 home → 0.7 leaf pages)
 
 ---
 
@@ -230,7 +236,7 @@ alexgames.am/
 ├── index.html                              # Home - 2 category cards
 ├── CNAME                                   # Custom domain (alexgames.am)
 ├── robots.txt                              # Search engine crawler rules
-├── sitemap.xml                             # All 14 pages for search engines
+├── sitemap.xml                             # All 15 pages for search engines
 ├── README.md
 ├── assets/
 │   ├── styles/
@@ -257,7 +263,7 @@ alexgames.am/
 │           ├── play-icon.svg
 │           └── lock-icon.svg
 ├── entertainment/
-│   ├── index.html                          # Entertainment landing - 9 game cards
+│   ├── index.html                          # Entertainment landing - 10 game cards
 │   └── games/
 │       ├── sonic/
 │       │   ├── index.html
@@ -286,6 +292,8 @@ alexgames.am/
 │       │   ├── index.html
 │       │   ├── game.js                     # WebGPU 3D chess
 │       │   └── style.css
+│       ├── monster-catch-3d/
+│       │   └── index.html                  # Monster Catch 3D - creature-catching adventure
 │       └── math-obby/
 │           └── index.html                  # Math Obby - single-file platformer
 └── educational/

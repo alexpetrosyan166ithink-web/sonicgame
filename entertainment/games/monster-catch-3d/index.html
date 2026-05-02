@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="../../../assets/images/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monster Catch 3D - WebGL Creature Adventure | Alex Games</title>
+    <meta name="description" content="Roam a 3D meadow, find original wild creatures, throw capture capsules, and build your collection in this browser monster-catching adventure.">
+    <meta name="keywords" content="monster catching game, 3D creature game, browser adventure, WebGL game, Three.js game, collection game, Alex Games">
+    <meta name="author" content="Alex Games">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://alexgames.am/entertainment/games/monster-catch-3d/">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://alexgames.am/entertainment/games/monster-catch-3d/">
+    <meta property="og:title" content="Monster Catch 3D - WebGL Creature Adventure">
+    <meta property="og:description" content="An original monster-catching adventure with 3D exploration, capture capsules, and a living creature collection.">
+    <meta property="og:image" content="https://alexgames.am/assets/images/game-thumbnails/monster-catch-3d-thumb.svg">
+    <meta property="og:site_name" content="Alex Games">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Monster Catch 3D - WebGL Creature Adventure">
+    <meta name="twitter:description" content="Catch original 3D creatures, explore the meadow, and complete your local dex in the browser.">
+    <meta name="twitter:image" content="https://alexgames.am/assets/images/game-thumbnails/monster-catch-3d-thumb.svg">
+    <link rel="stylesheet" href="style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "Monster Catch 3D",
+        "description": "A browser-based 3D creature-catching adventure with roaming exploration, capture capsules, and a persistent collection.",
+        "url": "https://alexgames.am/entertainment/games/monster-catch-3d/",
+        "genre": "Adventure",
+        "gamePlatform": "Web Browser",
+        "applicationCategory": "Game",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        }
+    }
+    </script>
+</head>
+<body>
+    <a class="back-link" href="../../">Back To Entertainment</a>
+
+    <main id="game-container" class="shell">
+        <section class="stage-shell" aria-label="Monster Catch 3D game area">
+            <div class="stage-topbar">
+                <div class="pill pill--accent">Monster Catch 3D</div>
+                <div class="pill" id="sceneLabel">Meadow Field</div>
+                <div class="button-row">
+                    <button id="pauseBtn" type="button">Pause</button>
+                    <button id="resetBtn" type="button">Reset Run</button>
+                    <button id="recenterBtn" type="button">Center</button>
+                </div>
+            </div>
+
+            <canvas id="scene" aria-label="3D creature catching adventure"></canvas>
+
+            <div id="unsupported" class="overlay hidden" role="alert">
+                <h2>WebGL is not available.</h2>
+                <p>This game needs a WebGL-capable browser. Try a recent version of Chrome or Edge.</p>
+            </div>
+
+            <div id="start-screen" class="overlay">
+                <div class="overlay-card">
+                    <p class="eyebrow">Alex Games</p>
+                    <h1>Monster Catch 3D</h1>
+                    <p class="lede">Explore a living meadow, find original wild creatures, and toss capsules to fill your local collection.</p>
+                    <div class="control-list">
+                        <div><span>WASD / Arrows</span> Move</div>
+                        <div><span>Space / Click</span> Throw Capsule</div>
+                        <div><span>E</span> Scan Creature</div>
+                        <div><span>P</span> Pause</div>
+                    </div>
+                    <button id="startBtn" type="button" class="primary-btn">Start Adventure</button>
+                </div>
+            </div>
+
+            <div id="pause-screen" class="overlay hidden">
+                <div class="overlay-card">
+                    <p class="eyebrow">Paused</p>
+                    <h2>Field Log</h2>
+                    <p class="lede">Your creatures are waiting. Resume the expedition or reset the current run.</p>
+                    <div class="button-row button-row--center">
+                        <button id="resumeBtn" type="button" class="primary-btn">Resume</button>
+                        <button id="restartBtn" type="button">Reset Run</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="complete-screen" class="overlay hidden">
+                <div class="overlay-card">
+                    <p class="eyebrow">Collection Complete</p>
+                    <h2>Local Dex Filled</h2>
+                    <p class="lede" id="completeText"></p>
+                    <div class="button-row button-row--center">
+                        <button id="continueBtn" type="button" class="primary-btn">Keep Exploring</button>
+                        <button id="newRunBtn" type="button">New Run</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="status-bar" aria-live="polite"></div>
+        </section>
+
+        <aside class="hud-panel">
+            <div class="hero-copy">
+                <p class="eyebrow">WebGL adventure</p>
+                <h1>Catch original monsters in a small open field.</h1>
+                <p class="summary">Walk the meadow, scan nearby creatures, throw capsules, and build a persistent collection saved in your browser.</p>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Capsules</span>
+                    <strong id="ballsLabel">24</strong>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Caught</span>
+                    <strong id="caughtLabel">0 / 5</strong>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Coins</span>
+                    <strong id="coinsLabel">0</strong>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Target</span>
+                    <strong id="targetLabel">None</strong>
+                </div>
+            </div>
+
+            <section class="panel-block">
+                <div class="panel-head">
+                    <h2>Creature Log</h2>
+                    <span id="progressLabel">0 / 5 captured</span>
+                </div>
+                <div id="dexGrid" class="dex-grid"></div>
+            </section>
+
+            <section class="panel-block">
+                <div class="panel-head">
+                    <h2>Field Notes</h2>
+                    <span id="scanLabel">Move close and press Scan</span>
+                </div>
+                <div class="detail-card">
+                    <div class="detail-spot" id="detailSpot"></div>
+                    <div class="detail-copy">
+                        <h3 id="detailName">No creature targeted</h3>
+                        <p id="detailType">Walk toward a wild creature to lock the nearest one.</p>
+                        <p id="detailDesc">Captured creatures are saved locally and remain visible in the log after a reload.</p>
+                    </div>
+                </div>
+            </section>
+
+            <p class="hint">Desktop: use WASD, Space, and E. On touch devices the game adds virtual controls automatically.</p>
+        </aside>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../../../assets/js/mobile-touch.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
