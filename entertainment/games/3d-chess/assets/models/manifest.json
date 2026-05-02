@@ -1,6 +1,6 @@
 {
-  "enabled": true,
-  "notes": "Remote free/Creative Commons GLB assets are attempted first. They are deliberately not only chess assets: the game customizes soldiers, horses, castles, books, and characters into chess roles with procedural crowns, shields, staffs, banners, glows, and team materials. If a browser cannot fetch them because of network or CORS restrictions, the game falls back to the built-in procedural WebGPU character pieces.",
+  "enabled": false,
+  "notes": "Remote free/Creative Commons GLB asset URLs are documented below, but disabled for production because the current CDN host does not resolve reliably from alexgames.am browsers. The game uses built-in procedural WebGPU character pieces until local GLB files are added or a stable CDN is selected.",
   "attribution": [
     {
       "title": "Filer free 3D chess GLB listings",

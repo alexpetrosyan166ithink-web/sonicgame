@@ -553,7 +553,7 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(127.1,311.7))) * 4
  let torch = vec3<f32>(1.0, 0.45, 0.12) * max(0.0, 1.0 - distance(i.wp.xz, vec2<f32>(-6.8, -6.8)) * 0.16) * 0.45;
  let glow = i.c * i.flags.z;
  let fog = clamp((distance(u.cam.xyz, i.wp) - 11.0) / 28.0, 0.0, 1.0);
- let lit = i.c * (0.28 + l * 0.98 + sparkle) + vec3<f32>(spec) + fresnel + glow + torch;
+ var lit = i.c * (0.28 + l * 0.98 + sparkle) + vec3<f32>(spec) + fresnel + glow + torch;
  lit = mix(lit, vec3<f32>(0.045, 0.046, 0.058), fog * 0.34);
  return vec4<f32>(lit, max(0.18, i.flags.x));
 }` });
