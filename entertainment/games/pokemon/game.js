@@ -1,4 +1,4 @@
-// Pokemon Battle 3D — Three.js
+// Pokemon Battle 3D - Three.js
 // =========================================================
 // CONFIG
 // =========================================================
@@ -36,68 +36,32 @@ function initThree() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    if (THREE.ACESFilmicToneMapping) renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.08;
     container.appendChild(renderer.domElement);
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87ceeb);
-    scene.fog = new THREE.Fog(0xa0c4e0, 30, 80);
+    scene.background = new THREE.Color(0xb6dcff);
+    scene.fog = new THREE.Fog(0xb6dcff, 18, 70);
 
     camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 200);
     updateCamera();
 
-    const ambient = new THREE.AmbientLight(0xffffff, 0.55);
+    const ambient = new THREE.HemisphereLight(0xddeeff, 0x5b4a34, 0.72);
     scene.add(ambient);
-    const sun = new THREE.DirectionalLight(0xfff5d8, 1.0);
-    sun.position.set(8, 16, 6);
+    const sun = new THREE.DirectionalLight(0xfff1c7, 1.45);
+    sun.position.set(8, 18, 10);
     sun.castShadow = true;
-    sun.shadow.mapSize.set(1024, 1024);
-    sun.shadow.camera.left = -20; sun.shadow.camera.right = 20;
-    sun.shadow.camera.top = 20; sun.shadow.camera.bottom = -20;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.camera.left = -24; sun.shadow.camera.right = 24;
+    sun.shadow.camera.top = 24; sun.shadow.camera.bottom = -24;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 48;
     scene.add(sun);
-    const rim = new THREE.DirectionalLight(0xa0c0ff, 0.35);
-    rim.position.set(-6, 8, -6);
+    const rim = new THREE.DirectionalLight(0x89b8ff, 0.72);
+    rim.position.set(-8, 7, -8);
     scene.add(rim);
-
-    const grassGeo = new THREE.CircleGeometry(40, 64);
-    grassGeo.rotateX(-Math.PI / 2);
-    const grassMat = new THREE.MeshStandardMaterial({ color: 0x6ba03f, roughness: 0.9 });
-    const ground = new THREE.Mesh(grassGeo, grassMat);
-    ground.receiveShadow = true;
-    scene.add(ground);
-
-    const padGeo = new THREE.CylinderGeometry(2.2, 2.4, 0.18, 32);
-    const playerPad = new THREE.Mesh(padGeo, new THREE.MeshStandardMaterial({ color: 0x4f8a2a, roughness: 0.85 }));
-    playerPad.position.set(-3.5, 0.09, 2.4); playerPad.receiveShadow = true; scene.add(playerPad);
-    const enemyPad = new THREE.Mesh(padGeo, new THREE.MeshStandardMaterial({ color: 0x528f30, roughness: 0.85 }));
-    enemyPad.position.set(3.5, 0.09, -2.4); enemyPad.receiveShadow = true; scene.add(enemyPad);
-
-    // distant trees
-    for (let i = 0; i < 18; i++) {
-        const angle = (i / 18) * Math.PI * 2;
-        const r = 16 + Math.random() * 8;
-        const tx = Math.cos(angle) * r, tz = Math.sin(angle) * r;
-        const trunk = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.18, 0.22, 1.2, 6),
-            new THREE.MeshStandardMaterial({ color: 0x6b4226 })
-        );
-        trunk.position.set(tx, 0.6, tz);
-        const leaves = new THREE.Mesh(
-            new THREE.SphereGeometry(0.9 + Math.random() * 0.3, 8, 6),
-            new THREE.MeshStandardMaterial({ color: 0x3d8b2e })
-        );
-        leaves.position.set(tx, 1.7, tz);
-        scene.add(trunk); scene.add(leaves);
-    }
-    // clouds
-    for (let i = 0; i < 8; i++) {
-        const cloud = new THREE.Mesh(
-            new THREE.SphereGeometry(1.5 + Math.random() * 0.8, 8, 6),
-            new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 })
-        );
-        cloud.position.set(-20 + Math.random() * 40, 10 + Math.random() * 6, -20 + Math.random() * 40);
-        cloud.scale.set(2 + Math.random(), 0.8, 1.2 + Math.random() * 0.5);
-        scene.add(cloud);
-    }
+    createBattleArena();
 
     clock = new THREE.Clock();
 
@@ -149,15 +113,127 @@ function updateCamera() {
 function mesh(geom, color, opts = {}) {
     const mat = new THREE.MeshStandardMaterial({
         color, roughness: opts.roughness ?? 0.6, metalness: opts.metalness ?? 0.0,
-        emissive: opts.emissive ?? 0x000000, emissiveIntensity: opts.emissiveIntensity ?? 0
+        emissive: opts.emissive ?? 0x000000, emissiveIntensity: opts.emissiveIntensity ?? 0,
+        transparent: opts.transparent ?? false, opacity: opts.opacity ?? 1,
+        side: opts.side ?? THREE.FrontSide
     });
     const m = new THREE.Mesh(geom, mat);
     m.castShadow = true;
+    m.receiveShadow = Boolean(opts.receiveShadow);
     return m;
 }
-function sphere(r, color, opts) { return mesh(new THREE.SphereGeometry(r, 16, 12), color, opts); }
+function sphere(r, color, opts) { return mesh(new THREE.SphereGeometry(r, 24, 18), color, opts); }
 function ellipsoid(rx, ry, rz, color, opts) { const m = sphere(1, color, opts); m.scale.set(rx, ry, rz); return m; }
 function box(w, h, d, color, opts) { return mesh(new THREE.BoxGeometry(w, h, d), color, opts); }
+function cylinder(rt, rb, h, color, opts) { return mesh(new THREE.CylinderGeometry(rt, rb, h, opts?.segments ?? 18), color, opts); }
+function cone(r, h, color, opts) { return mesh(new THREE.ConeGeometry(r, h, opts?.segments ?? 18), color, opts); }
+function addPart(group, part, pos = [0, 0, 0], rot = [0, 0, 0]) {
+    part.position.set(pos[0], pos[1], pos[2]);
+    part.rotation.set(rot[0], rot[1], rot[2]);
+    group.add(part);
+    return part;
+}
+function addEye(group, x, y, z, pupil = 0x202020, glow = 0) {
+    addPart(group, sphere(0.105, 0xffffff, { roughness: 0.25 }), [x, y, z]);
+    addPart(group, sphere(0.052, pupil, { emissive: pupil, emissiveIntensity: glow, roughness: 0.25 }), [x, y, z + 0.085]);
+}
+function makeWing(color, accent) {
+    const wing = new THREE.Group();
+    const membrane = mesh(new THREE.CircleGeometry(0.9, 3), accent, {
+        roughness: 0.74,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.9
+    });
+    membrane.scale.set(1.1, 1.65, 1);
+    membrane.rotation.z = Math.PI / 6;
+    wing.add(membrane);
+    addPart(wing, cylinder(0.045, 0.06, 1.7, color), [0.05, 0, 0], [0, 0, -0.55]);
+    addPart(wing, cylinder(0.035, 0.05, 1.25, color), [0.42, -0.12, 0], [0, 0, 0.2]);
+    return wing;
+}
+
+function createBattleArena() {
+    const groundGeo = new THREE.CircleGeometry(42, 96);
+    groundGeo.rotateX(-Math.PI / 2);
+    const ground = mesh(groundGeo, 0x5f9f45, { roughness: 0.96, receiveShadow: true });
+    scene.add(ground);
+
+    const arena = mesh(new THREE.CylinderGeometry(7.2, 7.8, 0.34, 96), 0xb7955e, { roughness: 0.88, receiveShadow: true });
+    arena.scale.set(1.32, 1, 0.82);
+    arena.position.y = 0.12;
+    scene.add(arena);
+
+    const turf = mesh(new THREE.CylinderGeometry(6.65, 6.95, 0.13, 96), 0x6fb055, { roughness: 0.92, receiveShadow: true });
+    turf.scale.set(1.24, 1, 0.74);
+    turf.position.y = 0.38;
+    scene.add(turf);
+
+    const lineMat = new THREE.MeshBasicMaterial({ color: 0xf5e8ba, transparent: true, opacity: 0.78 });
+    const centerLine = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.018, 8.2), lineMat);
+    centerLine.position.y = 0.47;
+    centerLine.receiveShadow = true;
+    scene.add(centerLine);
+
+    const padGeo = new THREE.CylinderGeometry(2.25, 2.45, 0.22, 48);
+    [['player', -3.5, 2.4, 0x4f8a35], ['enemy', 3.5, -2.4, 0x568f3c]].forEach(([, x, z, color]) => {
+        const pad = mesh(padGeo, color, { roughness: 0.8, receiveShadow: true });
+        pad.position.set(x, 0.55, z);
+        scene.add(pad);
+        const ring = mesh(new THREE.TorusGeometry(2.18, 0.035, 10, 64), 0xf8e8b0, { roughness: 0.5 });
+        ring.position.set(x, 0.68, z);
+        ring.rotation.x = Math.PI / 2;
+        scene.add(ring);
+    });
+
+    for (let i = 0; i < 58; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const r = 8 + Math.random() * 27;
+        const x = Math.cos(angle) * r;
+        const z = Math.sin(angle) * r;
+        if (Math.abs(x) < 8 && Math.abs(z) < 6) continue;
+        const blade = cone(0.08 + Math.random() * 0.06, 0.65 + Math.random() * 0.7, 0x3f7d32, { roughness: 1, segments: 6 });
+        blade.position.set(x, 0.32, z);
+        blade.rotation.z = (Math.random() - 0.5) * 0.35;
+        scene.add(blade);
+    }
+
+    for (let i = 0; i < 22; i++) {
+        const angle = (i / 22) * Math.PI * 2 + Math.random() * 0.1;
+        const r = 17 + Math.random() * 9;
+        const tx = Math.cos(angle) * r, tz = Math.sin(angle) * r;
+        const trunk = cylinder(0.18, 0.28, 1.9 + Math.random() * 0.9, 0x6b4629, { segments: 8 });
+        trunk.position.set(tx, 0.95, tz);
+        const leaves = ellipsoid(1.15 + Math.random() * 0.45, 1.25, 1.05, 0x356f2e, { roughness: 0.9 });
+        leaves.position.set(tx, 2.35 + Math.random() * 0.4, tz);
+        scene.add(trunk); scene.add(leaves);
+    }
+
+    for (let i = 0; i < 14; i++) {
+        const rock = ellipsoid(0.45 + Math.random() * 0.5, 0.24 + Math.random() * 0.25, 0.34 + Math.random() * 0.45, 0x8f8a78, { roughness: 0.95 });
+        const angle = Math.random() * Math.PI * 2;
+        const r = 9 + Math.random() * 12;
+        rock.position.set(Math.cos(angle) * r, 0.22, Math.sin(angle) * r);
+        rock.rotation.y = Math.random() * Math.PI;
+        scene.add(rock);
+    }
+
+    for (let i = 0; i < 9; i++) {
+        const cloud = new THREE.Group();
+        for (let j = 0; j < 4; j++) {
+            const puff = new THREE.Mesh(
+                new THREE.SphereGeometry(0.9 + Math.random() * 0.45, 16, 10),
+                new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.82 })
+            );
+            puff.position.set(j * 0.85, Math.random() * 0.25, (Math.random() - 0.5) * 0.35);
+            puff.scale.y = 0.55;
+            cloud.add(puff);
+        }
+        cloud.position.set(-24 + Math.random() * 48, 9 + Math.random() * 6, -26 + Math.random() * 42);
+        cloud.scale.setScalar(1.2 + Math.random() * 0.8);
+        scene.add(cloud);
+    }
+}
 
 // =========================================================
 // POKEMON BUILDERS
@@ -189,6 +265,12 @@ const BUILDERS = {
         tail.position.set(0, 0.3, -0.7); tail.rotation.x = -0.5; g.add(tail);
         const footL = ellipsoid(0.22, 0.12, 0.3, 0xfcd83d); footL.position.set(-0.35, 0.12, 0.15); g.add(footL);
         const footR = ellipsoid(0.22, 0.12, 0.3, 0xfcd83d); footR.position.set(0.35, 0.12, 0.15); g.add(footR);
+        addPart(g, ellipsoid(0.18, 0.13, 0.12, 0xf7c83b), [-0.58, 1.0, 0.32], [0, 0, 0.45]);
+        addPart(g, ellipsoid(0.18, 0.13, 0.12, 0xf7c83b), [0.58, 1.0, 0.32], [0, 0, -0.45]);
+        addPart(g, ellipsoid(0.045, 0.02, 0.05, 0xffffff, { roughness: 0.18 }), [-0.19, 1.98, 0.56]);
+        addPart(g, ellipsoid(0.045, 0.02, 0.05, 0xffffff, { roughness: 0.18 }), [0.25, 1.98, 0.56]);
+        addPart(g, cylinder(0.025, 0.025, 0.28, 0x202020), [0, 1.68, 0.58], [Math.PI / 2, 0, 0]);
+        g.scale.setScalar(1.03);
         return g;
     },
 
@@ -340,31 +422,126 @@ const BUILDERS = {
         return g;
     },
 
+    charizard() {
+        const g = new THREE.Group();
+        const orange = 0xe66f2d;
+        const cream = 0xf3d19b;
+        const wingBlue = 0x3fa7d9;
+        addPart(g, ellipsoid(0.9, 1.25, 0.72, orange, { roughness: 0.58 }), [0, 1.35, 0]);
+        addPart(g, ellipsoid(0.58, 0.9, 0.35, cream, { roughness: 0.62 }), [0, 1.26, 0.52]);
+        addPart(g, ellipsoid(0.72, 0.58, 0.62, orange, { roughness: 0.56 }), [0, 2.55, 0.14]);
+        addPart(g, ellipsoid(0.38, 0.22, 0.28, cream, { roughness: 0.62 }), [0, 2.42, 0.72]);
+        addEye(g, -0.24, 2.68, 0.66, 0x1c8d6a);
+        addEye(g, 0.24, 2.68, 0.66, 0x1c8d6a);
+        addPart(g, cone(0.14, 0.55, orange), [-0.32, 3.06, 0.02], [0.18, 0, 0.4]);
+        addPart(g, cone(0.14, 0.55, orange), [0.32, 3.06, 0.02], [0.18, 0, -0.4]);
+
+        const wingL = makeWing(orange, wingBlue);
+        wingL.position.set(-0.72, 2.02, -0.38);
+        wingL.rotation.set(0.15, -0.65, 0.5);
+        g.add(wingL);
+        const wingR = makeWing(orange, wingBlue);
+        wingR.position.set(0.72, 2.02, -0.38);
+        wingR.rotation.set(0.15, 0.65, -0.5);
+        wingR.scale.x = -1;
+        g.add(wingR);
+
+        addPart(g, cylinder(0.13, 0.19, 0.88, orange), [-0.82, 1.45, 0.15], [0.25, 0, 0.72]);
+        addPart(g, cylinder(0.13, 0.19, 0.88, orange), [0.82, 1.45, 0.15], [0.25, 0, -0.72]);
+        addPart(g, cylinder(0.22, 0.28, 0.82, orange), [-0.35, 0.48, 0.1], [0.1, 0, 0]);
+        addPart(g, cylinder(0.22, 0.28, 0.82, orange), [0.35, 0.48, 0.1], [0.1, 0, 0]);
+        addPart(g, ellipsoid(0.36, 0.13, 0.5, cream), [-0.38, 0.12, 0.28]);
+        addPart(g, ellipsoid(0.36, 0.13, 0.5, cream), [0.38, 0.12, 0.28]);
+        for (const x of [-0.55, -0.35, 0.35, 0.55]) addPart(g, cone(0.055, 0.22, 0xf6f0dd), [x, 0.14, 0.72], [Math.PI / 2, 0, 0]);
+
+        const tailCurve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(0, 1.0, -0.54),
+            new THREE.Vector3(0.25, 0.78, -1.18),
+            new THREE.Vector3(0.72, 1.08, -1.78),
+            new THREE.Vector3(0.9, 1.75, -2.18)
+        ]);
+        g.add(mesh(new THREE.TubeGeometry(tailCurve, 36, 0.16, 12, false), orange, { roughness: 0.56 }));
+        const flameGroup = new THREE.Group();
+        addPart(flameGroup, cone(0.38, 0.86, 0xff6500, { emissive: 0xff6500, emissiveIntensity: 0.9 }), [0, 0.15, 0]);
+        addPart(flameGroup, cone(0.22, 0.6, 0xffe35b, { emissive: 0xffd200, emissiveIntensity: 1.1 }), [0.02, 0.04, 0.05]);
+        flameGroup.position.set(0.95, 2.05, -2.28);
+        flameGroup.rotation.x = -0.45;
+        g.add(flameGroup);
+        g.userData.flame = flameGroup;
+        g.scale.setScalar(1.05);
+        return g;
+    },
+
+    dragonite() {
+        const g = new THREE.Group();
+        const orange = 0xdf8b3f;
+        const cream = 0xf3d7a4;
+        const green = 0x75b86f;
+        addPart(g, ellipsoid(1.12, 1.35, 0.88, orange, { roughness: 0.7 }), [0, 1.45, 0]);
+        addPart(g, ellipsoid(0.68, 1.08, 0.35, cream, { roughness: 0.78 }), [0, 1.32, 0.58]);
+        for (let i = 0; i < 4; i++) addPart(g, box(0.46, 0.045, 0.035, 0xd1aa78), [0, 0.86 + i * 0.28, 0.96]);
+        addPart(g, ellipsoid(0.7, 0.62, 0.7, orange, { roughness: 0.66 }), [0, 2.78, 0.2]);
+        addPart(g, ellipsoid(0.38, 0.22, 0.34, cream, { roughness: 0.7 }), [0, 2.63, 0.78]);
+        addEye(g, -0.23, 2.88, 0.72, 0x2b7d44);
+        addEye(g, 0.23, 2.88, 0.72, 0x2b7d44);
+        addPart(g, cylinder(0.035, 0.045, 0.86, 0x7b5f34), [-0.22, 3.3, 0.1], [0.55, 0, 0.25]);
+        addPart(g, cylinder(0.035, 0.045, 0.86, 0x7b5f34), [0.22, 3.3, 0.1], [0.55, 0, -0.25]);
+
+        const wingL = makeWing(orange, green);
+        wingL.scale.set(0.78, 0.78, 0.78);
+        wingL.position.set(-0.78, 2.1, -0.48);
+        wingL.rotation.set(0.2, -0.45, 0.58);
+        g.add(wingL);
+        const wingR = makeWing(orange, green);
+        wingR.scale.set(-0.78, 0.78, 0.78);
+        wingR.position.set(0.78, 2.1, -0.48);
+        wingR.rotation.set(0.2, 0.45, -0.58);
+        g.add(wingR);
+
+        addPart(g, cylinder(0.18, 0.22, 0.82, orange), [-0.88, 1.42, 0.2], [0.15, 0, 0.75]);
+        addPart(g, cylinder(0.18, 0.22, 0.82, orange), [0.88, 1.42, 0.2], [0.15, 0, -0.75]);
+        addPart(g, cylinder(0.24, 0.31, 0.78, orange), [-0.42, 0.48, 0.05]);
+        addPart(g, cylinder(0.24, 0.31, 0.78, orange), [0.42, 0.48, 0.05]);
+        addPart(g, ellipsoid(0.38, 0.15, 0.48, cream), [-0.46, 0.1, 0.35]);
+        addPart(g, ellipsoid(0.38, 0.15, 0.48, cream), [0.46, 0.1, 0.35]);
+        const tailCurve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(0, 1.05, -0.72),
+            new THREE.Vector3(0.1, 0.82, -1.4),
+            new THREE.Vector3(0.3, 0.92, -2.02),
+            new THREE.Vector3(0.12, 1.12, -2.55)
+        ]);
+        g.add(mesh(new THREE.TubeGeometry(tailCurve, 36, 0.2, 12, false), orange, { roughness: 0.68 }));
+        g.scale.setScalar(1.0);
+        return g;
+    },
+
     mewtwo() {
         const g = new THREE.Group();
-        const body = ellipsoid(0.55, 1.0, 0.45, 0xc0c0d0); body.position.y = 1.4; g.add(body);
-        const chest = ellipsoid(0.35, 0.55, 0.2, 0x9080a8); chest.position.set(0, 1.45, 0.4); g.add(chest);
-        const legGeo = new THREE.CylinderGeometry(0.15, 0.12, 0.7, 10);
-        const lL = mesh(legGeo, 0xc0c0d0); lL.position.set(-0.25, 0.4, 0.05); g.add(lL);
-        const lR = mesh(legGeo, 0xc0c0d0); lR.position.set(0.25, 0.4, 0.05); g.add(lR);
-        const armGeo = new THREE.CylinderGeometry(0.13, 0.1, 0.7, 10);
-        const aL = mesh(armGeo, 0xc0c0d0); aL.position.set(-0.7, 1.4, 0); aL.rotation.z = 0.4; g.add(aL);
-        const aR = mesh(armGeo, 0xc0c0d0); aR.position.set(0.7, 1.4, 0); aR.rotation.z = -0.4; g.add(aR);
-        const head = ellipsoid(0.55, 0.6, 0.55, 0xc0c0d0); head.position.set(0, 2.6, 0.05); g.add(head);
-        const bulge = sphere(0.3, 0xc0c0d0); bulge.position.set(0.4, 2.55, -0.2); g.add(bulge);
-        const tube = mesh(new THREE.TorusGeometry(0.4, 0.08, 8, 16, Math.PI * 0.8), 0x9080a8);
-        tube.position.set(0.45, 2.15, -0.35); tube.rotation.x = Math.PI / 2; tube.rotation.z = -0.3; g.add(tube);
-        const eyeGeo = new THREE.SphereGeometry(0.09, 10, 8);
-        const eL = mesh(eyeGeo, 0x7050a0, { emissive: 0x7050a0, emissiveIntensity: 0.9 }); eL.position.set(-0.16, 2.65, 0.55); g.add(eL);
-        const eR = mesh(eyeGeo, 0x7050a0, { emissive: 0x7050a0, emissiveIntensity: 0.9 }); eR.position.set(0.16, 2.65, 0.55); g.add(eR);
+        const pale = 0xcfd1dc;
+        const purple = 0x8b6caa;
+        addPart(g, ellipsoid(0.48, 1.08, 0.42, pale, { roughness: 0.42 }), [0, 1.55, 0]);
+        addPart(g, ellipsoid(0.3, 0.58, 0.22, purple, { roughness: 0.5 }), [0, 1.46, 0.42]);
+        addPart(g, cylinder(0.13, 0.16, 0.82, pale), [-0.27, 0.55, 0.04], [0.04, 0, 0.08]);
+        addPart(g, cylinder(0.13, 0.16, 0.82, pale), [0.27, 0.55, 0.04], [0.04, 0, -0.08]);
+        addPart(g, ellipsoid(0.25, 0.11, 0.42, pale), [-0.32, 0.12, 0.22]);
+        addPart(g, ellipsoid(0.25, 0.11, 0.42, pale), [0.32, 0.12, 0.22]);
+        addPart(g, cylinder(0.1, 0.14, 0.95, pale), [-0.63, 1.48, 0.08], [0.05, 0, 0.45]);
+        addPart(g, cylinder(0.1, 0.14, 0.95, pale), [0.63, 1.48, 0.08], [0.05, 0, -0.45]);
+        addPart(g, ellipsoid(0.16, 0.1, 0.2, pale), [-0.92, 1.12, 0.16]);
+        addPart(g, ellipsoid(0.16, 0.1, 0.2, pale), [0.92, 1.12, 0.16]);
+        addPart(g, ellipsoid(0.56, 0.68, 0.5, pale, { roughness: 0.4 }), [0, 2.68, 0.04]);
+        addPart(g, ellipsoid(0.34, 0.34, 0.32, pale, { roughness: 0.4 }), [0.34, 2.7, -0.1]);
+        addPart(g, ellipsoid(0.26, 0.18, 0.24, pale, { roughness: 0.4 }), [-0.38, 2.63, -0.05]);
+        addPart(g, cylinder(0.08, 0.08, 1.0, purple, { roughness: 0.5 }), [0.42, 2.2, -0.28], [0.65, 0.2, -0.35]);
+        addPart(g, sphere(0.085, 0x7b50df, { emissive: 0x7b50df, emissiveIntensity: 1.15 }), [-0.17, 2.7, 0.5]);
+        addPart(g, sphere(0.085, 0x7b50df, { emissive: 0x7b50df, emissiveIntensity: 1.15 }), [0.17, 2.7, 0.5]);
         const curve = new THREE.CatmullRomCurve3([
             new THREE.Vector3(0, 1.3, -0.3),
             new THREE.Vector3(0.6, 1.0, -0.9),
             new THREE.Vector3(1.2, 1.5, -0.6),
             new THREE.Vector3(1.4, 2.3, -0.2)
         ]);
-        const tubeGeo = new THREE.TubeGeometry(curve, 32, 0.1, 8, false);
-        const tail = mesh(tubeGeo, 0xc0c0d0); g.add(tail);
+        g.add(mesh(new THREE.TubeGeometry(curve, 40, 0.13, 12, false), purple, { roughness: 0.48 }));
         return g;
     }
 };
@@ -387,6 +564,10 @@ const POKEDEX = {
                   moves: [ {name:'Shadow Ball', type:'ghost', power:28}, {name:'Lick', type:'ghost', power:18}, {name:'Hypnosis', type:'psychic', power:22}] },
     snorlax:    { name: 'Snorlax',    type: 'normal', maxHp: 130, builder: 'snorlax',
                   moves: [ {name:'Body Slam', type:'normal', power:26}, {name:'Headbutt', type:'normal', power:20}, {name:'Hyper Beam', type:'normal', power:34}] },
+    charizard:  { name: 'Charizard',  type: 'fire', maxHp: 125, builder: 'charizard',
+                  moves: [ {name:'Flamethrower', type:'fire', power:32}, {name:'Wing Strike', type:'normal', power:24}, {name:'Fire Spin', type:'fire', power:26}, {name:'Dragon Claw', type:'normal', power:30}] },
+    dragonite:  { name: 'Dragonite',  type: 'normal', maxHp: 135, builder: 'dragonite',
+                  moves: [ {name:'Dragon Rush', type:'normal', power:32}, {name:'Thunder Punch', type:'electric', power:27}, {name:'Aqua Tail', type:'water', power:28}, {name:'Fire Punch', type:'fire', power:27}] },
     mewtwo:     { name: 'Mewtwo',     type: 'psychic', maxHp: 140, builder: 'mewtwo',
                   moves: [ {name:'Psychic', type:'psychic', power:32}, {name:'Shadow Ball', type:'ghost', power:26}, {name:'Aura Sphere', type:'normal', power:28}, {name:'Recover', type:'psychic', power:0, heal:40}] }
 };
@@ -416,7 +597,8 @@ const TRAINERS = [
     { name: 'Wild Bulbasaur', mons: ['bulbasaur'], intro: 'A wild BULBASAUR appeared!', wild: true },
     { name: 'Wild Squirtle',  mons: ['squirtle'],  intro: 'A wild SQUIRTLE appeared!', wild: true },
     { name: 'Ghost Trainer',  mons: ['gengar'],    intro: 'GHOST TRAINER sent out GENGAR!', wild: false },
-    { name: 'Sleeping Giant', mons: ['snorlax'],   intro: 'A massive SNORLAX blocks your path!', wild: false },
+    { name: 'Fire Ace',       mons: ['charizard'], intro: 'FIRE ACE sent out CHARIZARD!', wild: false },
+    { name: 'Dragon Master',  mons: ['dragonite'], intro: 'DRAGON MASTER sent out DRAGONITE!', wild: false },
     { name: 'Champion',       mons: ['mewtwo'],    intro: 'CHAMPION sent out MEWTWO!', wild: false }
 ];
 
@@ -433,8 +615,8 @@ const messageBoxEl = $('messageBox');
 function buildStarterPicker() {
     const c = $('starterPick');
     c.innerHTML = '';
-    const icons = { pikachu: '⚡', charmander: '🔥', bulbasaur: '🌿', squirtle: '💧' };
-    ['pikachu', 'charmander', 'bulbasaur', 'squirtle'].forEach(key => {
+    const icons = { pikachu: 'P', charizard: 'C', dragonite: 'D', mewtwo: 'M' };
+    ['pikachu', 'charizard', 'dragonite', 'mewtwo'].forEach(key => {
         const p = POKEDEX[key];
         const div = document.createElement('div');
         div.className = 'starter';
@@ -498,7 +680,7 @@ function showMoveBox() {
     });
     $('runHint').textContent = TRAINERS[trainerIndex].wild
         ? 'Press R to run from this wild battle'
-        : 'Trainer battle — you cannot run';
+        : 'Trainer battle - you cannot run';
 }
 
 function showMessageBox(text) {
@@ -713,9 +895,9 @@ function resetToPicker() {
         <p>Choose your starter!</p>
         <div class="starters" id="starterPick"></div>
         <div id="controls">
-            <p>1 / 2 / 3 / 4 — pick a move during battle</p>
-            <p>R — run from wild pokemon &nbsp;•&nbsp; ENTER — skip message</p>
-            <p>Drag mouse — orbit camera</p>
+            <p>1 / 2 / 3 / 4 - pick a move during battle</p>
+            <p>R - run from wild pokemon &nbsp;|&nbsp; ENTER - skip message</p>
+            <p>Drag mouse - orbit camera</p>
         </div>
     `;
     showStartScreen();
@@ -730,12 +912,34 @@ function spawnEffect(who, moveType) {
     if (!target) return;
     const color = TYPE_HEX[moveType] || 0xffffff;
     const tx = target.position.x, ty = 1.4, tz = target.position.z;
-    for (let i = 0; i < 14; i++) {
-        const m = mesh(new THREE.SphereGeometry(0.15 + Math.random() * 0.15, 8, 6), color, { emissive: color, emissiveIntensity: 0.8 });
-        m.position.set(tx + (Math.random() - 0.5) * 0.4, ty + (Math.random() - 0.5) * 0.4, tz + (Math.random() - 0.5) * 0.4);
-        const v = new THREE.Vector3((Math.random() - 0.5) * 6, (Math.random() - 0.2) * 5, (Math.random() - 0.5) * 6);
+    const count = moveType === 'electric' ? 18 : moveType === 'psychic' || moveType === 'ghost' ? 12 : 22;
+    for (let i = 0; i < count; i++) {
+        let geom;
+        if (moveType === 'electric') geom = new THREE.CylinderGeometry(0.025, 0.025, 0.75 + Math.random() * 0.5, 6);
+        else if (moveType === 'grass') geom = new THREE.ConeGeometry(0.1, 0.45, 5);
+        else if (moveType === 'water') geom = new THREE.SphereGeometry(0.1 + Math.random() * 0.09, 10, 8);
+        else if (moveType === 'rock' || moveType === 'normal') geom = new THREE.DodecahedronGeometry(0.14 + Math.random() * 0.12);
+        else geom = new THREE.SphereGeometry(0.13 + Math.random() * 0.16, 10, 8);
+        const m = mesh(geom, color, { emissive: color, emissiveIntensity: moveType === 'normal' || moveType === 'rock' ? 0.1 : 0.85, roughness: 0.42 });
+        m.position.set(tx + (Math.random() - 0.5) * 0.65, ty + (Math.random() - 0.5) * 0.65, tz + (Math.random() - 0.5) * 0.65);
+        m.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+        const v = new THREE.Vector3((Math.random() - 0.5) * 7, (Math.random() - 0.05) * 5.4, (Math.random() - 0.5) * 7);
         scene.add(m);
-        effects.push({ mesh: m, vel: v, life: 0, ttl: 0.7 });
+        effects.push({ mesh: m, vel: v, life: 0, ttl: 0.65 + Math.random() * 0.25, spin: new THREE.Vector3(Math.random() * 7, Math.random() * 7, Math.random() * 7) });
+    }
+    if (moveType === 'psychic' || moveType === 'ghost') {
+        for (let i = 0; i < 3; i++) {
+            const ring = mesh(new THREE.TorusGeometry(0.55 + i * 0.28, 0.025, 8, 48), color, {
+                emissive: color,
+                emissiveIntensity: 0.9,
+                transparent: true,
+                opacity: 0.78
+            });
+            ring.position.set(tx, ty + i * 0.18, tz);
+            ring.rotation.x = Math.PI / 2;
+            scene.add(ring);
+            effects.push({ mesh: ring, vel: new THREE.Vector3(0, 0.65, 0), life: 0, ttl: 0.85, spin: new THREE.Vector3(0, 1.5, 0) });
+        }
     }
 }
 
@@ -746,6 +950,11 @@ function updateEffects(dt) {
         e.mesh.position.x += e.vel.x * dt;
         e.mesh.position.y += e.vel.y * dt;
         e.mesh.position.z += e.vel.z * dt;
+        if (e.spin) {
+            e.mesh.rotation.x += e.spin.x * dt;
+            e.mesh.rotation.y += e.spin.y * dt;
+            e.mesh.rotation.z += e.spin.z * dt;
+        }
         e.vel.y -= 8 * dt;
         const k = 1 - e.life / e.ttl;
         e.mesh.scale.setScalar(Math.max(0.01, k));
@@ -855,3 +1064,4 @@ window.addEventListener('keydown', (e) => {
 initThree();
 buildStarterPicker();
 animate();
+
