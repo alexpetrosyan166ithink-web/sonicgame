@@ -547,7 +547,7 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(127.1,311.7))) * 4
  let l = max(dot(normalize(i.n), normalize(-u.light.xyz)), 0.0);
  let v = normalize(u.cam.xyz - i.wp);
  let rim = pow(1.0 - max(dot(normalize(i.n), v), 0.0), 2.0);
- let sparkle = h(floor(i.wp.xz * 11.0 + i.wp.yy * 3.0)) * 0.045;
+ let sparkle = h(floor(i.wp.xz * 11.0 + vec2<f32>(i.wp.y * 3.0, i.wp.y * 3.0))) * 0.045;
  let spec = pow(max(dot(reflect(normalize(u.light.xyz), normalize(i.n)), v), 0.0), mix(18.0, 88.0, clamp(i.flags.y, 0.0, 1.0))) * (0.12 + i.flags.y * 1.45);
  let fresnel = rim * (0.08 + i.flags.y * 0.22);
  let torch = vec3<f32>(1.0, 0.45, 0.12) * max(0.0, 1.0 - distance(i.wp.xz, vec2<f32>(-6.8, -6.8)) * 0.16) * 0.45;
@@ -632,7 +632,7 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
     async function loadPieceModels() {
         modelStatus = 'loading';
         try {
-            const manifestRes = await fetch('assets/models/manifest.json', { cache: 'no-store' });
+            const manifestRes = await fetchWithTimeout('assets/models/manifest.json', { cache: 'no-store' }, 3500);
             if (!manifestRes.ok) throw new Error('No model manifest');
             const manifest = await manifestRes.json();
             if (manifest.enabled === false) throw new Error('Model manifest disabled');
@@ -659,7 +659,7 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
     }
 
     async function loadGlbMesh(src, config) {
-        const res = await fetch(src);
+        const res = await fetchWithTimeout(src, {}, 5000);
         if (!res.ok) throw new Error(`Could not load ${src}`);
         const buffer = await res.arrayBuffer();
         const parsed = parseGlb(buffer);
@@ -700,6 +700,16 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
             yOffset: Number(config.yOffset || 0),
             colorBoost: Number(config.colorBoost || 1)
         };
+    }
+
+    async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+            return await fetch(url, { ...options, signal: controller.signal });
+        } finally {
+            clearTimeout(timer);
+        }
     }
 
     function parseGlb(arrayBuffer) {
@@ -1171,9 +1181,12 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
         bindEvents();
         updateHud();
         if (await initGpu()) {
-            await loadPieceModels();
             resize();
             requestAnimationFrame(render);
+            loadPieceModels().catch(err => {
+                modelStatus = 'procedural';
+                console.info('3D Royal Chess model loading skipped:', err.message);
+            });
         }
     }
 
