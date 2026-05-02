@@ -1,64 +1,75 @@
 {
-  "enabled": false,
-  "notes": "Remote free/Creative Commons GLB asset URLs are documented below, but disabled for production because the current CDN host does not resolve reliably from alexgames.am browsers. The game uses built-in procedural WebGPU character pieces until local GLB files are added or a stable CDN is selected.",
+  "enabled": true,
+  "notes": "Production uses local GLB files so the game does not depend on remote model CDNs at runtime. The procedural WebGPU chess characters remain as a fallback if a model fails to load.",
   "attribution": [
     {
-      "title": "Filer free 3D chess GLB listings",
-      "url": "https://filer.dev/en/3d-model/chess-set.glb",
-      "license": "Creative Commons Attribution as listed by Filer"
+      "title": "Three.js Soldier GLB",
+      "url": "https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf",
+      "license": "Included with the Three.js example assets"
     },
     {
-      "title": "Filer medieval soldier GLB",
-      "url": "https://www.filer.dev/en/3d-model/medieval-soldier.glb",
-      "license": "Creative Commons/free model as listed by Filer"
+      "title": "Three.js Horse GLB",
+      "url": "https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf",
+      "license": "Included with the Three.js example assets"
     },
     {
-      "title": "Filer fantasy tree house medieval castle GLB",
-      "url": "https://www.filer.dev/en/3d-model/fantasy-tree-house-medieval-castle.glb",
-      "license": "Creative Commons/free model as listed by Filer"
+      "title": "Three.js RobotExpressive GLB",
+      "url": "https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive",
+      "license": "Included with the Three.js example assets"
     },
     {
-      "title": "Filer book GLB",
-      "url": "https://filer.dev/en/3d-model/book.glb",
-      "license": "Creative Commons/free model as listed by Filer"
+      "title": "Khronos glTF Sample Models - Damaged Helmet",
+      "url": "https://github.com/KhronosGroup/glTF-Sample-Models/tree/main/2.0/DamagedHelmet",
+      "license": "Khronos glTF Sample Models license"
+    },
+    {
+      "title": "Khronos glTF Sample Models - Avocado",
+      "url": "https://github.com/KhronosGroup/glTF-Sample-Models/tree/main/2.0/Avocado",
+      "license": "Khronos glTF Sample Models license"
     }
   ],
   "pieces": {
     "p": {
-      "role": "soldier pawn",
-      "src": "https://crudblobs.blob.core.windows.net/models/medieval-soldier.glb",
-      "scale": 0.26,
-      "yOffset": 0.02
+      "role": "armored foot soldier pawn",
+      "src": "soldier.glb",
+      "upAxis": "z",
+      "height": 1.28,
+      "yOffset": 0.03
     },
     "r": {
-      "role": "castle rook",
-      "src": "https://crudblobs.blob.core.windows.net/models/fantasy-tree-house-medieval-castle.glb",
-      "scale": 0.18,
-      "yOffset": -0.04
+      "role": "war helmet rook fortress",
+      "src": "damaged-helmet.glb",
+      "upAxis": "y",
+      "height": 1.65,
+      "yOffset": 0.03
     },
     "n": {
-      "role": "war horse knight",
-      "src": "https://crudblobs.blob.core.windows.net/models/chariot-horse.glb",
-      "scale": 0.28,
-      "yOffset": 0.02
+      "role": "real horse knight",
+      "src": "horse.glb",
+      "upAxis": "y",
+      "height": 1.55,
+      "yOffset": 0.03
     },
     "b": {
-      "role": "spell book bishop",
-      "src": "https://crudblobs.blob.core.windows.net/models/book.glb",
-      "scale": 0.54,
-      "yOffset": 0.08
+      "role": "mystic artifact bishop",
+      "src": "damaged-helmet.glb",
+      "upAxis": "y",
+      "height": 1.52,
+      "yOffset": 0.03
     },
     "q": {
-      "role": "royal queen",
-      "src": "https://crudblobs.blob.core.windows.net/models/female-model.glb",
-      "scale": 0.24,
-      "yOffset": 0.02
+      "role": "royal battle queen",
+      "src": "soldier.glb",
+      "upAxis": "z",
+      "height": 1.82,
+      "yOffset": 0.03
     },
     "k": {
-      "role": "crowned king",
-      "src": "https://crudblobs.blob.core.windows.net/models/medieval-soldier.glb",
-      "scale": 0.3,
-      "yOffset": 0.02
+      "role": "crowned battle king",
+      "src": "soldier.glb",
+      "upAxis": "z",
+      "height": 1.95,
+      "yOffset": 0.03
     }
   }
 }

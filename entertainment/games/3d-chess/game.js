@@ -51,7 +51,8 @@
     let gameOver = false;
     let fxEvents = [];
     let modelAssets = null;
-    let modelStatus = 'procedural';
+    let modelStatus = 'gothic';
+    let rendererFailed = false;
 
     const camera = {
         theta: Math.PI * 0.25,
@@ -118,10 +119,6 @@
 
     function squareName(r, c) {
         return FILES[c] + (8 - r);
-    }
-
-    function sameSquare(a, b) {
-        return a && b && a.r === b.r && a.c === b.c;
     }
 
     function generatePseudoMoves(b, r, c, state, attacksOnly = false) {
@@ -525,6 +522,9 @@
             unsupported.classList.remove('hidden');
             return false;
         }
+        device.lost.then(info => {
+            showRenderError(`WebGPU device lost: ${info.message || info.reason || 'unknown reason'}`);
+        });
         context = canvas.getContext('webgpu');
         format = navigator.gpu.getPreferredCanvasFormat();
         context.configure({ device, format, alphaMode: 'opaque' });
@@ -535,6 +535,7 @@
         uniformBuffer = device.createBuffer({ size: 96, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
         meshUniformBuffer = device.createBuffer({ size: 160, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
 
+        device.pushErrorScope('validation');
         const shader = device.createShaderModule({ code: `
 struct U { vp: mat4x4<f32>, cam: vec4<f32>, light: vec4<f32> }
 @group(0) @binding(0) var<uniform> u: U;
@@ -569,7 +570,7 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(127.1,311.7))) * 4
                 ]
             },
             fragment: { module: shader, entryPoint: 'fs', targets: [{ format }] },
-            primitive: { topology: 'triangle-list', cullMode: 'back' },
+            primitive: { topology: 'triangle-list', cullMode: 'none' },
             depthStencil: { depthWriteEnabled: true, depthCompare: 'less', format: 'depth24plus' }
         });
         bindGroup = device.createBindGroup({
@@ -577,7 +578,20 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(127.1,311.7))) * 4
             entries: [{ binding: 0, resource: { buffer: uniformBuffer } }]
         });
         initMeshPipeline();
+        const validationError = await device.popErrorScope();
+        if (validationError) {
+            showRenderError(validationError.message);
+            return false;
+        }
         return true;
+    }
+
+    function showRenderError(message) {
+        rendererFailed = true;
+        unsupported.innerHTML = '<h2>3D renderer stopped.</h2><p>Refresh the page or try a current Chrome or Edge browser with WebGPU enabled.</p>';
+        unsupported.classList.remove('hidden');
+        statusLabel.textContent = 'Renderer error';
+        console.error('3D Royal Chess render error:', message);
     }
 
     function initMeshPipeline() {
@@ -620,7 +634,7 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
                 buffers: [{ arrayStride: 24, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }, { shaderLocation: 1, offset: 12, format: 'float32x3' }] }]
             },
             fragment: { module: shader, entryPoint: 'fs', targets: [{ format }] },
-            primitive: { topology: 'triangle-list', cullMode: 'back' },
+            primitive: { topology: 'triangle-list', cullMode: 'none' },
             depthStencil: { depthWriteEnabled: true, depthCompare: 'less', format: 'depth24plus' }
         });
         meshBindGroup = device.createBindGroup({
@@ -635,7 +649,11 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
             const manifestRes = await fetchWithTimeout('assets/models/manifest.json', { cache: 'no-store' }, 3500);
             if (!manifestRes.ok) throw new Error('No model manifest');
             const manifest = await manifestRes.json();
-            if (manifest.enabled === false) throw new Error('Model manifest disabled');
+            if (manifest.enabled === false) {
+                modelAssets = null;
+                modelStatus = 'procedural';
+                return;
+            }
             const pieces = manifest.pieces || {};
             const loaded = {};
             for (const type of ['p', 'r', 'n', 'b', 'q', 'k']) {
@@ -658,11 +676,142 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
         }
     }
 
+    function createGothicChessSet() {
+        return {
+            p: createGothicAsset('p', 1.32),
+            r: createGothicAsset('r', 1.58),
+            n: createGothicAsset('n', 1.52),
+            b: createGothicAsset('b', 1.72),
+            q: createGothicAsset('q', 1.96),
+            k: createGothicAsset('k', 2.08)
+        };
+    }
+
+    function createGothicAsset(type, height) {
+        const verts = [];
+        const s = height / 2.05;
+        addFrustumMesh(verts, 0.48 * s, 0.42 * s, 0.14 * s, 0, 28);
+        addFrustumMesh(verts, 0.38 * s, 0.28 * s, 0.16 * s, 0.13 * s, 28);
+        addFrustumMesh(verts, 0.24 * s, 0.2 * s, 0.7 * s, 0.28 * s, 28);
+        addFrustumMesh(verts, 0.3 * s, 0.2 * s, 0.14 * s, 0.92 * s, 28);
+
+        if (type === 'p') {
+            addFrustumMesh(verts, 0.22 * s, 0.12 * s, 0.42 * s, 1.0 * s, 24);
+            addEllipsoidMesh(verts, 0, 1.5 * s, 0, 0.2 * s, 0.22 * s, 0.2 * s, 18, 10);
+            addConeMesh(verts, 0, 1.72 * s, 0, 0.18 * s, 0.32 * s, 24);
+        } else if (type === 'r') {
+            addFrustumMesh(verts, 0.34 * s, 0.34 * s, 0.62 * s, 0.95 * s, 28);
+            addFrustumMesh(verts, 0.42 * s, 0.36 * s, 0.16 * s, 1.48 * s, 28);
+            for (let i = 0; i < 6; i++) {
+                const a = i * Math.PI / 3;
+                addConeMesh(verts, Math.cos(a) * 0.29 * s, 1.7 * s, Math.sin(a) * 0.29 * s, 0.08 * s, 0.36 * s, 12);
+            }
+            addConeMesh(verts, 0, 1.72 * s, 0, 0.12 * s, 0.42 * s, 18);
+        } else if (type === 'n') {
+            addFrustumMesh(verts, 0.26 * s, 0.18 * s, 0.32 * s, 0.96 * s, 20);
+            addEllipsoidMesh(verts, -0.03 * s, 1.28 * s, 0.02 * s, 0.28 * s, 0.42 * s, 0.18 * s, 20, 10);
+            addEllipsoidMesh(verts, 0.02 * s, 1.62 * s, -0.2 * s, 0.2 * s, 0.2 * s, 0.34 * s, 18, 10);
+            addConeMesh(verts, -0.09 * s, 1.86 * s, -0.36 * s, 0.055 * s, 0.24 * s, 10);
+            addConeMesh(verts, 0.1 * s, 1.86 * s, -0.36 * s, 0.055 * s, 0.24 * s, 10);
+            addConeMesh(verts, 0, 1.34 * s, 0.28 * s, 0.08 * s, 0.5 * s, 14);
+        } else if (type === 'b') {
+            addFrustumMesh(verts, 0.22 * s, 0.15 * s, 0.78 * s, 0.95 * s, 28);
+            addEllipsoidMesh(verts, 0, 1.58 * s, 0, 0.24 * s, 0.42 * s, 0.2 * s, 24, 12);
+            addConeMesh(verts, 0, 1.88 * s, 0, 0.18 * s, 0.42 * s, 24);
+            addConeMesh(verts, 0.16 * s, 1.52 * s, -0.04 * s, 0.035 * s, 0.38 * s, 10);
+        } else {
+            const royal = type === 'k';
+            addFrustumMesh(verts, 0.28 * s, 0.2 * s, royal ? 0.86 * s : 0.76 * s, 0.96 * s, 32);
+            addEllipsoidMesh(verts, 0, royal ? 1.72 * s : 1.62 * s, 0, 0.25 * s, 0.28 * s, 0.22 * s, 24, 12);
+            addFrustumMesh(verts, 0.28 * s, 0.2 * s, 0.12 * s, royal ? 1.92 * s : 1.8 * s, 28);
+            const count = royal ? 4 : 7;
+            for (let i = 0; i < count; i++) {
+                const a = i * Math.PI * 2 / count;
+                const r = royal ? 0.18 * s : 0.24 * s;
+                addConeMesh(verts, Math.cos(a) * r, (royal ? 1.98 : 1.88) * s, Math.sin(a) * r, 0.045 * s, 0.32 * s, 10);
+            }
+            if (royal) {
+                addFrustumMesh(verts, 0.035 * s, 0.03 * s, 0.42 * s, 2.08 * s, 8);
+                addFrustumMesh(verts, 0.16 * s, 0.14 * s, 0.045 * s, 2.25 * s, 8);
+            } else {
+                addConeMesh(verts, 0, 1.96 * s, 0, 0.1 * s, 0.36 * s, 16);
+            }
+        }
+
+        const data = new Float32Array(verts);
+        const vertex = device.createBuffer({ size: data.byteLength, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
+        device.queue.writeBuffer(vertex, 0, data);
+        return { primitives: [{ vertex, index: null, indexCount: 0, vertexCount: data.length / 6, indexFormat: 'uint16' }], scale: 1, yOffset: 0.02 };
+    }
+
+    function addVertex(out, x, y, z, nx, ny, nz) {
+        const len = Math.hypot(nx, ny, nz) || 1;
+        out.push(x, y, z, nx / len, ny / len, nz / len);
+    }
+
+    function addFrustumMesh(out, r0, r1, h, y, seg) {
+        const y0 = y;
+        const y1 = y + h;
+        const slope = (r0 - r1) / Math.max(0.001, h);
+        for (let i = 0; i < seg; i++) {
+            const a0 = i * Math.PI * 2 / seg;
+            const a1 = (i + 1) * Math.PI * 2 / seg;
+            const p00 = [Math.cos(a0) * r0, y0, Math.sin(a0) * r0];
+            const p01 = [Math.cos(a1) * r0, y0, Math.sin(a1) * r0];
+            const p10 = [Math.cos(a0) * r1, y1, Math.sin(a0) * r1];
+            const p11 = [Math.cos(a1) * r1, y1, Math.sin(a1) * r1];
+            const n0 = [Math.cos(a0), slope, Math.sin(a0)];
+            const n1 = [Math.cos(a1), slope, Math.sin(a1)];
+            addVertex(out, ...p00, ...n0); addVertex(out, ...p10, ...n0); addVertex(out, ...p11, ...n1);
+            addVertex(out, ...p00, ...n0); addVertex(out, ...p11, ...n1); addVertex(out, ...p01, ...n1);
+            addVertex(out, 0, y0, 0, 0, -1, 0); addVertex(out, ...p01, 0, -1, 0); addVertex(out, ...p00, 0, -1, 0);
+            addVertex(out, 0, y1, 0, 0, 1, 0); addVertex(out, ...p10, 0, 1, 0); addVertex(out, ...p11, 0, 1, 0);
+        }
+    }
+
+    function addConeMesh(out, x, y, z, r, h, seg) {
+        const top = [x, y + h, z];
+        for (let i = 0; i < seg; i++) {
+            const a0 = i * Math.PI * 2 / seg;
+            const a1 = (i + 1) * Math.PI * 2 / seg;
+            const p0 = [x + Math.cos(a0) * r, y, z + Math.sin(a0) * r];
+            const p1 = [x + Math.cos(a1) * r, y, z + Math.sin(a1) * r];
+            const n0 = [Math.cos(a0), r / h, Math.sin(a0)];
+            const n1 = [Math.cos(a1), r / h, Math.sin(a1)];
+            addVertex(out, ...p0, ...n0); addVertex(out, ...top, ...n0); addVertex(out, ...p1, ...n1);
+            addVertex(out, x, y, z, 0, -1, 0); addVertex(out, ...p1, 0, -1, 0); addVertex(out, ...p0, 0, -1, 0);
+        }
+    }
+
+    function addEllipsoidMesh(out, cx, cy, cz, rx, ry, rz, seg, rings) {
+        for (let r = 0; r < rings; r++) {
+            const v0 = r / rings;
+            const v1 = (r + 1) / rings;
+            const p0 = -Math.PI / 2 + v0 * Math.PI;
+            const p1 = -Math.PI / 2 + v1 * Math.PI;
+            for (let i = 0; i < seg; i++) {
+                const a0 = i * Math.PI * 2 / seg;
+                const a1 = (i + 1) * Math.PI * 2 / seg;
+                const vtx = (p, a) => {
+                    const cp = Math.cos(p);
+                    const x = Math.cos(a) * cp;
+                    const y = Math.sin(p);
+                    const z = Math.sin(a) * cp;
+                    return [cx + x * rx, cy + y * ry, cz + z * rz, x / rx, y / ry, z / rz];
+                };
+                const a = vtx(p0, a0), b = vtx(p1, a0), c = vtx(p1, a1), d = vtx(p0, a1);
+                addVertex(out, ...a); addVertex(out, ...b); addVertex(out, ...c);
+                addVertex(out, ...a); addVertex(out, ...c); addVertex(out, ...d);
+            }
+        }
+    }
+
     async function loadGlbMesh(src, config) {
         const res = await fetchWithTimeout(src, {}, 5000);
         if (!res.ok) throw new Error(`Could not load ${src}`);
         const buffer = await res.arrayBuffer();
         const parsed = parseGlb(buffer);
+        const transform = createModelTransform(parsed, config);
         const meshes = [];
         for (const mesh of parsed.json.meshes || []) {
             for (const primitive of mesh.primitives || []) {
@@ -674,8 +823,20 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
                     : createFallbackNormals(positions.count);
                 const packed = new Float32Array(positions.count * 6);
                 for (let i = 0; i < positions.count; i++) {
-                    packed.set(positions.data.subarray(i * 3, i * 3 + 3), i * 6);
-                    packed.set(normals.data.subarray(i * 3, i * 3 + 3), i * 6 + 3);
+                    const pos = transformModelPosition(
+                        positions.data[i * 3],
+                        positions.data[i * 3 + 1],
+                        positions.data[i * 3 + 2],
+                        transform
+                    );
+                    const norm = transformModelNormal(
+                        normals.data[i * 3],
+                        normals.data[i * 3 + 1],
+                        normals.data[i * 3 + 2],
+                        transform
+                    );
+                    packed.set(pos, i * 6);
+                    packed.set(norm, i * 6 + 3);
                 }
                 const vertex = device.createBuffer({ size: packed.byteLength, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
                 device.queue.writeBuffer(vertex, 0, packed);
@@ -696,10 +857,86 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
         if (meshes.length === 0) throw new Error(`No mesh primitives in ${src}`);
         return {
             primitives: meshes,
-            scale: Number(config.scale || 1),
+            scale: 1,
             yOffset: Number(config.yOffset || 0),
             colorBoost: Number(config.colorBoost || 1)
         };
+    }
+
+    function createModelTransform(parsed, config) {
+        const bounds = modelBounds(parsed);
+        const axis = config.upAxis || 'y';
+        const min = bounds.min;
+        const max = bounds.max;
+        const converted = [
+            transformModelPosition(min[0], min[1], min[2], { axis, scale: 1, center: [0, 0, 0], minY: 0 }),
+            transformModelPosition(max[0], max[1], max[2], { axis, scale: 1, center: [0, 0, 0], minY: 0 })
+        ];
+        const cMin = [
+            Math.min(converted[0][0], converted[1][0]),
+            Math.min(converted[0][1], converted[1][1]),
+            Math.min(converted[0][2], converted[1][2])
+        ];
+        const cMax = [
+            Math.max(converted[0][0], converted[1][0]),
+            Math.max(converted[0][1], converted[1][1]),
+            Math.max(converted[0][2], converted[1][2])
+        ];
+        const height = Math.max(0.001, cMax[1] - cMin[1]);
+        const targetHeight = Number(config.height || 1.55);
+        return {
+            axis,
+            scale: targetHeight / height,
+            center: [(cMin[0] + cMax[0]) * 0.5, 0, (cMin[2] + cMax[2]) * 0.5],
+            minY: cMin[1]
+        };
+    }
+
+    function modelBounds(parsed) {
+        const min = [Infinity, Infinity, Infinity];
+        const max = [-Infinity, -Infinity, -Infinity];
+        for (const mesh of parsed.json.meshes || []) {
+            for (const primitive of mesh.primitives || []) {
+                const posAccessor = primitive.attributes && primitive.attributes.POSITION;
+                const accessor = parsed.json.accessors && parsed.json.accessors[posAccessor];
+                if (!accessor || !accessor.min || !accessor.max) continue;
+                for (let i = 0; i < 3; i++) {
+                    min[i] = Math.min(min[i], accessor.min[i]);
+                    max[i] = Math.max(max[i], accessor.max[i]);
+                }
+            }
+        }
+        if (!Number.isFinite(min[0])) return { min: [-0.5, 0, -0.5], max: [0.5, 1, 0.5] };
+        return { min, max };
+    }
+
+    function transformModelPosition(x, y, z, transform) {
+        let px = x;
+        let py = y;
+        let pz = z;
+        if (transform.axis === 'z') {
+            px = x;
+            py = z;
+            pz = -y;
+        }
+        return [
+            (px - transform.center[0]) * transform.scale,
+            (py - transform.minY) * transform.scale,
+            (pz - transform.center[2]) * transform.scale
+        ];
+    }
+
+    function transformModelNormal(x, y, z, transform) {
+        let nx = x;
+        let ny = y;
+        let nz = z;
+        if (transform.axis === 'z') {
+            nx = x;
+            ny = z;
+            nz = -y;
+        }
+        const len = Math.hypot(nx, ny, nz) || 1;
+        return [nx / len, ny / len, nz / len];
     }
 
     async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
@@ -813,9 +1050,10 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
 
     function buildInstances(time) {
         const out = [];
-        pushBox(out, 0, -0.74, 0, BOARD + 8, 0.12, BOARD + 8, [0.035, 0.035, 0.045], 1, 0.18, 0);
-        pushBox(out, 0, -0.48, 0, BOARD + 2.6, 0.72, BOARD + 2.6, [0.09, 0.055, 0.032], 1, 0.45, 0);
-        pushBox(out, 0, -0.16, 0, BOARD + 0.42, 0.16, BOARD + 0.42, [0.9, 0.63, 0.25], 1, 0.95, 0.04);
+        addMountainBattlefield(out, time);
+        pushBox(out, 0, -0.56, 0, BOARD + 3.3, 0.72, BOARD + 3.3, [0.11, 0.07, 0.045], 1, 0.45, 0);
+        pushBox(out, 0, -0.19, 0, BOARD + 0.66, 0.18, BOARD + 0.66, [0.88, 0.58, 0.18], 1, 0.95, 0.05);
+        pushBox(out, 0, -0.09, 0, BOARD + 0.28, 0.08, BOARD + 0.28, [0.28, 0.22, 0.16], 1, 0.55, 0.02);
         for (const sx of [-1, 1]) {
             for (const sz of [-1, 1]) {
                 const px = sx * (BOARD * 0.5 + 1.4);
@@ -860,8 +1098,39 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
         return new Float32Array(out.slice(0, maxInstances * 12));
     }
 
+    function addMountainBattlefield(out, time) {
+        pushBox(out, 0, -0.95, 0, BOARD + 24, 0.12, BOARD + 24, [0.026, 0.031, 0.038], 1, 0.16, 0);
+        pushBox(out, 0, -0.86, 0, BOARD + 19, 0.1, BOARD + 19, [0.09, 0.115, 0.12], 1, 0.12, 0);
+        const peaks = [
+            [-14.5, -12.5, 1.9, 2.7], [-11.8, -14.4, 2.6, 3.9], [-5.8, -15.1, 1.7, 3.1], [5.7, -15.2, 2.2, 3.8],
+            [12.4, -13.5, 1.9, 3.0], [15.0, -7.8, 2.6, 4.4], [-15.2, 4.9, 2.1, 3.3], [-13.9, 12.3, 2.8, 4.1],
+            [-4.6, 15.0, 1.9, 2.9], [5.8, 15.2, 2.7, 4.2], [13.1, 10.8, 2.0, 3.2], [15.6, 3.1, 2.4, 3.7]
+        ];
+        for (const [x, z, w, h] of peaks) {
+            const sway = Math.sin(time * 0.35 + x + z) * 0.04;
+            pushBox(out, x, -1.25 + h * 0.28, z, w * 1.7, h * 0.75, w * 1.35, [0.18, 0.205, 0.21], 1, 0.2, 0);
+            pushBox(out, x + w * 0.18, -0.72 + h * 0.55, z - w * 0.12, w * 1.05, h * 0.62, w * 0.9, [0.27, 0.30, 0.31], 1, 0.28, 0);
+            pushBox(out, x - w * 0.12, -0.14 + h * 0.78 + sway, z + w * 0.08, w * 0.58, h * 0.24, w * 0.52, [0.8, 0.86, 0.88], 1, 0.65, 0.02);
+        }
+        for (let i = 0; i < 18; i++) {
+            const a = i * 0.72;
+            const d = 8.3 + (i % 4) * 0.7;
+            const x = Math.cos(a) * d;
+            const z = Math.sin(a) * d;
+            pushBox(out, x, -0.42, z, 0.18, 0.82 + (i % 3) * 0.2, 0.18, [0.11, 0.085, 0.06], 1, 0.2, 0);
+            pushBox(out, x, 0.1 + (i % 3) * 0.12, z, 0.58, 0.28, 0.58, [0.045, 0.12, 0.075], 1, 0.18, 0);
+        }
+        for (const side of [-1, 1]) {
+            const x = side * (BOARD * 0.5 + 2.35);
+            pushBox(out, x, 0.25, -1.8, 0.12, 1.75, 0.12, [0.62, 0.43, 0.2], 1, 0.34, 0.02);
+            pushBox(out, x, 1.05 + Math.sin(time * 2.3) * 0.03, -1.48, 0.76, 0.42, 0.06, side < 0 ? [0.12, 0.32, 0.85] : [0.72, 0.05, 0.04], 1, 0.42, 0.04);
+            pushBox(out, x, 0.25, 1.8, 0.12, 1.75, 0.12, [0.62, 0.43, 0.2], 1, 0.34, 0.02);
+            pushBox(out, x, 1.05 + Math.cos(time * 2.1) * 0.03, 2.12, 0.76, 0.42, 0.06, side < 0 ? [0.12, 0.32, 0.85] : [0.72, 0.05, 0.04], 1, 0.42, 0.04);
+        }
+    }
+
     function addImportedModelAdornments(out, time) {
-        if (!modelAssets) return;
+        if (!modelAssets || modelStatus === 'gothic') return;
         for (let r = 0; r < 8; r++) {
             for (let c = 0; c < 8; c++) {
                 const p = board[r][c];
@@ -928,13 +1197,15 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
 
     function addPiece(out, p, x, z, time, isSelected) {
         const white = p.color === WHITE;
-        const main = white ? [0.92, 0.82, 0.62] : [0.08, 0.095, 0.12];
-        const cloth = white ? [0.25, 0.46, 0.9] : [0.58, 0.08, 0.08];
-        const metal = white ? [1.0, 0.78, 0.28] : [0.45, 0.52, 0.62];
+        const main = white ? [0.92, 0.82, 0.62] : [0.055, 0.065, 0.08];
+        const cloth = white ? [0.17, 0.39, 0.92] : [0.62, 0.035, 0.035];
+        const metal = white ? [1.0, 0.78, 0.28] : [0.52, 0.58, 0.68];
         const skin = white ? [0.86, 0.62, 0.42] : [0.38, 0.26, 0.2];
         const y = 0.15 + (isSelected ? Math.sin(time * 5) * 0.05 + 0.08 : 0);
         const shine = white ? 0.46 : 0.76;
-        pushBox(out, x, y + 0.08, z, 1.0, 0.18, 1.0, metal, 1, shine, isSelected ? 0.08 : 0);
+        const teamGlow = isSelected ? 0.16 : 0.03;
+        pushBox(out, x, y + 0.06, z, 1.08, 0.14, 1.08, metal, 1, shine, teamGlow);
+        pushBox(out, x, y + 0.16, z, 0.92, 0.08, 0.92, white ? [0.95, 0.88, 0.68] : [0.16, 0.18, 0.22], 1, shine, teamGlow);
         if (p.type === 'p') addPawn(out, x, y, z, main, cloth, skin, shine);
         else if (p.type === 'r') addRook(out, x, y, z, main, metal, shine);
         else if (p.type === 'n') addHorse(out, x, y, z, main, skin, metal, shine);
@@ -946,32 +1217,44 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
     function addPawn(out, x, y, z, main, cloth, skin, shine) {
         pushBox(out, x, y + 0.5, z, 0.5, 0.65, 0.42, cloth, 1, shine);
         pushBox(out, x, y + 0.98, z, 0.38, 0.34, 0.36, skin, 1, shine);
+        pushBox(out, x, y + 1.18, z - 0.02, 0.46, 0.12, 0.42, main, 1, shine + 0.1, 0.02);
+        pushBox(out, x, y + 1.02, z - 0.2, 0.26, 0.06, 0.06, [0.02, 0.018, 0.014], 1, 0);
         pushBox(out, x - 0.28, y + 0.56, z, 0.16, 0.48, 0.18, main, 1, shine);
         pushBox(out, x + 0.28, y + 0.56, z, 0.16, 0.48, 0.18, main, 1, shine);
         pushBox(out, x - 0.15, y + 0.18, z, 0.16, 0.32, 0.18, main, 1, shine);
         pushBox(out, x + 0.15, y + 0.18, z, 0.16, 0.32, 0.18, main, 1, shine);
+        pushBox(out, x + 0.4, y + 0.75, z - 0.18, 0.08, 0.82, 0.08, main, 1, shine + 0.2, 0.03);
+        pushBox(out, x + 0.4, y + 1.18, z - 0.18, 0.28, 0.1, 0.1, main, 1, shine + 0.2, 0.03);
+        pushBox(out, x - 0.38, y + 0.72, z + 0.04, 0.08, 0.4, 0.36, main, 1, shine + 0.2, 0.02);
     }
 
     function addRook(out, x, y, z, main, metal, shine) {
-        pushBox(out, x, y + 0.55, z, 0.68, 0.95, 0.68, main, 1, shine);
-        pushBox(out, x, y + 1.12, z, 0.84, 0.22, 0.84, metal, 1, shine);
+        pushBox(out, x, y + 0.52, z, 0.78, 0.9, 0.78, main, 1, shine);
+        pushBox(out, x, y + 0.95, z, 0.92, 0.12, 0.92, metal, 1, shine + 0.1, 0.03);
+        pushBox(out, x, y + 1.16, z, 0.9, 0.22, 0.9, metal, 1, shine);
         for (const dx of [-0.28, 0, 0.28]) pushBox(out, x + dx, y + 1.35, z, 0.16, 0.28, 0.78, metal, 1, shine);
         for (const dz of [-0.28, 0.28]) pushBox(out, x, y + 1.35, z + dz, 0.78, 0.28, 0.16, metal, 1, shine);
+        pushBox(out, x - 0.34, y + 0.56, z - 0.42, 0.08, 0.72, 0.08, metal, 1, shine + 0.25, 0.03);
+        pushBox(out, x + 0.34, y + 0.56, z - 0.42, 0.08, 0.72, 0.08, metal, 1, shine + 0.25, 0.03);
+        pushBox(out, x, y + 0.55, z + 0.5, 0.68, 0.6, 0.07, [0.11, 0.12, 0.13], 1, shine, 0.01);
     }
 
     function addHorse(out, x, y, z, main, skin, metal, shine) {
-        pushBox(out, x, y + 0.48, z + 0.05, 0.86, 0.5, 0.42, main, 1, shine);
+        pushBox(out, x, y + 0.46, z + 0.05, 0.9, 0.5, 0.42, main, 1, shine);
         pushBox(out, x - 0.28, y + 0.16, z - 0.14, 0.16, 0.42, 0.14, skin, 1, shine);
         pushBox(out, x + 0.28, y + 0.16, z - 0.14, 0.16, 0.42, 0.14, skin, 1, shine);
         pushBox(out, x - 0.28, y + 0.16, z + 0.28, 0.16, 0.42, 0.14, skin, 1, shine);
         pushBox(out, x + 0.28, y + 0.16, z + 0.28, 0.16, 0.42, 0.14, skin, 1, shine);
         pushBox(out, x, y + 0.88, z - 0.22, 0.36, 0.7, 0.32, main, 1, shine);
-        pushBox(out, x, y + 1.2, z - 0.52, 0.46, 0.36, 0.58, skin, 1, shine);
+        pushBox(out, x, y + 1.22, z - 0.52, 0.46, 0.38, 0.58, skin, 1, shine);
+        pushBox(out, x, y + 1.06, z - 0.36, 0.16, 0.72, 0.08, [0.02, 0.018, 0.014], 1, shine);
+        pushBox(out, x, y + 0.62, z + 0.33, 0.58, 0.22, 0.16, metal, 1, shine + 0.22, 0.03);
         pushBox(out, x - 0.13, y + 1.47, z - 0.68, 0.12, 0.28, 0.1, metal, 1, shine);
         pushBox(out, x + 0.13, y + 1.47, z - 0.68, 0.12, 0.28, 0.1, metal, 1, shine);
         pushBox(out, x, y + 1.06, z + 0.38, 0.16, 0.46, 0.12, metal, 1, shine);
         pushBox(out, x - 0.13, y + 1.22, z - 0.78, 0.08, 0.08, 0.06, [0.02, 0.02, 0.02], 1, 0);
         pushBox(out, x + 0.13, y + 1.22, z - 0.78, 0.08, 0.08, 0.06, [0.02, 0.02, 0.02], 1, 0);
+        pushBox(out, x, y + 0.58, z + 0.56, 0.12, 0.14, 0.44, [0.02, 0.018, 0.014], 1, 0.12);
     }
 
     function addBishop(out, x, y, z, main, cloth, metal, shine) {
@@ -980,20 +1263,29 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
         pushBox(out, x, y + 1.32, z, 0.32, 0.28, 0.34, metal, 1, shine);
         pushBox(out, x + 0.12, y + 1.52, z, 0.12, 0.34, 0.12, metal, 1, shine);
         pushBox(out, x - 0.18, y + 0.83, z, 0.14, 0.56, 0.12, metal, 1, shine);
+        pushBox(out, x + 0.36, y + 0.78, z - 0.1, 0.1, 0.82, 0.1, metal, 1, shine + 0.3, 0.06);
+        pushGem(out, x + 0.36, y + 1.28, z - 0.1, 0.16, [0.42, 0.82, 1.0], 0.45);
+        pushBox(out, x, y + 0.63, z + 0.34, 0.5, 0.44, 0.06, cloth, 1, shine, 0.03);
     }
 
     function addRoyal(out, x, y, z, main, cloth, skin, metal, shine, king) {
-        pushBox(out, x, y + 0.48, z, 0.6, 0.76, 0.46, cloth, 1, shine);
+        pushBox(out, x, y + 0.48, z, 0.64, 0.78, 0.48, cloth, 1, shine);
         pushBox(out, x - 0.38, y + 0.62, z, 0.14, 0.58, 0.16, main, 1, shine);
         pushBox(out, x + 0.38, y + 0.62, z, 0.14, 0.58, 0.16, main, 1, shine);
         pushBox(out, x, y + 1.04, z, 0.42, 0.38, 0.38, skin, 1, shine);
+        pushBox(out, x, y + 1.05, z - 0.22, 0.26, 0.05, 0.05, [0.02, 0.018, 0.014], 1, 0);
         pushBox(out, x, y + 1.32, z, 0.52, 0.16, 0.52, metal, 1, shine);
         for (const dx of [-0.2, 0, 0.2]) pushBox(out, x + dx, y + 1.52, z, 0.12, 0.32, 0.12, metal, 1, shine);
+        pushBox(out, x, y + 0.7, z + 0.36, 0.74, 0.72, 0.08, cloth, 1, shine, 0.04);
         if (king) {
             pushBox(out, x, y + 1.82, z, 0.12, 0.42, 0.12, metal, 1, shine);
             pushBox(out, x, y + 1.98, z, 0.38, 0.1, 0.1, metal, 1, shine);
+            pushBox(out, x + 0.46, y + 0.82, z - 0.16, 0.08, 0.92, 0.08, metal, 1, shine + 0.3, 0.08);
+            pushBox(out, x + 0.46, y + 1.36, z - 0.16, 0.36, 0.12, 0.1, metal, 1, shine + 0.3, 0.08);
         } else {
             pushBox(out, x, y + 1.75, z, 0.22, 0.28, 0.22, metal, 1, shine);
+            for (const dx of [-0.28, 0.28]) pushGem(out, x + dx, y + 1.78, z, 0.13, metal, 0.22);
+            pushGem(out, x, y + 1.92, z, 0.14, [0.92, 0.22, 0.45], 0.32);
         }
     }
 
@@ -1019,44 +1311,49 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
     }
 
     function render(now) {
-        resize();
-        updateCamera();
-        const time = now / 1000;
-        const proj = new Float32Array(16);
-        const view = new Float32Array(16);
-        const vp = new Float32Array(16);
-        const uniforms = new Float32Array(24);
-        math3d.perspective(proj, Math.PI / 4.2, canvas.width / canvas.height, 0.1, 120);
-        math3d.lookAt(view, camera.eye, camera.target, [0, 1, 0]);
-        math3d.mul(vp, proj, view);
-        uniforms.set(vp, 0);
-        uniforms.set([camera.eye[0], camera.eye[1], camera.eye[2], 1], 16);
-        uniforms.set([-0.45, -0.9, -0.22, 0], 20);
-        device.queue.writeBuffer(uniformBuffer, 0, uniforms);
+        if (rendererFailed) return;
+        try {
+            resize();
+            updateCamera();
+            const time = now / 1000;
+            const proj = new Float32Array(16);
+            const view = new Float32Array(16);
+            const vp = new Float32Array(16);
+            const uniforms = new Float32Array(24);
+            math3d.perspective(proj, Math.PI / 4.2, canvas.width / canvas.height, 0.1, 120);
+            math3d.lookAt(view, camera.eye, camera.target, [0, 1, 0]);
+            math3d.mul(vp, proj, view);
+            uniforms.set(vp, 0);
+            uniforms.set([camera.eye[0], camera.eye[1], camera.eye[2], 1], 16);
+            uniforms.set([-0.45, -0.9, -0.22, 0], 20);
+            device.queue.writeBuffer(uniformBuffer, 0, uniforms);
 
-        const instances = buildInstances(time);
-        device.queue.writeBuffer(instanceBuffer, 0, instances);
+            const instances = buildInstances(time);
+            device.queue.writeBuffer(instanceBuffer, 0, instances);
+            const meshDraws = prepareModelDraws(vp);
 
-        const encoder = device.createCommandEncoder();
-        const pass = encoder.beginRenderPass({
-            colorAttachments: [{ view: context.getCurrentTexture().createView(), clearValue: { r: 0.035, g: 0.038, b: 0.048, a: 1 }, loadOp: 'clear', storeOp: 'store' }],
-            depthStencilAttachment: { view: depthTexture.createView(), depthClearValue: 1, depthLoadOp: 'clear', depthStoreOp: 'store' }
-        });
-        pass.setPipeline(pipeline);
-        pass.setBindGroup(0, bindGroup);
-        pass.setVertexBuffer(0, vertexBuffer);
-        pass.setVertexBuffer(1, instanceBuffer);
-        pass.draw(36, instances.length / 12);
-        drawModelPieces(pass, vp);
-        pass.end();
-        device.queue.submit([encoder.finish()]);
-        requestAnimationFrame(render);
+            const encoder = device.createCommandEncoder();
+            const pass = encoder.beginRenderPass({
+                colorAttachments: [{ view: context.getCurrentTexture().createView(), clearValue: { r: 0.035, g: 0.038, b: 0.048, a: 1 }, loadOp: 'clear', storeOp: 'store' }],
+                depthStencilAttachment: { view: depthTexture.createView(), depthClearValue: 1, depthLoadOp: 'clear', depthStoreOp: 'store' }
+            });
+            pass.setPipeline(pipeline);
+            pass.setBindGroup(0, bindGroup);
+            pass.setVertexBuffer(0, vertexBuffer);
+            pass.setVertexBuffer(1, instanceBuffer);
+            pass.draw(36, instances.length / 12);
+            drawModelPieces(pass, meshDraws);
+            pass.end();
+            device.queue.submit([encoder.finish()]);
+            requestAnimationFrame(render);
+        } catch (err) {
+            showRenderError(err && err.message ? err.message : err);
+        }
     }
 
-    function drawModelPieces(pass, vp) {
-        if (!modelAssets) return;
-        pass.setPipeline(meshPipeline);
-        pass.setBindGroup(0, meshBindGroup);
+    function prepareModelDraws(vp) {
+        if (!modelAssets) return [];
+        const draws = [];
         const uniforms = new Float32Array(40);
         uniforms.set(vp, 0);
         uniforms.set([camera.eye[0], camera.eye[1], camera.eye[2], 1], 16);
@@ -1074,15 +1371,30 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
                 uniforms.set([x, y, z, asset.scale], 24);
                 uniforms.set(color, 28);
                 uniforms.set([1, shine, selected && selected.r === r && selected.c === c ? 0.12 : 0.02, 0], 32);
-                device.queue.writeBuffer(meshUniformBuffer, 0, uniforms);
-                for (const primitive of asset.primitives) {
-                    pass.setVertexBuffer(0, primitive.vertex);
-                    if (primitive.index) {
-                        pass.setIndexBuffer(primitive.index, primitive.indexFormat);
-                        pass.drawIndexed(primitive.indexCount);
-                    } else {
-                        pass.draw(primitive.vertexCount);
-                    }
+                const uniformBufferForDraw = device.createBuffer({ size: 160, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+                device.queue.writeBuffer(uniformBufferForDraw, 0, uniforms);
+                const drawBindGroup = device.createBindGroup({
+                    layout: meshPipeline.getBindGroupLayout(0),
+                    entries: [{ binding: 0, resource: { buffer: uniformBufferForDraw } }]
+                });
+                draws.push({ asset, bindGroup: drawBindGroup });
+            }
+        }
+        return draws;
+    }
+
+    function drawModelPieces(pass, draws) {
+        if (!draws.length) return;
+        pass.setPipeline(meshPipeline);
+        for (const draw of draws) {
+            pass.setBindGroup(0, draw.bindGroup);
+            for (const primitive of draw.asset.primitives) {
+                pass.setVertexBuffer(0, primitive.vertex);
+                if (primitive.index) {
+                    pass.setIndexBuffer(primitive.index, primitive.indexFormat);
+                    pass.drawIndexed(primitive.indexCount);
+                } else {
+                    pass.draw(primitive.vertexCount);
                 }
             }
         }
@@ -1117,6 +1429,13 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
     }
 
     function bindEvents() {
+        const stopPointerDrag = e => {
+            dragging = false;
+            lastTouchDist = 0;
+            if (e && e.pointerId !== undefined && canvas.hasPointerCapture(e.pointerId)) {
+                canvas.releasePointerCapture(e.pointerId);
+            }
+        };
         canvas.addEventListener('pointerdown', e => {
             dragging = true;
             lastPointer = [e.clientX, e.clientY];
@@ -1137,9 +1456,11 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
         canvas.addEventListener('pointerup', e => {
             const moved = Math.hypot(e.clientX - downPointer[0], e.clientY - downPointer[1]);
             const sq = pickSquare(e.clientX, e.clientY);
-            dragging = false;
+            stopPointerDrag(e);
             if (moved < 6 && sq) selectSquare(sq.r, sq.c);
         });
+        canvas.addEventListener('pointercancel', stopPointerDrag);
+        canvas.addEventListener('pointerleave', stopPointerDrag);
         canvas.addEventListener('wheel', e => {
             e.preventDefault();
             camera.dist += e.deltaY * 0.015;
@@ -1183,10 +1504,8 @@ fn h(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(41.7,289.3))) * 12
         if (await initGpu()) {
             resize();
             requestAnimationFrame(render);
-            loadPieceModels().catch(err => {
-                modelStatus = 'procedural';
-                console.info('3D Royal Chess model loading skipped:', err.message);
-            });
+            modelAssets = createGothicChessSet();
+            modelStatus = 'gothic';
         }
     }
 
