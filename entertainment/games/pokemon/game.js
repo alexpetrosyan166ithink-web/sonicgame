@@ -587,6 +587,7 @@ let messageQueue = [];
 let currentMessage = null;
 let messageTimer = 0;
 let busy = false;
+let battleVoice = null;
 
 let playerAnim = { lunge: 0, hurt: 0, baseX: -3.5, baseZ: 2.4 };
 let enemyAnim  = { lunge: 0, hurt: 0, baseX: 3.5, baseZ: -2.4 };
@@ -740,6 +741,34 @@ function queueMessage(text, after) {
     if (!currentMessage) advanceMessage();
 }
 
+function speakBattleLine(text) {
+    if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) return;
+
+    const say = () => {
+        window.speechSynthesis.onvoiceschanged = null;
+        const utterance = new SpeechSynthesisUtterance(text);
+        const voices = window.speechSynthesis.getVoices();
+        battleVoice = battleVoice || voices.find(v => /^en(-|_)/i.test(v.lang)) || voices[0] || null;
+        if (battleVoice) utterance.voice = battleVoice;
+        utterance.rate = 0.95;
+        utterance.pitch = 1.08;
+        utterance.volume = 0.9;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utterance);
+    };
+
+    if (window.speechSynthesis.getVoices().length === 0) {
+        window.speechSynthesis.onvoiceschanged = say;
+    } else {
+        say();
+    }
+}
+
+function announceHit(attacker, defender, move, damage) {
+    if (damage <= 0) return;
+    speakBattleLine(`${attacker.name} hit ${defender.name} with ${move.name}.`);
+}
+
 function advanceMessage() {
     if (messageQueue.length === 0) {
         currentMessage = null;
@@ -781,6 +810,7 @@ function playerUseMove(idx) {
             enemy.hp = Math.max(0, enemy.hp - r.dmg);
             enemyAnim.hurt = 1.0;
             updateHud();
+            if (r.eff !== 0) announceHit(player, enemy, move, r.dmg);
             queueMessage(`${player.name} used ${move.name}!`);
             if (r.eff > 1) queueMessage("It's super effective!");
             else if (r.eff === 0) queueMessage('It had no effect...');
@@ -826,6 +856,7 @@ function enemyTurn() {
             player.hp = Math.max(0, player.hp - r.dmg);
             playerAnim.hurt = 1.0;
             updateHud();
+            if (r.eff !== 0) announceHit(enemy, player, best, r.dmg);
             queueMessage(`Foe ${enemy.name} used ${best.name}!`);
             if (r.eff > 1) queueMessage("It's super effective!");
             else if (r.eff === 0) queueMessage('It had no effect...');
