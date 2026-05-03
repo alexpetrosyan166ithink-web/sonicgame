@@ -19,6 +19,7 @@ body {
         linear-gradient(135deg, #07151d 0%, #102428 42%, #161820 100%);
     min-height: 100vh;
     overflow-x: hidden;
+    touch-action: manipulation;
 }
 
 button {
@@ -68,6 +69,7 @@ button {
     height: calc(100vh - 88px);
     min-height: 560px;
     background: #102018;
+    touch-action: none;
 }
 
 .scoreboard {
@@ -353,6 +355,67 @@ button {
     transform: translateX(-50%) translateY(0);
 }
 
+.football-controls-fallback {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 500;
+    pointer-events: none;
+    justify-content: space-between;
+    box-sizing: border-box;
+}
+
+.football-controls-fallback .dpad {
+    display: grid;
+    pointer-events: auto;
+}
+
+.football-controls-fallback .dpad-btn,
+.football-controls-fallback .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    cursor: pointer;
+}
+
+.football-controls-fallback .dpad-center.empty {
+    pointer-events: none;
+    opacity: 0;
+}
+
+.football-controls-fallback .dpad-up {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.football-controls-fallback .dpad-left {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.football-controls-fallback .dpad-right {
+    grid-column: 3;
+    grid-row: 2;
+}
+
+.football-controls-fallback .dpad-down {
+    grid-column: 2;
+    grid-row: 3;
+}
+
+.football-controls-fallback .action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: flex-end;
+    pointer-events: auto;
+}
+
 @media (max-width: 1050px) {
     .game-shell {
         grid-template-columns: 1fr;
@@ -371,7 +434,8 @@ button {
 
 @media (max-width: 680px) {
     .game-shell {
-        padding: 58px 10px 18px;
+        padding: 52px 8px 16px;
+        gap: 10px;
     }
 
     .back-link {
@@ -381,43 +445,219 @@ button {
     }
 
     .scoreboard {
-        width: calc(100% - 20px);
-        grid-template-columns: 1fr 92px 1fr;
+        top: 8px;
+        width: calc(100% - 12px);
+        grid-template-columns: minmax(0, 1fr) 78px minmax(0, 1fr);
+        border-radius: 6px;
     }
 
-    .score-team {
-        gap: 8px;
+    .score-team,
+    .clock-box {
+        min-height: 46px;
+        gap: 5px;
+        padding: 0 5px;
     }
 
     .score-team span,
     .clock-box span {
-        font-size: 9px;
+        font-size: 8px;
+        letter-spacing: 0.04em;
     }
 
     .score-team strong,
     .clock-box strong {
-        font-size: 21px;
+        font-size: 19px;
     }
 
     #scene {
-        height: 64vh;
-        min-height: 420px;
+        height: 58vh;
+        min-height: 340px;
+        max-height: 500px;
     }
 
     .hud-panel {
-        padding: 14px;
+        padding: 12px;
+        gap: 10px;
     }
 
+    .hud-panel h1 {
+        font-size: 22px;
+    }
+
+    .summary,
+    .lede,
+    .controls-note p {
+        font-size: 12px;
+        line-height: 1.45;
+    }
+
+    .team-card {
+        padding: 10px;
+    }
+
+    .roster,
+    .match-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px;
+    }
+
+    .player-pill {
+        min-height: 36px;
+        padding: 7px;
+        font-size: 10px;
+    }
+
+    .match-stats div {
+        min-height: 62px;
+        padding: 9px;
+    }
+
+    .match-stats span,
+    .team-card h2 {
+        font-size: 9px;
+        margin-bottom: 7px;
+    }
+
+    .match-stats strong {
+        font-size: 12px;
+    }
+
+    .overlay {
+        padding: 10px;
+        align-items: flex-start;
+        padding-top: 74px;
+    }
+
+    .overlay-card {
+        padding: 16px;
+        max-height: calc(100vh - 94px);
+        overflow-y: auto;
+    }
+
+    .overlay-card h1 {
+        font-size: 31px;
+    }
+
+    .overlay-card h2 {
+        font-size: 25px;
+    }
+
+    .mode-row,
+    .button-row {
+        margin: 12px 0;
+        gap: 8px;
+    }
+
+    .mode-choice,
+    .primary-btn,
+    .button-row button {
+        min-height: 42px;
+        padding: 0 12px;
+    }
+
+    .control-grid {
+        margin: 12px 0;
+    }
+
+    .control-grid div {
+        font-size: 11px;
+        padding: 8px;
+    }
+
+    #toast {
+        bottom: 132px;
+        width: calc(100% - 32px);
+        text-align: center;
+        font-size: 12px;
+    }
+
+    body.football-touch #game-container {
+        padding-bottom: 112px !important;
+    }
+
+    body.football-touch #scene {
+        height: calc(100vh - 72px);
+        min-height: 560px;
+        max-height: none;
+    }
+
+    body.football-touch .stadium-panel {
+        min-height: 560px;
+    }
+
+    body.football-touch .hud-panel {
+        margin-bottom: 118px;
+    }
+
+    body.football-touch .mobile-controls {
+        padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+        align-items: flex-end;
+        background: linear-gradient(180deg, transparent, rgba(4, 13, 18, 0.72));
+    }
+
+    body.football-touch:not(.football-playing) .mobile-controls {
+        display: none !important;
+    }
+
+    body.football-touch .dpad {
+        grid-template-columns: 44px 44px 44px;
+        grid-template-rows: 44px 44px 44px;
+        gap: 3px;
+    }
+
+    body.football-touch .dpad-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 15px;
+        background: rgba(50, 213, 131, 0.28);
+        border-color: rgba(50, 213, 131, 0.58);
+        color: #7ee4a8;
+    }
+
+    body.football-touch .action-buttons {
+        max-width: 144px;
+        gap: 7px;
+    }
+
+    body.football-touch .action-btn {
+        width: 54px;
+        height: 54px;
+        font-size: 8px;
+        background: rgba(255, 230, 109, 0.24);
+        border-color: rgba(255, 230, 109, 0.62);
+        color: #ffe66d;
+    }
+
+    body.football-touch .action-btn.primary {
+        width: 64px;
+        height: 64px;
+        color: #ff7b92;
+        background: rgba(255, 77, 109, 0.25);
+        border-color: rgba(255, 77, 109, 0.66);
+    }
+
+    body.football-touch #twoPlayerModeBtn {
+        display: none;
+    }
+}
+
+@media (max-width: 420px) {
     .roster,
     .match-stats {
         grid-template-columns: 1fr;
     }
 
-    .overlay {
-        padding: 14px;
+    .score-team {
+        flex-direction: column;
+        gap: 1px;
     }
 
-    .overlay-card {
-        padding: 20px;
+    .score-team--rivals {
+        flex-direction: column-reverse;
+    }
+
+    #scene {
+        height: 56vh;
+        min-height: 320px;
     }
 }

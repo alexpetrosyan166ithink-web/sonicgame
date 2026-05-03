@@ -17,6 +17,7 @@
     const finishTitle = $('finishTitle');
     const finishText = $('finishText');
     const toast = $('toast');
+    const urlParams = new URLSearchParams(window.location.search);
 
     const PITCH_WIDTH = 62;
     const PITCH_LENGTH = 96;
@@ -69,7 +70,8 @@
     let resetTimer = 0;
     let toastTimer = 0;
     let cameraShake = 0;
-    const touchControls = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const touchControls = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || urlParams.get('touch') === '1';
+    let compactView = false;
 
     const ball = {
         pos: new THREE.Vector3(0, BALL_RADIUS, 0),
@@ -414,6 +416,7 @@
     function startMatch() {
         running = true;
         paused = false;
+        document.body.classList.add('football-playing');
         elapsed = 0;
         stars = 0;
         rivals = 0;
@@ -450,7 +453,9 @@
         const width = Math.max(1, rect.width);
         const height = Math.max(1, rect.height);
         renderer.setSize(width, height, false);
+        compactView = width < 680 || width / height < 0.88;
         camera.aspect = width / height;
+        camera.fov = compactView ? 55 : 46;
         camera.updateProjectionMatrix();
     }
 
@@ -747,6 +752,7 @@
 
     function finishMatch() {
         running = false;
+        document.body.classList.remove('football-playing');
         setScreen(finishScreen, true);
         if (stars > rivals) {
             finishTitle.textContent = 'Stars Win';
@@ -777,7 +783,11 @@
     function updateCamera(dt) {
         const targetZ = clamp(ball.pos.z * 0.38, -21, 21);
         const targetX = clamp(ball.pos.x * 0.22, -9, 9);
-        tempVec.set(targetX, 60, 78 + targetZ * 0.1);
+        if (compactView) {
+            tempVec.set(targetX * 0.6, 72, 92 + targetZ * 0.08);
+        } else {
+            tempVec.set(targetX, 60, 78 + targetZ * 0.1);
+        }
         camera.position.lerp(tempVec, dt * 1.7);
         tempVec2.set(targetX * 0.55, 0, targetZ);
         if (cameraShake > 0) {
@@ -845,6 +855,7 @@
     }
 
     function setMode(nextMode) {
+        if (touchControls) nextMode = 'ai';
         mode = nextMode;
         $('aiModeBtn').classList.toggle('active', mode === 'ai');
         $('twoPlayerModeBtn').classList.toggle('active', mode === 'two');
@@ -878,6 +889,7 @@
         $('switchModeBtn').addEventListener('click', () => {
             setScreen(finishScreen, false);
             setScreen(startScreen, true);
+            document.body.classList.remove('football-playing');
         });
         canvas.addEventListener('pointerdown', () => {
             if (mode === 'ai') justPressed.Space = true;
@@ -894,13 +906,65 @@
                 ]
             });
         }
+        if (touchControls && !document.querySelector('.mobile-controls')) {
+            createFootballTouchControls();
+        }
     }
 
+    function createFootballTouchControls() {
+        const container = document.createElement('div');
+        container.className = 'mobile-controls active football-controls-fallback';
+        container.innerHTML = `
+            <div class="dpad">
+                <div class="dpad-btn dpad-up" data-key="ArrowUp">▲</div>
+                <div class="dpad-btn dpad-left" data-key="ArrowLeft">◄</div>
+                <div class="dpad-btn dpad-center empty"></div>
+                <div class="dpad-btn dpad-right" data-key="ArrowRight">►</div>
+                <div class="dpad-btn dpad-down" data-key="ArrowDown">▼</div>
+            </div>
+            <div class="action-buttons">
+                <div class="action-btn primary" data-key="Space">KICK</div>
+                <div class="action-btn" data-key="ShiftLeft">SPRINT</div>
+            </div>
+        `;
+        document.body.appendChild(container);
+        $('game-container').style.paddingBottom = '112px';
+
+        function press(el, down) {
+            const code = el.dataset.key;
+            if (!code) return;
+            if (down && !keys[code]) justPressed[code] = true;
+            keys[code] = down;
+            el.classList.toggle('pressed', down);
+        }
+
+        container.querySelectorAll('[data-key]').forEach((el) => {
+            el.addEventListener('pointerdown', (event) => {
+                event.preventDefault();
+                el.setPointerCapture(event.pointerId);
+                press(el, true);
+            });
+            el.addEventListener('pointerup', (event) => {
+                event.preventDefault();
+                press(el, false);
+            });
+            el.addEventListener('pointercancel', () => press(el, false));
+            el.addEventListener('lostpointercapture', () => press(el, false));
+        });
+    }
+
+    if (touchControls) {
+        document.body.classList.add('football-touch');
+        mode = 'ai';
+        $('twoPlayerModeBtn').setAttribute('aria-hidden', 'true');
+        $('twoPlayerModeBtn').tabIndex = -1;
+        document.querySelector('.control-grid').innerHTML = '<div><span>P1</span> D-pad move, Kick shoot/pass, Sprint burst</div>';
+    }
     renderRoster('starsRoster', starTeam);
     renderRoster('rivalsRoster', rivalTeam);
     bindEvents();
     initScene();
-    if (new URLSearchParams(window.location.search).get('autostart') === '1') {
+    if (urlParams.get('autostart') === '1') {
         window.setTimeout(startMatch, 250);
     }
 })();
