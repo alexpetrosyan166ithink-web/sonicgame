@@ -2116,8 +2116,8 @@ function update() {
     // Update HUD
     document.getElementById('ui-score').textContent = 'SCORE ' + score;
 
-    // Clear justPressed
-    justPressed = {};
+    // Keep the same object so mobile controls retain their reference.
+    Object.keys(justPressed).forEach(code => { delete justPressed[code]; });
 }
 
 function startGame() {
