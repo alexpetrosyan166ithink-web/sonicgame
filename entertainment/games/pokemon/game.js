@@ -573,9 +573,9 @@ const POKEDEX = {
 };
 
 const LANGUAGE_OPTIONS = [
-    { key: 'armenian', label: 'Armenian', native: 'Հայերեն', speechLang: 'hy-AM' },
-    { key: 'french', label: 'French', native: 'Français', speechLang: 'fr-FR' },
-    { key: 'english', label: 'English', native: 'English', speechLang: 'en-US' }
+    { key: 'armenian', label: 'Armenian', native: 'Հայերեն', speechLang: 'hy-AM', htmlLang: 'hy' },
+    { key: 'french', label: 'French', native: 'Français', speechLang: 'fr-FR', htmlLang: 'fr' },
+    { key: 'english', label: 'English', native: 'English', speechLang: 'en-US', htmlLang: 'en' }
 ];
 
 const POKEMON_NAMES = {
@@ -599,14 +599,35 @@ const POKEMON_NAMES = {
 const COPY = {
     english: {
         title: 'POKEMON BATTLE 3D',
+        pageTitle: 'Pokemon Battle 3D - Free Online Turn-Based Battle Game',
+        backLink: '← BACK TO ENTERTAINMENT',
         chooseLanguage: 'Choose your language!',
         chooseStarter: 'Choose your starter!',
         controls: ['1 / 2 / 3 / 4 - pick a move during battle', 'R - run from wild pokemon | ENTER - skip message', 'Drag mouse - orbit camera'],
+        battleChip: 'GO Battle',
+        hpLabel: 'HP',
+        expLabel: 'EXP',
+        cp: value => `CP ${value}`,
+        starterHp: value => `HP ${value}`,
+        skipMessage: 'press ENTER to skip',
+        runWild: 'RUN',
+        trainerBattle: 'TRAINER BATTLE',
         wildAppeared: name => `A wild ${name} appeared!`,
         sentOut: (trainer, name) => `${trainer} sent out ${name}!`,
         go: name => `Go, ${name}!`,
+        usedMove: (name, move) => `${name} used ${move}!`,
+        foeUsedMove: (name, move) => `Foe ${name} used ${move}!`,
+        recoveredHp: hp => `Recovered ${hp} HP.`,
+        superEffective: "It's super effective!",
+        noEffect: 'It had no effect...',
+        notVeryEffective: "It's not very effective...",
+        dealtDamage: damage => `Dealt ${damage} damage.`,
+        tookDamage: damage => `You took ${damage} damage.`,
+        fainted: name => `${name} fainted!`,
         battleWon: 'You won the battle!',
-        hitLine: (attacker, defender, move) => `${attacker} hit ${defender} with ${move}.`,
+        cantRun: "Can't run from a trainer battle!",
+        escaped: 'Got away safely!',
+        failedEscape: "Couldn't escape!",
         winTitle: 'YOU WON!',
         winText: name => `You defeated all trainers including the Champion's ${name}!`,
         legendText: name => `${name} is now a true legend!`,
@@ -617,14 +638,35 @@ const COPY = {
     },
     french: {
         title: 'POKEMON BATTLE 3D',
+        pageTitle: 'Pokemon Battle 3D - Jeu de combat au tour par tour gratuit',
+        backLink: '← RETOUR AU DIVERTISSEMENT',
         chooseLanguage: 'Choisis ta langue !',
         chooseStarter: 'Choisis ton starter !',
         controls: ['1 / 2 / 3 / 4 - choisir une attaque', 'R - fuir un pokemon sauvage | ENTER - passer le message', 'Glisse la souris - tourner la caméra'],
+        battleChip: 'Combat GO',
+        hpLabel: 'PV',
+        expLabel: 'EXP',
+        cp: value => `PC ${value}`,
+        starterHp: value => `PV ${value}`,
+        skipMessage: 'appuie sur ENTER pour passer',
+        runWild: 'FUIR',
+        trainerBattle: 'COMBAT DE DRESSEUR',
         wildAppeared: name => `Un ${name} sauvage apparaît !`,
         sentOut: (trainer, name) => `${trainer} envoie ${name} !`,
         go: name => `Go, ${name} !`,
+        usedMove: (name, move) => `${name} utilise ${move} !`,
+        foeUsedMove: (name, move) => `Le ${name} adverse utilise ${move} !`,
+        recoveredHp: hp => `Récupère ${hp} PV.`,
+        superEffective: "C'est super efficace !",
+        noEffect: "Ça n'a aucun effet...",
+        notVeryEffective: "Ce n'est pas très efficace...",
+        dealtDamage: damage => `${damage} dégâts infligés.`,
+        tookDamage: damage => `Tu subis ${damage} dégâts.`,
+        fainted: name => `${name} est K.O. !`,
         battleWon: 'Tu as gagné le combat !',
-        hitLine: (attacker, defender, move) => `${attacker} a touché ${defender} avec ${move}.`,
+        cantRun: "Impossible de fuir un combat de dresseur !",
+        escaped: 'Tu as pris la fuite !',
+        failedEscape: "Impossible de s'échapper !",
         winTitle: 'VICTOIRE !',
         winText: name => `Tu as battu tous les dresseurs, même le ${name} du Champion !`,
         legendText: name => `${name} est maintenant une vraie légende !`,
@@ -635,14 +677,35 @@ const COPY = {
     },
     armenian: {
         title: 'POKEMON BATTLE 3D',
+        pageTitle: 'Pokemon Battle 3D - անվճար հերթական մարտական խաղ',
+        backLink: '← ՎԵՐԱԴԱՌՆԱԼ ԺԱՄԱՆՑ',
         chooseLanguage: 'Ընտրիր լեզուն',
         chooseStarter: 'Ընտրիր քո հերոսին',
         controls: ['1 / 2 / 3 / 4 - ընտրել հարվածը', 'R - փախչել վայրի պոկեմոնից | ENTER - անցնել հաղորդագրությունը', 'Քաշիր մկնիկը - պտտել տեսախցիկը'],
+        battleChip: 'GO մարտ',
+        hpLabel: 'Կյանք',
+        expLabel: 'Փորձ',
+        cp: value => `Ուժ ${value}`,
+        starterHp: value => `Կյանք ${value}`,
+        skipMessage: 'սեղմիր ENTER անցնելու համար',
+        runWild: 'ՓԱԽՉԵԼ',
+        trainerBattle: 'ՄԱՐԶԻՉԻ ՄԱՐՏ',
         wildAppeared: name => `Վայրի ${name} հայտնվեց։`,
         sentOut: (trainer, name) => `${trainer}-ը ուղարկեց ${name}-ին։`,
         go: name => `Առաջ, ${name}։`,
+        usedMove: (name, move) => `${name}-ը օգտագործեց ${move}։`,
+        foeUsedMove: (name, move) => `Հակառակորդ ${name}-ը օգտագործեց ${move}։`,
+        recoveredHp: hp => `Վերականգնեց ${hp} կյանք։`,
+        superEffective: 'Դա շատ արդյունավետ է։',
+        noEffect: 'Դա ազդեցություն չունեցավ...',
+        notVeryEffective: 'Դա այնքան էլ արդյունավետ չէ...',
+        dealtDamage: damage => `Հասցրեց ${damage} վնաս։`,
+        tookDamage: damage => `Դու ստացար ${damage} վնաս։`,
+        fainted: name => `${name}-ը ուշաթափվեց։`,
         battleWon: 'Դու հաղթեցիր մարտը։',
-        hitLine: (attacker, defender, move) => `${attacker}-ը հարվածեց ${defender}-ին ${move}-ով։`,
+        cantRun: 'Մարզիչի մարտից փախչել չի կարելի։',
+        escaped: 'Դու հաջողությամբ փախար։',
+        failedEscape: 'Փախչել չհաջողվեց։',
         winTitle: 'ԴՈՒ ՀԱՂԹԵՑԻՐ',
         winText: name => `Դու հաղթեցիր բոլոր մարզիչներին, նաև չեմպիոնի ${name}-ին։`,
         legendText: name => `${name}-ը հիմա իսկական լեգենդ է։`,
@@ -663,6 +726,10 @@ let currentLanguage = 'english';
 
 function copy() {
     return COPY[currentLanguage] || COPY.english;
+}
+
+function getLanguageOption() {
+    return LANGUAGE_OPTIONS.find(lang => lang.key === currentLanguage) || LANGUAGE_OPTIONS[2];
 }
 
 function getPokemonName(key) {
@@ -714,7 +781,24 @@ const bottomEl = $('bottomPanel');
 const moveBoxEl = $('moveBox');
 const messageBoxEl = $('messageBox');
 
+function setStaticLanguageText() {
+    const t = copy();
+    const lang = getLanguageOption();
+    document.documentElement.lang = lang.htmlLang;
+    document.title = t.pageTitle;
+    const backLink = document.querySelector('.breadcrumb a');
+    if (backLink) backLink.textContent = t.backLink;
+    const battleChip = document.querySelector('.battle-chip');
+    if (battleChip) battleChip.textContent = t.battleChip;
+    document.querySelectorAll('.hp-label').forEach(el => { el.textContent = t.hpLabel; });
+    const expLabel = document.querySelector('.exp-label');
+    if (expLabel) expLabel.textContent = t.expLabel;
+    const enterHint = document.querySelector('.enter-hint');
+    if (enterHint) enterHint.textContent = t.skipMessage;
+}
+
 function renderStartScreen(mode = 'language') {
+    setStaticLanguageText();
     const t = copy();
     const controls = t.controls.map(line => `<p>${line}</p>`).join('');
     screenEl.innerHTML = `
@@ -746,6 +830,7 @@ function buildLanguagePicker() {
 function selectLanguage(language) {
     currentLanguage = language;
     state = 'pick';
+    battleVoice = null;
     renderStartScreen('starter');
 }
 
@@ -761,7 +846,7 @@ function buildStarterPicker() {
             <div class="icon">${icons[key]}</div>
             <p>${getPokemonName(key)}</p>
             <span class="type-pill" style="background:${TYPE_COLOR[p.type]}">${p.type.toUpperCase()}</span>
-            <p class="hp-text">HP ${p.maxHp}</p>
+            <p class="hp-text">${copy().starterHp(p.maxHp)}</p>
         `;
         div.onclick = () => pickStarter(key);
         c.appendChild(div);
@@ -781,11 +866,13 @@ function hideStartScreen() {
 
 function updateHud() {
     if (!player || !enemy) return;
+    const t = copy();
+    setStaticLanguageText();
     $('playerName').textContent = player.name;
     $('enemyName').textContent = enemy.name;
     $('battleRound').textContent = getTrainerName(trainerIndex);
-    $('playerCp').textContent = `CP ${Math.round(player.maxHp * 18 + player.moves.length * 45)}`;
-    $('enemyCp').textContent = `CP ${Math.round(enemy.maxHp * 18 + enemy.moves.length * 45)}`;
+    $('playerCp').textContent = t.cp(Math.round(player.maxHp * 18 + player.moves.length * 45));
+    $('enemyCp').textContent = t.cp(Math.round(enemy.maxHp * 18 + enemy.moves.length * 45));
     $('playerType').textContent = player.type.toUpperCase();
     $('enemyType').textContent = enemy.type.toUpperCase();
     $('playerType').style.background = TYPE_COLOR[player.type];
@@ -822,11 +909,12 @@ function showMoveBox() {
         c.appendChild(btn);
     });
     $('runHint').textContent = TRAINERS[trainerIndex].wild
-        ? 'RUN'
-        : 'TRAINER BATTLE';
+        ? copy().runWild
+        : copy().trainerBattle;
 }
 
 function showMessageBox(text) {
+    setStaticLanguageText();
     moveBoxEl.classList.add('hidden');
     messageBoxEl.classList.remove('hidden');
     $('messageText').textContent = text;
@@ -880,34 +968,21 @@ function queueMessage(text, after) {
 function speakBattleLine(text) {
     if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) return;
 
-    const say = () => {
-        window.speechSynthesis.onvoiceschanged = null;
-        const utterance = new SpeechSynthesisUtterance(text);
-        const voices = window.speechSynthesis.getVoices();
-        const speechLang = LANGUAGE_OPTIONS.find(lang => lang.key === currentLanguage)?.speechLang || 'en-US';
-        battleVoice = voices.find(v => v.lang.toLowerCase() === speechLang.toLowerCase())
-            || voices.find(v => v.lang.toLowerCase().startsWith(speechLang.slice(0, 2).toLowerCase()))
-            || voices.find(v => /^en(-|_)/i.test(v.lang))
-            || voices[0]
-            || null;
-        if (battleVoice) utterance.voice = battleVoice;
-        utterance.rate = 0.95;
-        utterance.pitch = 1.08;
-        utterance.volume = 0.9;
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(utterance);
-    };
-
-    if (window.speechSynthesis.getVoices().length === 0) {
-        window.speechSynthesis.onvoiceschanged = say;
-    } else {
-        say();
-    }
-}
-
-function announceHit(attacker, defender, move, damage) {
-    if (damage <= 0) return;
-    speakBattleLine(copy().hitLine(attacker.name, defender.name, move.name));
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voices = window.speechSynthesis.getVoices();
+    const speechLang = getLanguageOption().speechLang;
+    battleVoice = voices.find(v => v.lang.toLowerCase() === speechLang.toLowerCase())
+        || voices.find(v => v.lang.toLowerCase().startsWith(speechLang.slice(0, 2).toLowerCase()))
+        || voices.find(v => /^en(-|_)/i.test(v.lang))
+        || voices[0]
+        || null;
+    if (battleVoice) utterance.voice = battleVoice;
+    utterance.lang = speechLang;
+    utterance.rate = 0.95;
+    utterance.pitch = 1.08;
+    utterance.volume = 0.9;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
 }
 
 function advanceMessage() {
@@ -920,6 +995,7 @@ function advanceMessage() {
     messageTimer = 110;
     busy = true;
     showMessageBox(currentMessage.text);
+    speakBattleLine(currentMessage.text);
 }
 
 // =========================================================
@@ -937,6 +1013,7 @@ function playerUseMove(idx) {
     if (state !== 'choose' || busy) return;
     const move = player.moves[idx];
     if (!move) return;
+    const t = copy();
     busy = true;
     state = 'playerAttack';
     playerAnim.lunge = 1.0;
@@ -945,25 +1022,25 @@ function playerUseMove(idx) {
         if (move.heal) {
             const h = Math.min(move.heal, player.maxHp - player.hp);
             player.hp += h; updateHud();
-            queueMessage(`${player.name} used ${move.name}! Recovered ${h} HP.`, afterPlayerMove);
+            queueMessage(t.usedMove(player.name, move.name));
+            queueMessage(t.recoveredHp(h), afterPlayerMove);
         } else {
             const r = calcDamage(player, enemy, move);
             enemy.hp = Math.max(0, enemy.hp - r.dmg);
             enemyAnim.hurt = 1.0;
             updateHud();
-            if (r.eff !== 0) announceHit(player, enemy, move, r.dmg);
-            queueMessage(`${player.name} used ${move.name}!`);
-            if (r.eff > 1) queueMessage("It's super effective!");
-            else if (r.eff === 0) queueMessage('It had no effect...');
-            else if (r.eff < 1) queueMessage("It's not very effective...");
-            queueMessage(`Dealt ${r.dmg} damage.`, afterPlayerMove);
+            queueMessage(t.usedMove(player.name, move.name));
+            if (r.eff > 1) queueMessage(t.superEffective);
+            else if (r.eff === 0) queueMessage(t.noEffect);
+            else if (r.eff < 1) queueMessage(t.notVeryEffective);
+            queueMessage(t.dealtDamage(r.dmg), afterPlayerMove);
         }
     }, 500);
 }
 
 function afterPlayerMove() {
     if (enemy.hp <= 0) {
-        queueMessage(`${enemy.name} fainted!`, () => {
+        queueMessage(copy().fainted(enemy.name), () => {
             if (enemyGroup) scene.remove(enemyGroup);
             enemyGroup = null;
             trainerIndex++;
@@ -977,6 +1054,7 @@ function afterPlayerMove() {
 }
 
 function enemyTurn() {
+    const t = copy();
     let best = enemy.moves[0], bestScore = -1;
     for (const m of enemy.moves) {
         if (m.heal && enemy.hp < enemy.maxHp * 0.35) { best = m; break; }
@@ -991,24 +1069,24 @@ function enemyTurn() {
         if (best.heal) {
             const h = Math.min(best.heal, enemy.maxHp - enemy.hp);
             enemy.hp += h; updateHud();
-            queueMessage(`Foe ${enemy.name} used ${best.name}! Recovered ${h} HP.`, afterEnemyMove);
+            queueMessage(t.foeUsedMove(enemy.name, best.name));
+            queueMessage(t.recoveredHp(h), afterEnemyMove);
         } else {
             const r = calcDamage(enemy, player, best);
             player.hp = Math.max(0, player.hp - r.dmg);
             playerAnim.hurt = 1.0;
             updateHud();
-            if (r.eff !== 0) announceHit(enemy, player, best, r.dmg);
-            queueMessage(`Foe ${enemy.name} used ${best.name}!`);
-            if (r.eff > 1) queueMessage("It's super effective!");
-            else if (r.eff === 0) queueMessage('It had no effect...');
-            else if (r.eff < 1) queueMessage("It's not very effective...");
-            queueMessage(`You took ${r.dmg} damage.`, afterEnemyMove);
+            queueMessage(t.foeUsedMove(enemy.name, best.name));
+            if (r.eff > 1) queueMessage(t.superEffective);
+            else if (r.eff === 0) queueMessage(t.noEffect);
+            else if (r.eff < 1) queueMessage(t.notVeryEffective);
+            queueMessage(t.tookDamage(r.dmg), afterEnemyMove);
         }
     }, 500);
 }
 
 function afterEnemyMove() {
-    if (player.hp <= 0) { queueMessage(`${player.name} fainted!`, showLoseScreen); return; }
+    if (player.hp <= 0) { queueMessage(copy().fainted(player.name), showLoseScreen); return; }
     state = 'choose';
     busy = false;
     showMoveBox();
@@ -1016,14 +1094,15 @@ function afterEnemyMove() {
 
 function tryRun() {
     if (state !== 'choose' || busy) return;
+    const t = copy();
     if (!TRAINERS[trainerIndex].wild) {
         busy = true;
-        queueMessage("Can't run from a trainer battle!", () => { state = 'choose'; showMoveBox(); });
+        queueMessage(t.cantRun, () => { state = 'choose'; showMoveBox(); });
         return;
     }
     busy = true;
     if (Math.random() < 0.6) {
-        queueMessage('Got away safely!', () => {
+        queueMessage(t.escaped, () => {
             if (enemyGroup) scene.remove(enemyGroup);
             enemyGroup = null;
             trainerIndex++;
@@ -1031,7 +1110,7 @@ function tryRun() {
             else startNextBattle();
         });
     } else {
-        queueMessage("Couldn't escape!", () => {
+        queueMessage(t.failedEscape, () => {
             state = 'enemyAttack';
             setTimeout(enemyTurn, 400);
         });
@@ -1044,12 +1123,14 @@ function showWinScreen() {
     screenEl.classList.remove('hidden');
     hudEl.classList.add('hidden');
     bottomEl.classList.add('hidden');
+    setStaticLanguageText();
     screenEl.innerHTML = `
         <h1>${t.winTitle}</h1>
         <p>${t.winText(getPokemonName('mewtwo'))}</p>
         <p>${t.legendText(player.name)}</p>
         <p style="margin-top:20px;color:#aaa;">${t.playAgain}</p>
     `;
+    speakBattleLine(`${t.winTitle}. ${t.winText(getPokemonName('mewtwo'))} ${t.legendText(player.name)}`);
 }
 
 function showLoseScreen() {
@@ -1058,11 +1139,13 @@ function showLoseScreen() {
     screenEl.classList.remove('hidden');
     hudEl.classList.add('hidden');
     bottomEl.classList.add('hidden');
+    setStaticLanguageText();
     screenEl.innerHTML = `
         <h1>${t.loseTitle}</h1>
         <p>${t.loseText(player.name, enemy.name)}</p>
         <p style="margin-top:20px;color:#aaa;">${t.tryAgain}</p>
     `;
+    speakBattleLine(`${t.loseTitle}. ${t.loseText(player.name, enemy.name)}`);
 }
 
 function resetToPicker() {
@@ -1070,6 +1153,7 @@ function resetToPicker() {
     if (enemyGroup) { scene.remove(enemyGroup); enemyGroup = null; }
     state = 'language'; player = null; enemy = null; trainerIndex = 0;
     messageQueue = []; currentMessage = null; busy = false;
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     showStartScreen();
     renderStartScreen('language');
 }
