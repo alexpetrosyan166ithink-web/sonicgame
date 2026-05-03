@@ -26,14 +26,14 @@
     const PLAYER_RADIUS = 1.45;
     const BALL_RADIUS = 0.58;
     const MATCH_LENGTH = 180;
-    const STAR_GOAL_Z = -HALF_L;
-    const RIVAL_GOAL_Z = HALF_L;
+    const STARS_ATTACK_GOAL_Z = -HALF_L;
+    const RIVALS_ATTACK_GOAL_Z = HALF_L;
 
     const starTeam = [
         { name: 'Neymar', number: 10, color: 0x32d583, start: [-16, 17], role: 'wing' },
         { name: 'Mbappe', number: 7, color: 0x66e3ff, start: [16, 16], role: 'striker' },
         { name: 'Messi', number: 30, color: 0xffe66d, start: [-8, 3], role: 'playmaker' },
-        { name: 'Ronaldo', number: 9, color: 0xff9f43, start: [8, -9], role: 'forward' }
+        { name: 'Ronaldo', number: 9, color: 0xff9f43, start: [8, 9], role: 'forward' }
     ];
 
     const rivalTeam = [
@@ -322,7 +322,7 @@
             pos: new THREE.Vector3(data.start[0], 0, data.start[1]),
             vel: new THREE.Vector3(),
             home: new THREE.Vector3(data.start[0], 0, data.start[1]),
-            dir: team === 'stars' ? 1 : -1,
+            dir: team === 'stars' ? -1 : 1,
             cooldown: 0,
             tackleCooldown: 0,
             sprintJuice: 1,
@@ -554,7 +554,7 @@
         const ownBall = ball.owner && ball.owner.team === 'rivals';
         const target = tempVec.copy(ball.pos);
         if (ownBall) {
-            target.set(clamp(ball.pos.x * 0.72, -HALF_W + 6, HALF_W - 6), 0, -HALF_L + 12);
+            target.set(clamp(ball.pos.x * 0.72, -HALF_W + 6, HALF_W - 6), 0, RIVALS_ATTACK_GOAL_Z - 12);
         } else if (ball.owner && ball.owner.team === 'stars') {
             target.copy(ball.pos);
         } else {
@@ -572,10 +572,10 @@
         players.filter((p) => p.team === team && p !== active).forEach((player) => {
             let target = player.home.clone();
             if (ball.owner && ball.owner.team === team) {
-                target.z += team === 'stars' ? 15 : -15;
+                target.z += team === 'stars' ? -15 : 15;
                 target.x += (player.index - 1.5) * 2;
             } else if (ball.owner && ball.owner.team !== team) {
-                target.z -= team === 'stars' ? 8 : -8;
+                target.z += team === 'stars' ? 8 : -8;
             } else {
                 target.lerp(ball.pos, 0.2);
             }
@@ -605,7 +605,7 @@
     function updateBall(dt) {
         if (ball.owner) {
             const owner = ball.owner;
-            const facing = owner.facing && owner.facing.lengthSq() > 0.01 ? owner.facing : new THREE.Vector3(0, 0, owner.team === 'stars' ? 1 : -1);
+            const facing = owner.facing && owner.facing.lengthSq() > 0.01 ? owner.facing : new THREE.Vector3(0, 0, owner.team === 'stars' ? -1 : 1);
             ball.pos.copy(owner.pos).addScaledVector(facing, 1.75);
             ball.pos.y = BALL_RADIUS;
             ball.vel.copy(owner.vel).multiplyScalar(0.45);
@@ -676,7 +676,7 @@
     }
 
     function kickFrom(player) {
-        const attackingGoal = player.team === 'stars' ? RIVAL_GOAL_Z : STAR_GOAL_Z;
+        const attackingGoal = player.team === 'stars' ? STARS_ATTACK_GOAL_Z : RIVALS_ATTACK_GOAL_Z;
         const nearGoal = Math.abs(attackingGoal - player.pos.z) < 32 && Math.abs(player.pos.x) < 23;
         const target = new THREE.Vector3(0, BALL_RADIUS, attackingGoal);
         let power = nearGoal ? 43 : 29;
@@ -686,9 +686,9 @@
             const mate = bestPassingTarget(player);
             if (mate) {
                 target.copy(mate.pos);
-                target.z += player.team === 'stars' ? 5 : -5;
+                target.z += player.team === 'stars' ? -5 : 5;
             } else {
-                target.set(player.pos.x * 0.65, BALL_RADIUS, player.pos.z + (player.team === 'stars' ? 18 : -18));
+                target.set(player.pos.x * 0.65, BALL_RADIUS, player.pos.z + (player.team === 'stars' ? -18 : 18));
             }
         } else {
             target.x = clamp(player.pos.x * -0.15 + (Math.random() - 0.5) * 8, -GOAL_WIDTH / 2 + 1, GOAL_WIDTH / 2 - 1);
@@ -698,7 +698,7 @@
         ball.owner = null;
         tempVec.copy(target).sub(ball.pos);
         tempVec.y = 0;
-        if (tempVec.lengthSq() === 0) tempVec.set(0, 0, player.team === 'stars' ? 1 : -1);
+        if (tempVec.lengthSq() === 0) tempVec.set(0, 0, player.team === 'stars' ? -1 : 1);
         tempVec.normalize();
         ball.vel.copy(tempVec).multiplyScalar(power);
         ball.vel.x += (Math.random() - 0.5) * 2.2;
@@ -712,7 +712,7 @@
         let best = null;
         let score = -Infinity;
         players.filter((p) => p.team === player.team && p !== player).forEach((mate) => {
-            const forward = player.team === 'stars' ? mate.pos.z - player.pos.z : player.pos.z - mate.pos.z;
+            const forward = player.team === 'stars' ? player.pos.z - mate.pos.z : mate.pos.z - player.pos.z;
             const dist = flatDistance(player.pos, mate.pos);
             const pressure = players.filter((p) => p.team !== player.team).reduce((min, rival) => Math.min(min, flatDistance(rival.pos, mate.pos)), 99);
             const value = forward * 0.7 + pressure * 1.4 - dist * 0.12;
@@ -726,10 +726,10 @@
 
     function handleGoals() {
         if (Math.abs(ball.pos.x) > GOAL_WIDTH / 2) return;
-        if (ball.pos.z > HALF_L + 0.6) {
+        if (ball.pos.z < -HALF_L - 0.6) {
             stars += 1;
             scoreGoal('stars');
-        } else if (ball.pos.z < -HALF_L - 0.6) {
+        } else if (ball.pos.z > HALF_L + 0.6) {
             rivals += 1;
             scoreGoal('rivals');
         }
@@ -741,7 +741,7 @@
         showToast(`${team === 'stars' ? 'Stars' : 'Rivals'} goal!`);
         playLabel.textContent = `${scorer} scores`;
         cameraShake = 0.55;
-        spawnBurst(new THREE.Vector3(0, 1, team === 'stars' ? HALF_L : -HALF_L), team === 'stars' ? 0x32d583 : 0xff4d6d, 32);
+        spawnBurst(new THREE.Vector3(0, 1, team === 'stars' ? STARS_ATTACK_GOAL_Z : RIVALS_ATTACK_GOAL_Z), team === 'stars' ? 0x32d583 : 0xff4d6d, 32);
         resetPositions();
     }
 
