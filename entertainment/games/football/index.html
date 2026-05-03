@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="../../../assets/images/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Football 4v4 - Arcade Soccer Game | Alex Games</title>
+    <meta name="description" content="Play a polished 4v4 arcade football game with Neymar, Mbappe, Messi, Ronaldo, two-player local matches, and a smart AI opponent.">
+    <meta name="keywords" content="football game, soccer game, Neymar game, Mbappe game, Messi game, Ronaldo game, two player soccer, browser football, Alex Games">
+    <meta name="author" content="Alex Games">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://alexgames.am/entertainment/games/football/">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://alexgames.am/entertainment/games/football/">
+    <meta property="og:title" content="Star Football 4v4 - Arcade Soccer Game">
+    <meta property="og:description" content="Fast 4v4 browser football with star players, local two-player controls, AI, goals, passes, tackles, and a cinematic stadium.">
+    <meta property="og:image" content="https://alexgames.am/assets/images/game-thumbnails/football-thumb.svg">
+    <meta property="og:site_name" content="Alex Games">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Star Football 4v4 - Arcade Soccer Game">
+    <meta name="twitter:description" content="Play 4v4 arcade football with Neymar, Mbappe, Messi, Ronaldo, AI, and local two-player mode.">
+    <meta name="twitter:image" content="https://alexgames.am/assets/images/game-thumbnails/football-thumb.svg">
+    <link rel="stylesheet" href="style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "Star Football 4v4",
+        "description": "A browser-based 4v4 arcade football game with stylized star players, local two-player play, and an AI opponent.",
+        "url": "https://alexgames.am/entertainment/games/football/",
+        "genre": "Sports",
+        "gamePlatform": "Web Browser",
+        "applicationCategory": "Game",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        }
+    }
+    </script>
+</head>
+<body>
+    <a class="back-link" href="../../">Back To Entertainment</a>
+
+    <main id="game-container" class="game-shell">
+        <section class="stadium-panel" aria-label="Star Football 4v4 game area">
+            <div class="scoreboard">
+                <div class="score-team score-team--stars"><span>Stars</span><strong id="starsScore">0</strong></div>
+                <div class="clock-box">
+                    <span id="modeLabel">Vs AI</span>
+                    <strong id="clockLabel">3:00</strong>
+                </div>
+                <div class="score-team score-team--rivals"><strong id="rivalsScore">0</strong><span>Rivals</span></div>
+            </div>
+
+            <canvas id="scene" aria-label="3D football pitch"></canvas>
+
+            <div id="unsupported" class="overlay hidden" role="alert">
+                <div class="overlay-card">
+                    <h2>WebGL is not available.</h2>
+                    <p>This game needs a WebGL-capable browser. Try a recent version of Chrome or Edge.</p>
+                </div>
+            </div>
+
+            <div id="startScreen" class="overlay">
+                <div class="overlay-card">
+                    <p class="eyebrow">Alex Games</p>
+                    <h1>Star Football 4v4</h1>
+                    <p class="lede">Neymar, Mbappe, Messi, and Ronaldo take on a fast rival squad in a bright arcade stadium.</p>
+                    <div class="mode-row" role="group" aria-label="Choose match mode">
+                        <button id="aiModeBtn" class="mode-choice active" type="button">Vs AI</button>
+                        <button id="twoPlayerModeBtn" class="mode-choice" type="button">2 Player</button>
+                    </div>
+                    <div class="control-grid">
+                        <div><span>P1</span> WASD move, Space kick, Shift sprint</div>
+                        <div><span>P2</span> Arrows move, Enter kick, / sprint</div>
+                    </div>
+                    <button id="startBtn" class="primary-btn" type="button">Kick Off</button>
+                </div>
+            </div>
+
+            <div id="pauseScreen" class="overlay hidden">
+                <div class="overlay-card">
+                    <p class="eyebrow">Paused</p>
+                    <h2>Match Stopped</h2>
+                    <div class="button-row">
+                        <button id="resumeBtn" class="primary-btn" type="button">Resume</button>
+                        <button id="restartBtn" type="button">Restart</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="finishScreen" class="overlay hidden">
+                <div class="overlay-card">
+                    <p class="eyebrow">Full Time</p>
+                    <h2 id="finishTitle">Match Complete</h2>
+                    <p class="lede" id="finishText"></p>
+                    <div class="button-row">
+                        <button id="playAgainBtn" class="primary-btn" type="button">Play Again</button>
+                        <button id="switchModeBtn" type="button">Switch Mode</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="toast" aria-live="polite"></div>
+        </section>
+
+        <aside class="hud-panel">
+            <div>
+                <p class="eyebrow">4v4 arcade football</p>
+                <h1>Fast passes, bold runs, clean goals.</h1>
+                <p class="summary">Control the nearest player, press the action button to pass or shoot, and sprint into space before the defense closes down.</p>
+            </div>
+
+            <div class="team-card team-card--stars">
+                <h2>Star Team</h2>
+                <div class="roster" id="starsRoster"></div>
+            </div>
+
+            <div class="team-card team-card--rivals">
+                <h2>Rival Team</h2>
+                <div class="roster" id="rivalsRoster"></div>
+            </div>
+
+            <section class="match-stats">
+                <div><span>Possession</span><strong id="possessionLabel">Open Ball</strong></div>
+                <div><span>Last Play</span><strong id="playLabel">Kickoff</strong></div>
+                <div><span>Active Star</span><strong id="activeStarLabel">Messi</strong></div>
+                <div><span>Active Rival</span><strong id="activeRivalLabel">Orion</strong></div>
+            </section>
+
+            <div class="controls-note">
+                <p><strong>P</strong> pauses. The action button shoots near goal and passes from deeper positions. On touch screens, virtual controls control the star team.</p>
+            </div>
+        </aside>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../../../assets/js/mobile-touch.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

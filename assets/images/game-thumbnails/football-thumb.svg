@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300" role="img" aria-labelledby="title desc">
+  <title id="title">Star Football 4v4 thumbnail</title>
+  <desc id="desc">Arcade football pitch with star players, stadium lights, and a ball flying toward goal.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07151d"/>
+      <stop offset=".52" stop-color="#12332d"/>
+      <stop offset="1" stop-color="#191b27"/>
+    </linearGradient>
+    <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1bb45f"/>
+      <stop offset="1" stop-color="#0b6b37"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#sky)"/>
+  <path d="M0 92h400v38H0z" fill="#111b23"/>
+  <g opacity=".85">
+    <rect x="12" y="102" width="20" height="10" fill="#32d583"/>
+    <rect x="42" y="102" width="20" height="10" fill="#ff4d6d"/>
+    <rect x="72" y="102" width="20" height="10" fill="#ffe66d"/>
+    <rect x="102" y="102" width="20" height="10" fill="#60a5fa"/>
+    <rect x="278" y="102" width="20" height="10" fill="#32d583"/>
+    <rect x="308" y="102" width="20" height="10" fill="#ff4d6d"/>
+    <rect x="338" y="102" width="20" height="10" fill="#ffe66d"/>
+    <rect x="368" y="102" width="20" height="10" fill="#60a5fa"/>
+  </g>
+  <g filter="url(#glow)">
+    <circle cx="76" cy="48" r="15" fill="#ffffff" opacity=".85"/>
+    <circle cx="324" cy="48" r="15" fill="#ffffff" opacity=".85"/>
+    <path d="M76 63 26 126M324 63l50 63" stroke="#f8fbff" stroke-width="5" opacity=".45"/>
+  </g>
+  <path d="M42 126h316l42 174H0z" fill="url(#grass)"/>
+  <path d="M67 143h266l25 132H42z" fill="none" stroke="#eaffef" stroke-width="4"/>
+  <path d="M200 143v132" stroke="#eaffef" stroke-width="3"/>
+  <ellipse cx="200" cy="208" rx="48" ry="24" fill="none" stroke="#eaffef" stroke-width="3"/>
+  <path d="M83 178h52v62H83M317 178h-52v62h52" fill="none" stroke="#eaffef" stroke-width="3"/>
+  <g>
+    <circle cx="138" cy="202" r="14" fill="#32d583"/>
+    <rect x="127" y="214" width="22" height="28" rx="8" fill="#083b2a"/>
+    <text x="138" y="252" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="800" fill="#fff">MESSI</text>
+  </g>
+  <g>
+    <circle cx="186" cy="174" r="14" fill="#66e3ff"/>
+    <rect x="175" y="186" width="22" height="28" rx="8" fill="#083b2a"/>
+    <text x="186" y="162" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="800" fill="#fff">MBAPPE</text>
+  </g>
+  <g>
+    <circle cx="246" cy="214" r="14" fill="#ff4d6d"/>
+    <rect x="235" y="226" width="22" height="28" rx="8" fill="#461623"/>
+  </g>
+  <g transform="translate(286 165) rotate(-12)">
+    <circle r="18" fill="#fff"/>
+    <path d="M0-15 8-4 5 10H-5l-8-14z" fill="#111827"/>
+    <path d="M-15 1h30M-8 13 8-13" stroke="#111827" stroke-width="3"/>
+  </g>
+  <text x="28" y="50" font-family="Arial Black, Arial, sans-serif" font-size="34" font-weight="900" fill="#ffffff">STAR</text>
+  <text x="28" y="82" font-family="Arial Black, Arial, sans-serif" font-size="34" font-weight="900" fill="#ffe66d">FOOTBALL</text>
+  <text x="300" y="270" font-family="Arial Black, Arial, sans-serif" font-size="28" font-weight="900" fill="#ffffff">4V4</text>
+</svg>

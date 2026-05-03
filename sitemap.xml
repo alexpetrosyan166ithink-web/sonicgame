@@ -25,6 +25,18 @@
         <priority>0.8</priority>
     </url>
     <url>
+        <loc>https://alexgames.am/entertainment/games/pokemon/</loc>
+        <lastmod>2026-05-02</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://alexgames.am/entertainment/games/football/</loc>
+        <lastmod>2026-05-03</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
         <loc>https://alexgames.am/entertainment/games/snake/</loc>
         <lastmod>2026-02-22</lastmod>
         <changefreq>monthly</changefreq>
@@ -62,6 +74,12 @@
     </url>
     <url>
         <loc>https://alexgames.am/entertainment/games/monster-catch-3d/</loc>
+        <lastmod>2026-05-02</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://alexgames.am/entertainment/games/math-obby/</loc>
         <lastmod>2026-05-02</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>

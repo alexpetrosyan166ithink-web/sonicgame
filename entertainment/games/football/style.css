@@ -1,0 +1,423 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800;900&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    font-family: Inter, Arial, sans-serif;
+    color: #f6fbff;
+    background:
+        radial-gradient(circle at 18% 18%, rgba(255, 221, 87, 0.18), transparent 25%),
+        radial-gradient(circle at 88% 14%, rgba(0, 184, 148, 0.18), transparent 26%),
+        linear-gradient(135deg, #07151d 0%, #102428 42%, #161820 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+button {
+    font: inherit;
+}
+
+.back-link {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 30;
+    color: #f8fbff;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(4, 13, 18, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 10px 12px;
+    border-radius: 6px;
+    backdrop-filter: blur(14px);
+}
+
+.game-shell {
+    width: min(1440px, 100%);
+    margin: 0 auto;
+    padding: 64px 18px 24px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 330px;
+    gap: 18px;
+}
+
+.stadium-panel {
+    position: relative;
+    min-height: calc(100vh - 88px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #0a1518;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+}
+
+#scene {
+    display: block;
+    width: 100%;
+    height: calc(100vh - 88px);
+    min-height: 560px;
+    background: #102018;
+}
+
+.scoreboard {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 12;
+    display: grid;
+    grid-template-columns: 150px 116px 150px;
+    align-items: stretch;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.score-team,
+.clock-box {
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: rgba(3, 13, 18, 0.8);
+    backdrop-filter: blur(16px);
+}
+
+.score-team span,
+.clock-box span {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.score-team strong,
+.clock-box strong {
+    color: #ffffff;
+    font-size: 28px;
+    line-height: 1;
+}
+
+.score-team--stars {
+    border-top: 4px solid #32d583;
+}
+
+.score-team--rivals {
+    border-top: 4px solid #ff4d6d;
+}
+
+.clock-box {
+    flex-direction: column;
+    gap: 2px;
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.clock-box strong {
+    font-size: 24px;
+    color: #ffe66d;
+}
+
+.hud-panel {
+    min-height: calc(100vh - 88px);
+    padding: 20px;
+    border-radius: 8px;
+    background: rgba(4, 16, 20, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(18px);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.eyebrow {
+    margin: 0 0 8px;
+    color: #7ee4a8;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.hud-panel h1,
+.overlay-card h1,
+.overlay-card h2 {
+    margin: 0;
+    font-size: clamp(28px, 4vw, 46px);
+    line-height: 1.02;
+    letter-spacing: 0;
+}
+
+.hud-panel h1 {
+    font-size: 29px;
+}
+
+.summary,
+.lede,
+.controls-note p {
+    color: rgba(246, 251, 255, 0.78);
+    line-height: 1.55;
+    font-size: 14px;
+}
+
+.team-card {
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.team-card h2,
+.match-stats span {
+    margin: 0 0 12px;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+}
+
+.team-card--stars {
+    border-top: 4px solid #32d583;
+}
+
+.team-card--rivals {
+    border-top: 4px solid #ff4d6d;
+}
+
+.roster {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.player-pill {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.22);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.player-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-shadow: 0 0 14px currentColor;
+    flex: 0 0 auto;
+}
+
+.match-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.match-stats div {
+    min-height: 76px;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.match-stats span {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.match-stats strong {
+    font-size: 15px;
+    line-height: 1.25;
+}
+
+.controls-note {
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding-top: 12px;
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(2, 12, 16, 0.9), rgba(7, 31, 29, 0.76));
+    backdrop-filter: blur(8px);
+}
+
+.overlay.hidden {
+    display: none;
+}
+
+.overlay-card {
+    width: min(560px, 100%);
+    padding: 28px;
+    border-radius: 8px;
+    background: rgba(7, 18, 24, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 24px 90px rgba(0, 0, 0, 0.45);
+}
+
+.mode-row,
+.button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 18px 0;
+}
+
+.mode-choice,
+.primary-btn,
+.button-row button {
+    min-height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 6px;
+    padding: 0 16px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    font-weight: 900;
+}
+
+.mode-choice.active,
+.primary-btn {
+    background: #32d583;
+    color: #052014;
+    border-color: #32d583;
+}
+
+.control-grid {
+    display: grid;
+    gap: 8px;
+    margin: 18px 0;
+}
+
+.control-grid div {
+    padding: 10px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.76);
+    font-size: 13px;
+}
+
+.control-grid span {
+    display: inline-flex;
+    min-width: 42px;
+    color: #ffe66d;
+    font-weight: 900;
+}
+
+#toast {
+    position: absolute;
+    left: 50%;
+    bottom: 26px;
+    transform: translateX(-50%) translateY(16px);
+    z-index: 14;
+    opacity: 0;
+    pointer-events: none;
+    color: #061416;
+    background: #ffe66d;
+    border-radius: 6px;
+    padding: 11px 14px;
+    font-size: 13px;
+    font-weight: 900;
+    transition: opacity 160ms ease, transform 160ms ease;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
+}
+
+#toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 1050px) {
+    .game-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .hud-panel,
+    .stadium-panel {
+        min-height: auto;
+    }
+
+    #scene {
+        height: 68vh;
+        min-height: 480px;
+    }
+}
+
+@media (max-width: 680px) {
+    .game-shell {
+        padding: 58px 10px 18px;
+    }
+
+    .back-link {
+        top: 10px;
+        left: 10px;
+        font-size: 10px;
+    }
+
+    .scoreboard {
+        width: calc(100% - 20px);
+        grid-template-columns: 1fr 92px 1fr;
+    }
+
+    .score-team {
+        gap: 8px;
+    }
+
+    .score-team span,
+    .clock-box span {
+        font-size: 9px;
+    }
+
+    .score-team strong,
+    .clock-box strong {
+        font-size: 21px;
+    }
+
+    #scene {
+        height: 64vh;
+        min-height: 420px;
+    }
+
+    .hud-panel {
+        padding: 14px;
+    }
+
+    .roster,
+    .match-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .overlay {
+        padding: 14px;
+    }
+
+    .overlay-card {
+        padding: 20px;
+    }
+}
