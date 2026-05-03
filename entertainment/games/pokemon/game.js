@@ -572,15 +572,116 @@ const POKEDEX = {
                   moves: [ {name:'Psychic', type:'psychic', power:32}, {name:'Shadow Ball', type:'ghost', power:26}, {name:'Aura Sphere', type:'normal', power:28}, {name:'Recover', type:'psychic', power:0, heal:40}] }
 };
 
+const LANGUAGE_OPTIONS = [
+    { key: 'armenian', label: 'Armenian', native: 'Հայերեն', speechLang: 'hy-AM' },
+    { key: 'french', label: 'French', native: 'Français', speechLang: 'fr-FR' },
+    { key: 'english', label: 'English', native: 'English', speechLang: 'en-US' }
+];
+
+const POKEMON_NAMES = {
+    english: {
+        pikachu: 'Pikachu', charmander: 'Charmander', bulbasaur: 'Bulbasaur', squirtle: 'Squirtle',
+        eevee: 'Eevee', gengar: 'Gengar', snorlax: 'Snorlax', charizard: 'Charizard',
+        dragonite: 'Dragonite', mewtwo: 'Mewtwo'
+    },
+    french: {
+        pikachu: 'Pikachu', charmander: 'Salamèche', bulbasaur: 'Bulbizarre', squirtle: 'Carapuce',
+        eevee: 'Évoli', gengar: 'Ectoplasma', snorlax: 'Ronflex', charizard: 'Dracaufeu',
+        dragonite: 'Dracolosse', mewtwo: 'Mewtwo'
+    },
+    armenian: {
+        pikachu: 'Պիկաչու', charmander: 'Չարմանդեր', bulbasaur: 'Բուլբասավր', squirtle: 'Սկվիրտլ',
+        eevee: 'Իվի', gengar: 'Գենգար', snorlax: 'Սնորլաքս', charizard: 'Չարիզարդ',
+        dragonite: 'Դրագոնայթ', mewtwo: 'Մյութու'
+    }
+};
+
+const COPY = {
+    english: {
+        title: 'POKEMON BATTLE 3D',
+        chooseLanguage: 'Choose your language!',
+        chooseStarter: 'Choose your starter!',
+        controls: ['1 / 2 / 3 / 4 - pick a move during battle', 'R - run from wild pokemon | ENTER - skip message', 'Drag mouse - orbit camera'],
+        wildAppeared: name => `A wild ${name} appeared!`,
+        sentOut: (trainer, name) => `${trainer} sent out ${name}!`,
+        go: name => `Go, ${name}!`,
+        battleWon: 'You won the battle!',
+        hitLine: (attacker, defender, move) => `${attacker} hit ${defender} with ${move}.`,
+        winTitle: 'YOU WON!',
+        winText: name => `You defeated all trainers including the Champion's ${name}!`,
+        legendText: name => `${name} is now a true legend!`,
+        playAgain: 'Press ENTER to play again',
+        loseTitle: 'YOU LOST...',
+        loseText: (playerName, enemyName) => `${playerName} fainted against ${enemyName}.`,
+        tryAgain: 'Press ENTER to try again'
+    },
+    french: {
+        title: 'POKEMON BATTLE 3D',
+        chooseLanguage: 'Choisis ta langue !',
+        chooseStarter: 'Choisis ton starter !',
+        controls: ['1 / 2 / 3 / 4 - choisir une attaque', 'R - fuir un pokemon sauvage | ENTER - passer le message', 'Glisse la souris - tourner la caméra'],
+        wildAppeared: name => `Un ${name} sauvage apparaît !`,
+        sentOut: (trainer, name) => `${trainer} envoie ${name} !`,
+        go: name => `Go, ${name} !`,
+        battleWon: 'Tu as gagné le combat !',
+        hitLine: (attacker, defender, move) => `${attacker} a touché ${defender} avec ${move}.`,
+        winTitle: 'VICTOIRE !',
+        winText: name => `Tu as battu tous les dresseurs, même le ${name} du Champion !`,
+        legendText: name => `${name} est maintenant une vraie légende !`,
+        playAgain: 'Appuie sur ENTER pour rejouer',
+        loseTitle: 'DÉFAITE...',
+        loseText: (playerName, enemyName) => `${playerName} est K.O. contre ${enemyName}.`,
+        tryAgain: 'Appuie sur ENTER pour réessayer'
+    },
+    armenian: {
+        title: 'POKEMON BATTLE 3D',
+        chooseLanguage: 'Ընտրիր լեզուն',
+        chooseStarter: 'Ընտրիր քո հերոսին',
+        controls: ['1 / 2 / 3 / 4 - ընտրել հարվածը', 'R - փախչել վայրի պոկեմոնից | ENTER - անցնել հաղորդագրությունը', 'Քաշիր մկնիկը - պտտել տեսախցիկը'],
+        wildAppeared: name => `Վայրի ${name} հայտնվեց։`,
+        sentOut: (trainer, name) => `${trainer}-ը ուղարկեց ${name}-ին։`,
+        go: name => `Առաջ, ${name}։`,
+        battleWon: 'Դու հաղթեցիր մարտը։',
+        hitLine: (attacker, defender, move) => `${attacker}-ը հարվածեց ${defender}-ին ${move}-ով։`,
+        winTitle: 'ԴՈՒ ՀԱՂԹԵՑԻՐ',
+        winText: name => `Դու հաղթեցիր բոլոր մարզիչներին, նաև չեմպիոնի ${name}-ին։`,
+        legendText: name => `${name}-ը հիմա իսկական լեգենդ է։`,
+        playAgain: 'Սեղմիր ENTER նորից խաղալու համար',
+        loseTitle: 'ԴՈՒ ՊԱՐՏՎԵՑԻՐ...',
+        loseText: (playerName, enemyName) => `${playerName}-ը պարտվեց ${enemyName}-ին։`,
+        tryAgain: 'Սեղմիր ENTER նորից փորձելու համար'
+    }
+};
+
+const TRAINER_NAMES = {
+    english: ['Wild Eevee', 'Wild Bulbasaur', 'Wild Squirtle', 'Ghost Trainer', 'Fire Ace', 'Dragon Master', 'Champion'],
+    french: ['Évoli sauvage', 'Bulbizarre sauvage', 'Carapuce sauvage', 'Dresseur Spectre', 'As du Feu', 'Maître Dragon', 'Champion'],
+    armenian: ['Վայրի Իվի', 'Վայրի Բուլբասավր', 'Վայրի Սկվիրտլ', 'Ուրվական մարզիչ', 'Կրակի վարպետ', 'Վիշապի վարպետ', 'Չեմպիոն']
+};
+
+let currentLanguage = 'english';
+
+function copy() {
+    return COPY[currentLanguage] || COPY.english;
+}
+
+function getPokemonName(key) {
+    return (POKEMON_NAMES[currentLanguage] && POKEMON_NAMES[currentLanguage][key]) || POKEDEX[key].name;
+}
+
+function getTrainerName(index) {
+    return (TRAINER_NAMES[currentLanguage] && TRAINER_NAMES[currentLanguage][index]) || TRAINERS[index]?.name || 'Champion';
+}
+
 function makePokemon(key) {
     const base = POKEDEX[key];
-    return { key, name: base.name, type: base.type, hp: base.maxHp, maxHp: base.maxHp, moves: base.moves, builder: base.builder };
+    return { key, name: getPokemonName(key), type: base.type, hp: base.maxHp, maxHp: base.maxHp, moves: base.moves, builder: base.builder };
 }
 
 // =========================================================
 // GAME STATE
 // =========================================================
-let state = 'pick';
+let state = 'language';
 let player = null, enemy = null;
 let trainerIndex = 0;
 let messageQueue = [];
@@ -594,13 +695,13 @@ let enemyAnim  = { lunge: 0, hurt: 0, baseX: 3.5, baseZ: -2.4 };
 let effects = [];
 
 const TRAINERS = [
-    { name: 'Wild Eevee',     mons: ['eevee'],     intro: 'A wild EEVEE appeared!', wild: true },
-    { name: 'Wild Bulbasaur', mons: ['bulbasaur'], intro: 'A wild BULBASAUR appeared!', wild: true },
-    { name: 'Wild Squirtle',  mons: ['squirtle'],  intro: 'A wild SQUIRTLE appeared!', wild: true },
-    { name: 'Ghost Trainer',  mons: ['gengar'],    intro: 'GHOST TRAINER sent out GENGAR!', wild: false },
-    { name: 'Fire Ace',       mons: ['charizard'], intro: 'FIRE ACE sent out CHARIZARD!', wild: false },
-    { name: 'Dragon Master',  mons: ['dragonite'], intro: 'DRAGON MASTER sent out DRAGONITE!', wild: false },
-    { name: 'Champion',       mons: ['mewtwo'],    intro: 'CHAMPION sent out MEWTWO!', wild: false }
+    { name: 'Wild Eevee',     mons: ['eevee'],     wild: true },
+    { name: 'Wild Bulbasaur', mons: ['bulbasaur'], wild: true },
+    { name: 'Wild Squirtle',  mons: ['squirtle'],  wild: true },
+    { name: 'Ghost Trainer',  mons: ['gengar'],    wild: false },
+    { name: 'Fire Ace',       mons: ['charizard'], wild: false },
+    { name: 'Dragon Master',  mons: ['dragonite'], wild: false },
+    { name: 'Champion',       mons: ['mewtwo'],    wild: false }
 ];
 
 // =========================================================
@@ -613,6 +714,41 @@ const bottomEl = $('bottomPanel');
 const moveBoxEl = $('moveBox');
 const messageBoxEl = $('messageBox');
 
+function renderStartScreen(mode = 'language') {
+    const t = copy();
+    const controls = t.controls.map(line => `<p>${line}</p>`).join('');
+    screenEl.innerHTML = `
+        <h1>${t.title}</h1>
+        <p>${mode === 'language' ? t.chooseLanguage : t.chooseStarter}</p>
+        ${mode === 'language' ? '<div class="language-picker" id="languagePick"></div>' : '<div class="starters" id="starterPick"></div>'}
+        <div id="controls">${controls}</div>
+    `;
+    if (mode === 'language') buildLanguagePicker();
+    else buildStarterPicker();
+}
+
+function buildLanguagePicker() {
+    const c = $('languagePick');
+    c.innerHTML = '';
+    LANGUAGE_OPTIONS.forEach(lang => {
+        const div = document.createElement('button');
+        div.className = 'language-option';
+        div.type = 'button';
+        div.innerHTML = `
+            <span class="language-native">${lang.native}</span>
+            <span class="language-label">${lang.label}</span>
+        `;
+        div.onclick = () => selectLanguage(lang.key);
+        c.appendChild(div);
+    });
+}
+
+function selectLanguage(language) {
+    currentLanguage = language;
+    state = 'pick';
+    renderStartScreen('starter');
+}
+
 function buildStarterPicker() {
     const c = $('starterPick');
     c.innerHTML = '';
@@ -623,7 +759,7 @@ function buildStarterPicker() {
         div.className = 'starter';
         div.innerHTML = `
             <div class="icon">${icons[key]}</div>
-            <p>${p.name}</p>
+            <p>${getPokemonName(key)}</p>
             <span class="type-pill" style="background:${TYPE_COLOR[p.type]}">${p.type.toUpperCase()}</span>
             <p class="hp-text">HP ${p.maxHp}</p>
         `;
@@ -647,7 +783,7 @@ function updateHud() {
     if (!player || !enemy) return;
     $('playerName').textContent = player.name;
     $('enemyName').textContent = enemy.name;
-    $('battleRound').textContent = TRAINERS[trainerIndex]?.name || 'Champion';
+    $('battleRound').textContent = getTrainerName(trainerIndex);
     $('playerCp').textContent = `CP ${Math.round(player.maxHp * 18 + player.moves.length * 45)}`;
     $('enemyCp').textContent = `CP ${Math.round(enemy.maxHp * 18 + enemy.moves.length * 45)}`;
     $('playerType').textContent = player.type.toUpperCase();
@@ -732,8 +868,8 @@ function startNextBattle() {
     enemy = makePokemon(t.mons[0]);
     spawnEnemy(t.mons[0]);
     updateHud();
-    queueMessage(t.intro);
-    queueMessage(`Go, ${player.name}!`, () => { state = 'choose'; showMoveBox(); });
+    queueMessage(t.wild ? copy().wildAppeared(enemy.name) : copy().sentOut(getTrainerName(trainerIndex), enemy.name));
+    queueMessage(copy().go(player.name), () => { state = 'choose'; showMoveBox(); });
 }
 
 function queueMessage(text, after) {
@@ -748,7 +884,12 @@ function speakBattleLine(text) {
         window.speechSynthesis.onvoiceschanged = null;
         const utterance = new SpeechSynthesisUtterance(text);
         const voices = window.speechSynthesis.getVoices();
-        battleVoice = battleVoice || voices.find(v => /^en(-|_)/i.test(v.lang)) || voices[0] || null;
+        const speechLang = LANGUAGE_OPTIONS.find(lang => lang.key === currentLanguage)?.speechLang || 'en-US';
+        battleVoice = voices.find(v => v.lang.toLowerCase() === speechLang.toLowerCase())
+            || voices.find(v => v.lang.toLowerCase().startsWith(speechLang.slice(0, 2).toLowerCase()))
+            || voices.find(v => /^en(-|_)/i.test(v.lang))
+            || voices[0]
+            || null;
         if (battleVoice) utterance.voice = battleVoice;
         utterance.rate = 0.95;
         utterance.pitch = 1.08;
@@ -766,7 +907,7 @@ function speakBattleLine(text) {
 
 function announceHit(attacker, defender, move, damage) {
     if (damage <= 0) return;
-    speakBattleLine(`${attacker.name} hit ${defender.name} with ${move.name}.`);
+    speakBattleLine(copy().hitLine(attacker.name, defender.name, move.name));
 }
 
 function advanceMessage() {
@@ -827,7 +968,7 @@ function afterPlayerMove() {
             enemyGroup = null;
             trainerIndex++;
             if (trainerIndex >= TRAINERS.length) showWinScreen();
-            else queueMessage('You won the battle!', startNextBattle);
+            else queueMessage(copy().battleWon, startNextBattle);
         });
         return;
     }
@@ -898,47 +1039,39 @@ function tryRun() {
 }
 
 function showWinScreen() {
+    const t = copy();
     state = 'win';
     screenEl.classList.remove('hidden');
     hudEl.classList.add('hidden');
     bottomEl.classList.add('hidden');
     screenEl.innerHTML = `
-        <h1>YOU WON!</h1>
-        <p>You defeated all trainers including the Champion's MEWTWO!</p>
-        <p>${player.name} is now a true legend!</p>
-        <p style="margin-top:20px;color:#aaa;">Press ENTER to play again</p>
+        <h1>${t.winTitle}</h1>
+        <p>${t.winText(getPokemonName('mewtwo'))}</p>
+        <p>${t.legendText(player.name)}</p>
+        <p style="margin-top:20px;color:#aaa;">${t.playAgain}</p>
     `;
 }
 
 function showLoseScreen() {
+    const t = copy();
     state = 'defeat';
     screenEl.classList.remove('hidden');
     hudEl.classList.add('hidden');
     bottomEl.classList.add('hidden');
     screenEl.innerHTML = `
-        <h1>YOU LOST...</h1>
-        <p>${player.name} fainted against ${enemy.name}.</p>
-        <p style="margin-top:20px;color:#aaa;">Press ENTER to try again</p>
+        <h1>${t.loseTitle}</h1>
+        <p>${t.loseText(player.name, enemy.name)}</p>
+        <p style="margin-top:20px;color:#aaa;">${t.tryAgain}</p>
     `;
 }
 
 function resetToPicker() {
     if (playerGroup) { scene.remove(playerGroup); playerGroup = null; }
     if (enemyGroup) { scene.remove(enemyGroup); enemyGroup = null; }
-    state = 'pick'; player = null; enemy = null; trainerIndex = 0;
+    state = 'language'; player = null; enemy = null; trainerIndex = 0;
     messageQueue = []; currentMessage = null; busy = false;
-    screenEl.innerHTML = `
-        <h1>POKEMON BATTLE 3D</h1>
-        <p>Choose your starter!</p>
-        <div class="starters" id="starterPick"></div>
-        <div id="controls">
-            <p>1 / 2 / 3 / 4 - pick a move during battle</p>
-            <p>R - run from wild pokemon &nbsp;|&nbsp; ENTER - skip message</p>
-            <p>Drag mouse - orbit camera</p>
-        </div>
-    `;
     showStartScreen();
-    buildStarterPicker();
+    renderStartScreen('language');
 }
 
 // =========================================================
@@ -1099,6 +1232,6 @@ window.addEventListener('keydown', (e) => {
 // BOOT
 // =========================================================
 initThree();
-buildStarterPicker();
+renderStartScreen('language');
 animate();
 

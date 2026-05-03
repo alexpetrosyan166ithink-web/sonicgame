@@ -384,6 +384,47 @@ body {
 }
 #screen p { font-size: 16px; margin: 8px 0; }
 
+.language-picker {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.language-option {
+    width: 168px;
+    min-height: 96px;
+    border: 1px solid rgba(255,226,122,0.72);
+    border-radius: 18px;
+    color: #fff;
+    background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
+    box-shadow: 0 16px 34px rgba(0,0,0,0.28);
+    cursor: pointer;
+    display: grid;
+    gap: 8px;
+    place-items: center;
+    padding: 16px 12px;
+    font: inherit;
+    backdrop-filter: blur(10px);
+    transition: transform 0.15s, background 0.15s;
+}
+.language-option:hover {
+    transform: translateY(-4px) scale(1.04);
+    background: rgba(255,226,122,0.14);
+}
+.language-native {
+    color: #ffe27a;
+    font-size: 20px;
+    font-weight: 900;
+}
+.language-label {
+    color: rgba(255,255,255,0.76);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
 .starters {
     display: flex;
     gap: 18px;
@@ -497,6 +538,9 @@ body {
     }
     .run-hint { margin-bottom: 8px; }
     #screen h1 { font-size: 26px; }
+    .language-picker { gap: 10px; }
+    .language-option { width: 138px; min-height: 86px; }
+    .language-native { font-size: 17px; }
     .starters { gap: 10px; }
     .starter { width: 138px; }
 }
