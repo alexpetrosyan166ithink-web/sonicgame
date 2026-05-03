@@ -525,12 +525,13 @@
             if (isPressed('KeyS')) v.z += 1;
             if (isPressed('KeyA')) v.x -= 1;
             if (isPressed('KeyD')) v.x += 1;
-            if (isPressed('ArrowUp') && (mode === 'ai' || touchControls)) v.z -= 1;
-            if (isPressed('ArrowDown') && (mode === 'ai' || touchControls)) v.z += 1;
-            if (isPressed('ArrowLeft') && (mode === 'ai' || touchControls)) v.x -= 1;
-            if (isPressed('ArrowRight') && (mode === 'ai' || touchControls)) v.x += 1;
+            if (!touchControls && mode === 'ai') {
+                if (isPressed('ArrowUp')) v.z -= 1;
+                if (isPressed('ArrowDown')) v.z += 1;
+                if (isPressed('ArrowLeft')) v.x -= 1;
+                if (isPressed('ArrowRight')) v.x += 1;
+            }
         } else {
-            if (touchControls) return v;
             if (isPressed('ArrowUp')) v.z -= 1;
             if (isPressed('ArrowDown')) v.z += 1;
             if (isPressed('ArrowLeft')) v.x -= 1;
@@ -855,10 +856,10 @@
     }
 
     function setMode(nextMode) {
-        if (touchControls) nextMode = 'ai';
         mode = nextMode;
         $('aiModeBtn').classList.toggle('active', mode === 'ai');
         $('twoPlayerModeBtn').classList.toggle('active', mode === 'two');
+        document.body.classList.toggle('football-two-player', mode === 'two');
         updateScore();
     }
 
@@ -895,7 +896,7 @@
             if (mode === 'ai') justPressed.Space = true;
         });
 
-        if (window.initMobileControls) {
+        if (!touchControls && window.initMobileControls) {
             window.initMobileControls({
                 keys,
                 justPressed,
@@ -906,25 +907,43 @@
                 ]
             });
         }
-        if (touchControls && !document.querySelector('.mobile-controls')) {
+        if (touchControls) {
             createFootballTouchControls();
         }
     }
 
     function createFootballTouchControls() {
+        if (document.querySelector('.football-controls-fallback')) return;
         const container = document.createElement('div');
         container.className = 'mobile-controls active football-controls-fallback';
         container.innerHTML = `
-            <div class="dpad">
-                <div class="dpad-btn dpad-up" data-key="ArrowUp">▲</div>
-                <div class="dpad-btn dpad-left" data-key="ArrowLeft">◄</div>
-                <div class="dpad-btn dpad-center empty"></div>
-                <div class="dpad-btn dpad-right" data-key="ArrowRight">►</div>
-                <div class="dpad-btn dpad-down" data-key="ArrowDown">▼</div>
+            <div class="touch-team touch-team--p2" aria-label="Player 2 touch controls">
+                <div class="touch-label">P2 Rivals</div>
+                <div class="dpad">
+                    <div class="dpad-btn dpad-up" data-key="ArrowUp">▲</div>
+                    <div class="dpad-btn dpad-left" data-key="ArrowLeft">◄</div>
+                    <div class="dpad-btn dpad-center empty"></div>
+                    <div class="dpad-btn dpad-right" data-key="ArrowRight">►</div>
+                    <div class="dpad-btn dpad-down" data-key="ArrowDown">▼</div>
+                </div>
+                <div class="action-buttons">
+                    <div class="action-btn primary" data-key="Enter">KICK</div>
+                    <div class="action-btn" data-key="Slash">SPRINT</div>
+                </div>
             </div>
-            <div class="action-buttons">
-                <div class="action-btn primary" data-key="Space">KICK</div>
-                <div class="action-btn" data-key="ShiftLeft">SPRINT</div>
+            <div class="touch-team touch-team--p1" aria-label="Player 1 touch controls">
+                <div class="touch-label">P1 Stars</div>
+                <div class="dpad">
+                    <div class="dpad-btn dpad-up" data-key="KeyW">▲</div>
+                    <div class="dpad-btn dpad-left" data-key="KeyA">◄</div>
+                    <div class="dpad-btn dpad-center empty"></div>
+                    <div class="dpad-btn dpad-right" data-key="KeyD">►</div>
+                    <div class="dpad-btn dpad-down" data-key="KeyS">▼</div>
+                </div>
+                <div class="action-buttons">
+                    <div class="action-btn primary" data-key="Space">KICK</div>
+                    <div class="action-btn" data-key="ShiftLeft">SPRINT</div>
+                </div>
             </div>
         `;
         document.body.appendChild(container);
@@ -955,14 +974,14 @@
 
     if (touchControls) {
         document.body.classList.add('football-touch');
-        mode = 'ai';
-        $('twoPlayerModeBtn').setAttribute('aria-hidden', 'true');
-        $('twoPlayerModeBtn').tabIndex = -1;
-        document.querySelector('.control-grid').innerHTML = '<div><span>P1</span> D-pad move, Kick shoot/pass, Sprint burst</div>';
+        document.querySelector('.control-grid').innerHTML = '<div><span>P1</span> Bottom controls: move, kick, sprint</div><div><span>P2</span> Top controls in 2 Player mode</div>';
     }
     renderRoster('starsRoster', starTeam);
     renderRoster('rivalsRoster', rivalTeam);
     bindEvents();
+    if (urlParams.get('mode') === 'two') {
+        setMode('two');
+    }
     initScene();
     if (urlParams.get('autostart') === '1') {
         window.setTimeout(startMatch, 250);

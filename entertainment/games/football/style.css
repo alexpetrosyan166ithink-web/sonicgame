@@ -367,6 +367,23 @@ button {
     box-sizing: border-box;
 }
 
+.football-controls-fallback .touch-team {
+    display: contents;
+}
+
+.football-controls-fallback .touch-label {
+    position: fixed;
+    color: #f8fbff;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(4, 13, 18, 0.74);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 5px;
+    padding: 4px 7px;
+}
+
 .football-controls-fallback .dpad {
     display: grid;
     pointer-events: auto;
@@ -599,10 +616,34 @@ button {
         display: none !important;
     }
 
-    body.football-touch .dpad {
+    body.football-touch .touch-team--p1 .touch-label {
+        left: 10px;
+        bottom: 106px;
+        color: #7ee4a8;
+    }
+
+    body.football-touch .touch-team--p2 .touch-label {
+        right: 10px;
+        top: 116px;
+        color: #ff9aac;
+        display: none;
+    }
+
+    body.football-touch .touch-team--p1 .dpad {
         grid-template-columns: 44px 44px 44px;
         grid-template-rows: 44px 44px 44px;
         gap: 3px;
+    }
+
+    body.football-touch .touch-team--p2 .dpad {
+        position: fixed;
+        top: 142px;
+        right: 10px;
+        grid-template-columns: 38px 38px 38px;
+        grid-template-rows: 38px 38px 38px;
+        gap: 3px;
+        display: none;
+        pointer-events: auto;
     }
 
     body.football-touch .dpad-btn {
@@ -614,9 +655,28 @@ button {
         color: #7ee4a8;
     }
 
-    body.football-touch .action-buttons {
+    body.football-touch .touch-team--p2 .dpad-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 13px;
+        color: #ff9aac;
+        background: rgba(255, 77, 109, 0.24);
+        border-color: rgba(255, 77, 109, 0.58);
+    }
+
+    body.football-touch .touch-team--p1 .action-buttons {
         max-width: 144px;
         gap: 7px;
+    }
+
+    body.football-touch .touch-team--p2 .action-buttons {
+        position: fixed;
+        top: 150px;
+        left: 10px;
+        max-width: 120px;
+        gap: 6px;
+        display: none;
+        pointer-events: auto;
     }
 
     body.football-touch .action-btn {
@@ -636,8 +696,22 @@ button {
         border-color: rgba(255, 77, 109, 0.66);
     }
 
-    body.football-touch #twoPlayerModeBtn {
-        display: none;
+    body.football-touch.football-two-player .touch-team--p2 .dpad,
+    body.football-touch.football-two-player .touch-team--p2 .action-buttons,
+    body.football-touch.football-two-player .touch-team--p2 .touch-label {
+        display: block;
+    }
+
+    body.football-touch.football-two-player .touch-team--p2 .dpad {
+        display: grid;
+    }
+
+    body.football-touch.football-two-player .touch-team--p2 .action-buttons {
+        display: flex;
+    }
+
+    body.football-touch.football-two-player #scene {
+        filter: saturate(1.05);
     }
 }
 
